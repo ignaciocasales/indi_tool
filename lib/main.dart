@@ -14,6 +14,7 @@ class Indi extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: kAppName,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: GoogleFonts.openSans().fontFamily,
         colorSchemeSeed: Colors.deepPurple,
@@ -21,17 +22,30 @@ class Indi extends StatelessWidget {
         brightness: Brightness.dark,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const Scaffold(
+      home: Scaffold(
         body: Column(
           children: [
             Row(
               children: [
-                FlutterLogo(
-                  size: 64,
+                Expanded(
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minHeight: 32,
+                    ),
+                    color: Theme.of(context).colorScheme.primary,
+                    child: const Center(
+                      child: Text(
+                        kShortAppName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        )
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-            Expanded(
+            const Expanded(
               child: Row(
                 children: [
                   Workspace(),
