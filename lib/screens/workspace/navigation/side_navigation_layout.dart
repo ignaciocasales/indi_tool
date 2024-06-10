@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indi_tool/screens/workspace/navigation/tree_view.dart';
 
 class SideNavigationLayout extends StatelessWidget {
   const SideNavigationLayout({super.key});
@@ -9,7 +10,7 @@ class SideNavigationLayout extends StatelessWidget {
       flex: 2,
       child: Column(
         children: [
-          Text("Side Navigation Layout"),
+          TreeViewExample(),
         ],
       ),
     );
