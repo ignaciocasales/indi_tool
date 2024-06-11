@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:indi_tool/screens/services/http/body_type.dart';
+import 'package:indi_tool/services/http/body_type.dart';
 
 class Body extends StatelessWidget {
   const Body({super.key});
