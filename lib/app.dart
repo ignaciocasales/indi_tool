@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:indi_tool/consts.dart';
-import 'package:indi_tool/screens/workspace/workspace.dart';
+import 'package:indi_tool/ui/workspace/workspace.dart';
 
 class IndiApp extends StatelessWidget {
   const IndiApp({super.key});

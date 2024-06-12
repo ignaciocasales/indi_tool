@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/screens/workspace/navigation/tree_view.dart';
+import 'package:indi_tool/ui/workspace/navigation/tree_view.dart';
 
 class SideNavigationLayout extends StatelessWidget {
   const SideNavigationLayout({super.key});

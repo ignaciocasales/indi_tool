@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/screens/workspace/editor/body_pane.dart';
-import 'package:indi_tool/screens/workspace/editor/headers_pane.dart';
-import 'package:indi_tool/screens/workspace/editor/params_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/body_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/headers_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/params_pane.dart';
 
 class SimpleRequestEditorNav extends StatefulWidget {
   const SimpleRequestEditorNav({super.key});
