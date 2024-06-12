@@ -1,16 +1,16 @@
 import 'package:indi_tool/services/http/http_method.dart';
 
-class HttpRequest {
+class IndiHttpRequest {
   // TODO: In the future all of this properties will be final.
   String id;
   String name;
   HttpMethod method;
   String url;
   String? body;
-  List<HttpRequestParameter>? parameters;
-  List<HttpRequestHeader>? headers;
+  List<IndiHttpParameter>? parameters;
+  List<IndiHttpHeader>? headers;
 
-  HttpRequest({
+  IndiHttpRequest({
     required this.id,
     required this.name,
     required this.method,
@@ -21,27 +21,27 @@ class HttpRequest {
   });
 }
 
-class HttpRequestParameter {
+class IndiHttpParameter {
   // TODO: In the future all of this properties will be final.
   String key;
   String value;
   bool enabled;
   String description;
 
-  HttpRequestParameter({
+  IndiHttpParameter({
     required this.key,
     required this.value,
     required this.enabled,
     required this.description,
   });
 
-  HttpRequestParameter copyWith({
+  IndiHttpParameter copyWith({
     String? key,
     String? value,
     bool? enabled,
     String? description,
   }) {
-    return HttpRequestParameter(
+    return IndiHttpParameter(
       key: key ?? this.key,
       value: value ?? this.value,
       enabled: enabled ?? this.enabled,
@@ -49,8 +49,8 @@ class HttpRequestParameter {
     );
   }
 
-  static HttpRequestParameter newEmpty() {
-    return HttpRequestParameter(
+  static IndiHttpParameter newEmpty() {
+    return IndiHttpParameter(
       key: '',
       value: '',
       enabled: false,
@@ -66,14 +66,14 @@ class HttpRequestParameter {
   }
 }
 
-class HttpRequestHeader {
+class IndiHttpHeader {
   // TODO: In the future all of this properties will be final.
   String key;
   String value;
   bool enabled;
   String description;
 
-  HttpRequestHeader({
+  IndiHttpHeader({
     required this.key,
     required this.value,
     required this.enabled,

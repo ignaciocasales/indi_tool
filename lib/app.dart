@@ -32,10 +32,12 @@ class IndiApp extends StatelessWidget {
                     ),
                     color: Theme.of(context).colorScheme.primary,
                     child: const Center(
-                      child: Text(kShortAppName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          )),
+                      child: Text(
+                        kShortAppName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),

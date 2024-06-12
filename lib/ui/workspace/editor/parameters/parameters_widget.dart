@@ -27,11 +27,11 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
   }
 
   void _onFieldEdited(
-    List<HttpRequestParameter> parameters,
+    List<IndiHttpParameter> parameters,
     bool isLast,
   ) {
     if (isLast) {
-      parameters.add(HttpRequestParameter.newEmpty());
+      parameters.add(IndiHttpParameter.newEmpty());
     }
 
     ref
@@ -45,17 +45,17 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
   Widget build(BuildContext context) {
     final selectedRequest = ref.watch(selectedRequestProvider);
 
-    final List<HttpRequestParameter> parameters = selectedRequest?.parameters ?? [];
+    final List<IndiHttpParameter> parameters = selectedRequest?.parameters ?? [];
 
     if (parameters.isEmpty) {
-      parameters.add(HttpRequestParameter.newEmpty());
+      parameters.add(IndiHttpParameter.newEmpty());
       ref
           .read(selectedRequestProvider.notifier)
           .updateQueryParameters(parameters);
     }
 
     if (parameters.last.hasValue()) {
-      parameters.add(HttpRequestParameter.newEmpty());
+      parameters.add(IndiHttpParameter.newEmpty());
     }
 
     const TableRow headerRow = TableRow(

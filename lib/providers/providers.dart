@@ -5,26 +5,26 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
 
 @riverpod
-List<HttpRequest> requestList(RequestListRef ref) {
+List<IndiHttpRequest> requestList(RequestListRef ref) {
   return kRequestList;
 }
 
 @riverpod
 class SelectedRequest extends _$SelectedRequest {
   @override
-  HttpRequest? build() {
+  IndiHttpRequest? build() {
     return null;
   }
 
-  void select(HttpRequest request) {
+  void select(IndiHttpRequest request) {
     state = request;
   }
 
-  HttpRequest? get() {
+  IndiHttpRequest? get() {
     return state;
   }
 
-  void updateQueryParameters(List<HttpRequestParameter> parameters) {
+  void updateQueryParameters(List<IndiHttpParameter> parameters) {
     if (state == null) {
       return;
     }

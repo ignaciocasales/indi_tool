@@ -1,20 +1,20 @@
 import 'package:indi_tool/services/http/http_method.dart';
 import 'package:indi_tool/services/http/http_request.dart';
 
-final List<HttpRequest> kRequestList = [
-  HttpRequest(
+final List<IndiHttpRequest> kRequestList = [
+  IndiHttpRequest(
     id: "0",
     name: "Request 1",
     method: HttpMethod.get,
     url: "https://bored-api.appbrewery.com/random",
     parameters: [
-      HttpRequestParameter(
+      IndiHttpParameter(
         key: "key1",
         value: "value1",
         enabled: true,
         description: "Some description here",
       ),
-      HttpRequestParameter(
+      IndiHttpParameter(
         key: "key2",
         value: "value2",
         enabled: true,
@@ -22,13 +22,13 @@ final List<HttpRequest> kRequestList = [
       ),
     ],
     headers: [
-      HttpRequestHeader(
+      IndiHttpHeader(
         key: "key1",
         value: "value1",
         enabled: true,
         description: "Some description here",
       ),
-      HttpRequestHeader(
+      IndiHttpHeader(
         key: "key2",
         value: "value2",
         enabled: true,
@@ -36,7 +36,7 @@ final List<HttpRequest> kRequestList = [
       ),
     ],
   ),
-  HttpRequest(
+  IndiHttpRequest(
     id: "1",
     name: "Request 2",
     method: HttpMethod.post,
@@ -45,7 +45,7 @@ final List<HttpRequest> kRequestList = [
     headers: [],
     body: "{}",
   ),
-  HttpRequest(
+  IndiHttpRequest(
     id: "2",
     name: "Request 3",
     method: HttpMethod.put,
@@ -54,7 +54,7 @@ final List<HttpRequest> kRequestList = [
     headers: [],
     body: "{}",
   ),
-  HttpRequest(
+  IndiHttpRequest(
     id: "3",
     name: "Request 4",
     method: HttpMethod.delete,

@@ -60,7 +60,7 @@ class TreeViewExample extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<HttpRequest> requestList = ref.watch(requestListProvider);
+    final List<IndiHttpRequest> requestList = ref.watch(requestListProvider);
 
     return Expanded(
       child: ListView(
