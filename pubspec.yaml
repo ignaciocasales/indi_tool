@@ -11,25 +11,42 @@ environment:
   sdk: '>=3.4.1 <4.0.0'
 
 dependencies:
+  # Flutter SDK
   flutter:
     sdk: flutter
 
+  # Google Fonts
   google_fonts: ^6.2.1
 
+  # Riverpod state management
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 
+  # Isar Database
+  isar: 4.0.0-dev.14
+  isar_flutter_libs: 4.0.0-dev.14
+
+  # Path provider for common file paths
+  path_provider: ^2.0.15
+
+  # Manages the app's window
   window_manager: ^0.3.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # Default Lints
   flutter_lints: ^4.0.0
 
+  # Riverpod Generator
   riverpod_generator: ^2.4.0
   riverpod_lint: ^2.3.10
+
+  # Build Runner for code generation
   build_runner: ^2.4.11
+
+  # Custom Linting
   custom_lint: ^0.6.4
 
 flutter:

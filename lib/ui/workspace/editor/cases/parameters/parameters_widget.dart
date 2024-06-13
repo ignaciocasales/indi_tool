@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/providers.dart';
 import 'package:indi_tool/services/http/http_request.dart';
 
 class ParametersWidget extends ConsumerStatefulWidget {
@@ -21,7 +20,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
   }
 
   void _removeQueryParam(int index) {
-    ref.read(selectedRequestProvider.notifier).removeQueryParam(index);
+    /*ref.read(selectedRequestProvider.notifier).removeQueryParam(index);*/
 
     _generateNewKey();
   }
@@ -34,24 +33,25 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
       parameters.add(IndiHttpParameter.newEmpty());
     }
 
-    ref
+    /*ref
         .read(selectedRequestProvider.notifier)
-        .updateQueryParameters(parameters);
+        .updateQueryParameters(parameters);*/
 
     _generateNewKey();
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedRequest = ref.watch(selectedRequestProvider);
+    /*final selectedRequest = ref.watch(selectedRequestProvider);*/
+    const selectedRequest = null;
 
     final List<IndiHttpParameter> parameters = selectedRequest?.parameters ?? [];
 
     if (parameters.isEmpty) {
       parameters.add(IndiHttpParameter.newEmpty());
-      ref
+      /*ref
           .read(selectedRequestProvider.notifier)
-          .updateQueryParameters(parameters);
+          .updateQueryParameters(parameters);*/
     }
 
     if (parameters.last.hasValue()) {

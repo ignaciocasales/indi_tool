@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/parameters/parameters_widget.dart';
+import 'package:indi_tool/ui/workspace/editor/cases/parameters/parameters_widget.dart';
 
-class Params extends StatelessWidget {
-  const Params({super.key});
+class Headers extends StatelessWidget {
+  const Headers({super.key});
 
   @override
   Widget build(BuildContext context) {

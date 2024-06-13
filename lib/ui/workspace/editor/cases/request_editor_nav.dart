@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/body_pane.dart';
-import 'package:indi_tool/ui/workspace/editor/headers_pane.dart';
-import 'package:indi_tool/ui/workspace/editor/params_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/cases/body_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/cases/headers_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/cases/params_pane.dart';
 
-class SimpleRequestEditorNav extends StatefulWidget {
-  const SimpleRequestEditorNav({super.key});
+class RequestEditorNav extends StatefulWidget {
+  const RequestEditorNav({super.key});
 
   @override
-  State<SimpleRequestEditorNav> createState() => _SimpleRequestEditorNavState();
+  State<RequestEditorNav> createState() => _RequestEditorNavState();
 }
 
-class _SimpleRequestEditorNavState extends State<SimpleRequestEditorNav>
+class _RequestEditorNavState extends State<RequestEditorNav>
     with TickerProviderStateMixin {
   late final TabController _controller;
 

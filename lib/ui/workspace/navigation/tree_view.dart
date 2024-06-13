@@ -1,26 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/providers.dart';
-import 'package:indi_tool/services/http/http_request.dart';
+import 'package:indi_tool/providers/dependencies.dart';
+import 'package:indi_tool/schema/test_group.dart';
 
-class TreeNode {
-  String title;
-  List<TreeNode> children;
-  bool isExpanded;
+class TestGroupsTreeView extends ConsumerWidget {
+  const TestGroupsTreeView({super.key});
 
-  TreeNode(
-      {required this.title, this.children = const [], this.isExpanded = false});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<List<TestGroup>> testGroups =
+        ref.watch(testGroupsProvider);
+
+    return Expanded(
+      child: switch (testGroups) {
+        AsyncData(:final value) => value.isEmpty
+            ? const Center(child: Text('Create a test group to get started'))
+            : ListView(
+                children: value
+                    .map(
+                      (testGroup) => TreeNodeWidget(
+                        node: TreeNode(
+                          title: testGroup.name,
+                          isExpanded: true,
+                          children: testGroup.testCases
+                              .map(
+                                (testCase) => TreeNode(
+                                  title: testCase.name,
+                                  isExpanded: false,
+                                  children: [],
+                                  onTap: (node) {
+                                    ref
+                                        .read(selectedWorkItemProvider.notifier)
+                                        .select(
+                                          WorkItem(
+                                            id: testGroup.id,
+                                            type: WorkItemType.testCase,
+                                          ),
+                                        );
+                                  },
+                                ),
+                              )
+                              .toList(),
+                          onTap: (node) {
+                            ref.read(selectedWorkItemProvider.notifier).select(
+                                  WorkItem(
+                                    id: testGroup.id,
+                                    type: WorkItemType.testGroup,
+                                  ),
+                                );
+                          },
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+        AsyncError() => const Text('An error occurred'),
+        _ => const CircularProgressIndicator(),
+      },
+    );
+  }
 }
 
 class TreeNodeWidget extends StatelessWidget {
   final TreeNode node;
-  final Function(TreeNode) onTap;
   final int level;
 
   const TreeNodeWidget({
     super.key,
     required this.node,
-    required this.onTap,
     this.level = 0,
   });
 
@@ -36,7 +83,8 @@ class TreeNodeWidget extends StatelessWidget {
                 ? Icon(node.isExpanded ? Icons.expand_less : Icons.expand_more)
                 : null,
             onTap: () {
-              onTap(node);
+              /*onTap(node);*/
+              node.onTap(node);
             },
           ),
           if (node.isExpanded)
@@ -44,7 +92,6 @@ class TreeNodeWidget extends StatelessWidget {
               children: node.children
                   .map((child) => TreeNodeWidget(
                         node: child,
-                        onTap: onTap,
                         level: level + 1,
                       ))
                   .toList(),
@@ -55,27 +102,16 @@ class TreeNodeWidget extends StatelessWidget {
   }
 }
 
-class TreeViewExample extends ConsumerWidget {
-  const TreeViewExample({super.key});
+class TreeNode {
+  String title;
+  List<TreeNode> children;
+  bool isExpanded;
+  final Function(TreeNode) onTap;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final List<IndiHttpRequest> requestList = ref.watch(requestListProvider);
-
-    return Expanded(
-      child: ListView(
-        children: requestList
-            .map(
-              (request) => TreeNodeWidget(
-                node: TreeNode(title: request.name),
-                onTap: (node) {
-                  ref.read(selectedRequestProvider.notifier).select(request);
-                },
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
+  TreeNode({
+    required this.title,
+    this.children = const [],
+    this.isExpanded = false,
+    required this.onTap,
+  });
 }
-

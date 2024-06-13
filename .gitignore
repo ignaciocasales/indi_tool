@@ -42,8 +42,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Platform specific files
+# Ignore Generated Files
+*.g.dart
 
+# Ignore Platform specific files
 linux/
 macos/
 windows/

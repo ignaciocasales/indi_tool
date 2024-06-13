@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'editor/simple_request_editor_layout.dart';
-import 'navigation/side_navigation_layout.dart';
+import 'editor/editor_layout.dart';
+import 'navigation/workspace_nav.dart';
 
 class Workspace extends StatelessWidget {
   const Workspace({super.key});
@@ -10,9 +10,9 @@ class Workspace extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Expanded(
       child: Row(children: [
-        SideNavigationLayout(),
+        WorkspaceNav(),
         VerticalDivider(),
-        SimpleRequestEditorLayout(),
+        EditorLayout(),
       ]),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:indi_tool/providers/providers.dart';
 import 'package:indi_tool/services/http/body_type.dart';
 
 class Body extends StatelessWidget {
@@ -64,7 +63,7 @@ class TextEditorField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var selectedProvider = ref.watch(selectedRequestProvider);
+    var selectedProvider;
 
     return Expanded(
       child: Padding(
