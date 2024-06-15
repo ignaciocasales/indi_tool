@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/services/http/http_request.dart';
+import 'package:indi_tool/providers/dependencies.dart';
+import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/test_group.dart';
 
 class ParametersWidget extends ConsumerStatefulWidget {
   const ParametersWidget({super.key});
@@ -11,52 +13,59 @@ class ParametersWidget extends ConsumerStatefulWidget {
 }
 
 class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
-  Key _key = UniqueKey();
-
-  void _generateNewKey() {
-    setState(() {
-      _key = UniqueKey();
-    });
-  }
-
-  void _removeQueryParam(int index) {
-    /*ref.read(selectedRequestProvider.notifier).removeQueryParam(index);*/
-
-    _generateNewKey();
-  }
-
   void _onFieldEdited(
+    WorkItem workItem,
+    TestGroup testGroup,
     List<IndiHttpParameter> parameters,
-    bool isLast,
   ) {
-    if (isLast) {
-      parameters.add(IndiHttpParameter.newEmpty());
+    var original = testGroup.testScenarios[workItem.id];
+
+    var request = original.request;
+
+    testGroup.testScenarios[workItem.id] =
+        original.copyWith(request: request.copyWith(parameters: parameters));
+
+    String query = '';
+    for (var param in parameters) {
+      if (param.enabled == false) {
+        continue;
+      }
+
+      if (param.key.isEmpty) {
+        continue;
+      }
+
+      query += param.key;
+
+      if (param.value.isNotEmpty) {
+        query += '=${param.value}';
+      }
+
+      if (parameters.indexOf(param) < parameters.length - 1) {
+        query += '&';
+      }
     }
 
-    /*ref
-        .read(selectedRequestProvider.notifier)
-        .updateQueryParameters(parameters);*/
+    var updatedUri = Uri.parse(request.url).replace(query: query).toString();
 
-    _generateNewKey();
+    testGroup.testScenarios[workItem.id] =
+        testGroup.testScenarios[workItem.id].copyWith(
+      request: testGroup.testScenarios[workItem.id].request
+          .copyWith(url: updatedUri),
+    );
+
+    ref.read(testGroupsProvider.notifier).updateTestGroup(testGroup);
   }
 
   @override
   Widget build(BuildContext context) {
-    /*final selectedRequest = ref.watch(selectedRequestProvider);*/
-    const selectedRequest = null;
+    final workItem = ref.watch(selectedWorkItemProvider)!;
+    final TestGroup testGroup = ref.watch(testGroupsProvider.select((value) =>
+        value.value
+            ?.firstWhere((element) => element.id == workItem.parent!.id)))!;
 
-    final List<IndiHttpParameter> parameters = selectedRequest?.parameters ?? [];
-
-    if (parameters.isEmpty) {
-      parameters.add(IndiHttpParameter.newEmpty());
-      /*ref
-          .read(selectedRequestProvider.notifier)
-          .updateQueryParameters(parameters);*/
-    }
-
-    if (parameters.last.hasValue()) {
-      parameters.add(IndiHttpParameter.newEmpty());
-    }
+    final List<IndiHttpParameter> parameters =
+        testGroup.testScenarios[workItem.id].request.parameters;
 
     const TableRow headerRow = TableRow(
       children: [
@@ -93,67 +102,79 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
     );
 
     final List<TableRow> valueRows = List.generate(
-      parameters.length,
+      parameters.length + 1,
       (i) {
-        final bool isLast = i == parameters.length - 1;
+        final bool isLast = i == parameters.length;
         return TableRow(
           children: [
-            Checkbox(
-              key: Key("enabled-${parameters[i].hashCode}-${_key.toString()}"),
-              value: parameters[i].enabled,
+            CheckBoxEditingWidget(
+              value: parameters.elementAtOrNull(i)?.enabled ?? false,
               onChanged: isLast
                   ? null
                   : (bool? value) {
-                      parameters[i] = parameters[i].copyWith(enabled: value!);
+                      final param = parameters.elementAtOrNull(i);
 
-                      _onFieldEdited(parameters, isLast);
+                      if (param == null) {
+                        parameters.add(IndiHttpParameter.newWith(
+                          enabled: value!,
+                        ));
+                      } else {
+                        parameters[i] = param.copyWith(enabled: value!);
+                      }
+
+                      _onFieldEdited(workItem, testGroup, parameters);
                     },
             ),
-            TextFormField(
-              key: Key("key-${parameters[i].hashCode}-${_key.toString()}"),
-              initialValue: parameters[i].key,
-              decoration: const InputDecoration(
-                hintText: 'Key',
-                isDense: true,
-                contentPadding: EdgeInsets.all(8.0),
-                border: InputBorder.none,
-              ),
+            CellEditingWidget(
+              hint: 'Key',
+              text: parameters.elementAtOrNull(i)?.key ?? '',
               onChanged: (value) {
-                parameters[i] = parameters[i].copyWith(key: value);
+                final param = parameters.elementAtOrNull(i);
 
-                _onFieldEdited(parameters, isLast);
+                if (param == null) {
+                  parameters.add(IndiHttpParameter.newWith(
+                    key: value,
+                  ));
+                } else {
+                  parameters[i] = param.copyWith(key: value);
+                }
+
+                _onFieldEdited(workItem, testGroup, parameters);
               },
             ),
-            TextFormField(
-              key: Key("value-${parameters[i].hashCode}-${_key.toString()}"),
-              initialValue: parameters[i].value,
-              decoration: const InputDecoration(
-                hintText: 'Value',
-                isDense: true,
-                contentPadding: EdgeInsets.all(8.0),
-                border: InputBorder.none,
-              ),
+            CellEditingWidget(
+              hint: 'Value',
+              text: parameters.elementAtOrNull(i)?.value ?? '',
               onChanged: (value) {
-                parameters[i] = parameters[i].copyWith(value: value);
+                final param = parameters.elementAtOrNull(i);
 
-                _onFieldEdited(parameters, isLast);
+                if (param == null) {
+                  parameters.add(IndiHttpParameter.newWith(
+                    value: value,
+                  ));
+                } else {
+                  parameters[i] = param.copyWith(value: value);
+                }
+
+                _onFieldEdited(workItem, testGroup, parameters);
               },
             ),
-            TextFormField(
-              key: Key("desc-${parameters[i].hashCode}-${_key.toString()}"),
-              initialValue: parameters[i].description,
-              decoration: const InputDecoration(
-                hintText: 'Description',
-                isDense: true,
-                contentPadding: EdgeInsets.all(8.0),
-                border: InputBorder.none,
-              ),
-              onChanged: (value) {
-                parameters[i] = parameters[i].copyWith(description: value);
+            CellEditingWidget(
+                hint: 'Description',
+                text: parameters.elementAtOrNull(i)?.description ?? '',
+                onChanged: (value) {
+                  final param = parameters.elementAtOrNull(i);
 
-                _onFieldEdited(parameters, isLast);
-              },
-            ),
+                  if (param == null) {
+                    parameters.add(IndiHttpParameter.newWith(
+                      description: value,
+                    ));
+                  } else {
+                    parameters[i] = param.copyWith(description: value);
+                  }
+
+                  _onFieldEdited(workItem, testGroup, parameters);
+                }),
             isLast
                 ? const SizedBox()
                 : IconButton(
@@ -163,7 +184,10 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                       Icons.delete_outline_sharp,
                       size: 16,
                     ),
-                    onPressed: () => _removeQueryParam(i),
+                    onPressed: () => {
+                      parameters.removeAt(i),
+                      _onFieldEdited(workItem, testGroup, parameters),
+                    },
                   )
           ],
         );
@@ -191,6 +215,85 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CellEditingWidget extends ConsumerStatefulWidget {
+  const CellEditingWidget({
+    required this.hint,
+    required this.text,
+    required this.onChanged,
+    super.key,
+  });
+
+  final String hint;
+  final String text;
+  final void Function(String) onChanged;
+
+  @override
+  ConsumerState<CellEditingWidget> createState() => _CellEditingWidgetState();
+}
+
+class _CellEditingWidgetState extends ConsumerState<CellEditingWidget> {
+  final _uniqueKey = UniqueKey();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    _controller = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _controller.text = widget.text;
+
+    return TextFormField(
+      key: Key("${widget.hint}-${_uniqueKey.toString()}"),
+      controller: _controller,
+      decoration: InputDecoration(
+        hintText: widget.hint,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(8.0),
+        border: InputBorder.none,
+      ),
+      onChanged: widget.onChanged,
+    );
+  }
+}
+
+class CheckBoxEditingWidget extends ConsumerStatefulWidget {
+  const CheckBoxEditingWidget({
+    required this.value,
+    required this.onChanged,
+    super.key,
+  });
+
+  final bool value;
+  final void Function(bool?)? onChanged;
+
+  @override
+  ConsumerState createState() {
+    return _CheckBoxEditingWidgetState();
+  }
+}
+
+class _CheckBoxEditingWidgetState extends ConsumerState<CheckBoxEditingWidget> {
+  final _uniqueKey = UniqueKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      key: Key("enabled-${_uniqueKey.toString()}"),
+      value: widget.value,
+      onChanged: widget.onChanged,
     );
   }
 }

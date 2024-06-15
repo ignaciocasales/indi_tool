@@ -30,7 +30,7 @@ class GroupLayout extends ConsumerWidget {
                       onPressed: () {
                         ref
                             .read(testGroupsProvider.notifier)
-                            .addTestCase(snapshot.data!.id);
+                            .addTestScenario(snapshot.data!.id);
                       },
                       child: const Text('Add a Test Case'),
                     ),

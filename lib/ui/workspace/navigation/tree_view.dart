@@ -13,46 +13,50 @@ class TestGroupsTreeView extends ConsumerWidget {
 
     return Expanded(
       child: switch (testGroups) {
-        AsyncData(:final value) => value.isEmpty
+        AsyncData(value: final testGroup) => testGroup.isEmpty
             ? const Center(child: Text('Create a test group to get started'))
             : ListView(
-                children: value
-                    .map(
-                      (testGroup) => TreeNodeWidget(
-                        node: TreeNode(
-                          title: testGroup.name,
-                          isExpanded: true,
-                          children: testGroup.testCases
-                              .map(
-                                (testCase) => TreeNode(
-                                  title: testCase.name,
-                                  isExpanded: false,
-                                  children: [],
-                                  onTap: (node) {
-                                    ref
-                                        .read(selectedWorkItemProvider.notifier)
-                                        .select(
-                                          WorkItem(
-                                            id: testGroup.id,
-                                            type: WorkItemType.testCase,
-                                          ),
-                                        );
-                                  },
-                                ),
-                              )
-                              .toList(),
-                          onTap: (node) {
-                            ref.read(selectedWorkItemProvider.notifier).select(
-                                  WorkItem(
-                                    id: testGroup.id,
-                                    type: WorkItemType.testGroup,
-                                  ),
-                                );
+                children: testGroup.map(
+                  (testGroup) {
+                    var parent = WorkItem(
+                      id: testGroup.id,
+                      type: WorkItemType.testGroup,
+                    );
+
+                    return TreeNodeWidget(
+                      node: TreeNode(
+                        title: testGroup.name,
+                        isExpanded: true,
+                        children: testGroup.testScenarios.asMap().entries.map(
+                          (testScenarioEntry) {
+                            final testScenario = testScenarioEntry.value;
+                            return TreeNode(
+                              title: testScenario.name,
+                              isExpanded: false,
+                              children: [],
+                              onTap: (node) {
+                                ref
+                                    .read(selectedWorkItemProvider.notifier)
+                                    .select(
+                                      WorkItem(
+                                        id: testScenarioEntry.key,
+                                        type: WorkItemType.testCase,
+                                        parent: parent,
+                                      ),
+                                    );
+                              },
+                            );
                           },
-                        ),
+                        ).toList(),
+                        onTap: (node) {
+                          ref.read(selectedWorkItemProvider.notifier).select(
+                                parent,
+                              );
+                        },
                       ),
-                    )
-                    .toList(),
+                    );
+                  },
+                ).toList(),
               ),
         AsyncError() => const Text('An error occurred'),
         _ => const CircularProgressIndicator(),

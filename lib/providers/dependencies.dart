@@ -1,3 +1,4 @@
+import 'package:indi_tool/schema/request.dart';
 import 'package:indi_tool/schema/test_group.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:isar/isar.dart';
@@ -29,11 +30,10 @@ class TestGroups extends _$TestGroups {
     final newTestGroup = TestGroup(
       id: isar.testGroups.autoIncrement(),
       name: 'New Test Group',
-      description: '',
-      testCases: [],
+      testScenarios: List.empty(growable: true),
     );
 
-    isar.write((isar) async {
+    await isar.write((isar) async {
       isar.testGroups.put(newTestGroup);
     });
 
@@ -45,14 +45,30 @@ class TestGroups extends _$TestGroups {
     return isar.testGroups.get(id)!;
   }
 
-  Future<void> addTestCase(int id) async {
+  Future<void> updateTestGroup(TestGroup testGroup) async {
     final Isar isar = await ref.watch(isarProvider.future);
 
-    final newTestCase = TestScenario(0, 'New Test Case', '', 1, 1);
+    await isar.write((isar) async {
+      isar.testGroups.put(testGroup);
+    });
 
-    isar.write((isar) async {
+    state = AsyncValue.data(isar.testGroups.where().findAll());
+  }
+
+  Future<void> addTestScenario(int id) async {
+    final Isar isar = await ref.watch(isarProvider.future);
+
+    final newTestScenario = TestScenario.newWith(
+      name: 'New Test Scenario',
+      request: IndiHttpRequest.newWith(
+        parameters: List.empty(growable: true),
+        headers: List.empty(growable: true),
+      ),
+    );
+
+    await isar.write((isar) async {
       final testGroup = isar.testGroups.get(id)!;
-      testGroup.testCases.add(newTestCase);
+      testGroup.testScenarios.add(newTestScenario);
       isar.testGroups.put(testGroup);
     });
 
@@ -73,13 +89,15 @@ class SelectedWorkItem extends _$SelectedWorkItem {
 }
 
 class WorkItem {
-  final int id;
-  final WorkItemType type;
-
   WorkItem({
     required this.id,
     required this.type,
+    this.parent,
   });
+
+  final int id;
+  final WorkItemType type;
+  final WorkItem? parent;
 }
 
 enum WorkItemType {

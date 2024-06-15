@@ -1,3 +1,6 @@
+import 'package:indi_tool/schema/request.dart';
+import 'package:indi_tool/schema/request_header.dart';
+import 'package:indi_tool/schema/request_param.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:isar/isar.dart';
 
@@ -8,12 +11,12 @@ class TestGroup {
   TestGroup({
     required this.id,
     required this.name,
-    required this.description,
-    required this.testCases,
+    this.description = '',
+    required this.testScenarios,
   });
 
   final int id;
   final String name;
   final String description;
-  final List<TestScenario> testCases;
+  final List<TestScenario> testScenarios;
 }
