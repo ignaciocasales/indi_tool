@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:indi_tool/services/http/body_type.dart';
+import 'package:indi_tool/schema/body_type.dart';
 
 class Body extends StatelessWidget {
   const Body({super.key});
@@ -69,7 +69,7 @@ class TextEditorField extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
-          key: Key("body-${selectedProvider?.id}"),
+          key: Key('body-${selectedProvider?.id}'),
           initialValue: selectedProvider?.body ?? '',
           expands: true,
           maxLines: null,

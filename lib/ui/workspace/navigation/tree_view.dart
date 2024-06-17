@@ -40,7 +40,7 @@ class TestGroupsTreeView extends ConsumerWidget {
                                     .select(
                                       WorkItem(
                                         id: testScenarioEntry.key,
-                                        type: WorkItemType.testCase,
+                                        type: WorkItemType.testScenario,
                                         parent: parent,
                                       ),
                                     );

@@ -71,32 +71,32 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
       children: [
         Padding(
           padding: EdgeInsets.all(4.0),
-          child: Text(""),
+          child: Text(''),
         ),
         Padding(
           padding: EdgeInsets.all(4.0),
           child: Text(
-            "Key",
+            'Key',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         Padding(
           padding: EdgeInsets.all(4.0),
           child: Text(
-            "Value",
+            'Value',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         Padding(
           padding: EdgeInsets.all(4.0),
           child: Text(
-            "Description",
+            'Description',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         Padding(
           padding: EdgeInsets.all(4.0),
-          child: Text(""),
+          child: Text(''),
         ),
       ],
     );
@@ -256,7 +256,7 @@ class _CellEditingWidgetState extends ConsumerState<CellEditingWidget> {
     _controller.text = widget.text;
 
     return TextFormField(
-      key: Key("${widget.hint}-${_uniqueKey.toString()}"),
+      key: Key('${widget.hint}-${_uniqueKey.toString()}'),
       controller: _controller,
       decoration: InputDecoration(
         hintText: widget.hint,
@@ -291,7 +291,7 @@ class _CheckBoxEditingWidgetState extends ConsumerState<CheckBoxEditingWidget> {
   @override
   Widget build(BuildContext context) {
     return Checkbox(
-      key: Key("enabled-${_uniqueKey.toString()}"),
+      key: Key('enabled-${_uniqueKey.toString()}'),
       value: widget.value,
       onChanged: widget.onChanged,
     );

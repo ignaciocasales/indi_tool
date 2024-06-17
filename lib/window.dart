@@ -11,8 +11,16 @@ void setupWindow() async {
 
     await windowManager.ensureInitialized();
 
-    const WindowOptions windowOptions = WindowOptions(
-      size: Size(1280, 720),
+    await windowManager.maximize();
+
+    final size = await windowManager.getSize();
+
+    final double width = size.width * 0.65;
+
+    final double height = size.height * 0.65;
+
+    WindowOptions windowOptions = WindowOptions(
+      size: Size(width, height),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
@@ -20,7 +28,7 @@ void setupWindow() async {
       title: kAppName,
     );
 
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
     });

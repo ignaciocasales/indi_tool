@@ -18,7 +18,7 @@ class ResponseLayout extends StatelessWidget {
                   size: 80,
                   color: color,
                 ),
-                const Text("Hit Start to begin"),
+                const Text('Hit Start to begin'),
               ],
             ),
           ),

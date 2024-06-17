@@ -14,7 +14,7 @@ class EditorLayout extends ConsumerWidget {
     var layout = switch (workItem) {
       WorkItem(type: final type) when type == WorkItemType.testGroup =>
         const GroupLayout(),
-      WorkItem(type: final type) when type == WorkItemType.testCase =>
+      WorkItem(type: final type) when type == WorkItemType.testScenario =>
         const CaseLayout(),
       _ => const Center(child: Text('Select a request to view details')),
     };

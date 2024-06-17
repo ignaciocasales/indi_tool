@@ -32,7 +32,7 @@ class HttpMethodDropdown extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: DropdownMenu<HttpMethod>(
-          key: Key("method-${testGroup.id}"),
+          key: Key('method-${testGroup.id}'),
           initialSelection: selectedMethod,
           controller: methodController,
           enableFilter: false,

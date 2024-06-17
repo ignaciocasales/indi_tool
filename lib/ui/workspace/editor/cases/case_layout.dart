@@ -7,11 +7,11 @@ import 'package:indi_tool/ui/workspace/editor/cases/http_dropdown.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/request_editor_nav.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/response_layout.dart';
 
-class CaseLayout extends StatelessWidget {
+class CaseLayout extends ConsumerWidget {
   const CaseLayout({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         Row(
@@ -31,6 +31,7 @@ class CaseLayout extends StatelessWidget {
               child: FilledButton(
                 onPressed: () {
                   // Do something
+                  ref.read(httpServiceProvider.notifier).sendRequest();
                 },
                 child: const Row(
                   children: [
@@ -72,14 +73,77 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
 
   @override
   void initState() {
-    _urlController = TextEditingController();
     super.initState();
+    _urlController = TextEditingController();
+    _urlController.addListener(_updateUrl);
   }
 
   @override
   void dispose() {
+    _urlController.removeListener(_updateUrl);
     _urlController.dispose();
     super.dispose();
+  }
+
+  void _updateUrl() {
+    final String value = _urlController.text;
+
+    final workItem = ref.read(selectedWorkItemProvider)!;
+
+    final TestScenario testScenario = ref.read(testGroupsProvider.select(
+        (value) => value.value
+            ?.firstWhere((element) => element.id == workItem.parent!.id)
+            .testScenarios[workItem.id]))!;
+
+    final testGroup = ref.read(testGroupsProvider.select((value) => value.value
+        ?.firstWhere((element) => element.id == workItem.parent!.id)))!;
+
+    testGroup.testScenarios[workItem.id] = testScenario.copyWith(
+      request: testScenario.request.copyWith(url: value),
+    );
+
+    _urlController.text = testScenario.request.url;
+
+    final parameters = Uri.parse(value)
+        .query
+        .split('&')
+        .where((element) => element.isNotEmpty)
+        .map((param) {
+      final List<String> keyValue = param.split('=');
+
+      String key = '';
+      final maybeKey = keyValue.elementAtOrNull(0);
+      if (maybeKey != null) {
+        key = Uri.decodeQueryComponent(maybeKey);
+      }
+
+      String value = '';
+      final maybeValue = keyValue.elementAtOrNull(1);
+      if (maybeValue != null) {
+        value = Uri.decodeQueryComponent(maybeValue);
+      }
+
+      return IndiHttpParameter.newWith(key: key, value: value);
+    });
+
+    for (int i = 0; i < parameters.length; i++) {
+      if (i < testScenario.request.parameters.length) {
+        // If the index exists in both lists, update the original list
+        testScenario.request.parameters[i] =
+            testScenario.request.parameters[i].copyWith(
+          key: parameters.elementAt(i).key,
+          value: parameters.elementAt(i).value,
+        );
+      } else {
+        // If the index is only in the new list, add the item to the original list
+        testScenario.request.parameters.add(IndiHttpParameter.newWith(
+          key: parameters.elementAt(i).key,
+          value: parameters.elementAt(i).value,
+        ));
+      }
+    }
+
+    ref.read(testGroupsProvider.notifier).updateTestGroup(testGroup);
   }
 
   @override
@@ -91,61 +155,13 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
             ?.firstWhere((element) => element.id == workItem.parent!.id)
             .testScenarios[workItem.id]))!;
 
-    _urlController.text = testScenario.request.url;
+    if (_urlController.text != testScenario.request.url) {
+      _urlController.text = testScenario.request.url;
+    }
 
     return TextFormField(
-      key: Key("url-${workItem.id}"),
+      key: Key('url-${workItem.id}'),
       controller: _urlController,
-      onChanged: (value) {
-        final testGroup = ref.read(testGroupsProvider.select((value) => value
-            .value
-            ?.firstWhere((element) => element.id == workItem.parent!.id)))!;
-
-        testGroup.testScenarios[workItem.id] = testScenario.copyWith(
-          request: testScenario.request.copyWith(url: value),
-        );
-
-        final parameters = Uri.parse(value)
-            .query
-            .split('&')
-            .where((element) => element.isNotEmpty)
-            .map((param) {
-          final List<String> keyValue = param.split('=');
-
-          String key = '';
-          final maybeKey = keyValue.elementAtOrNull(0);
-          if (maybeKey != null) {
-            key = Uri.decodeQueryComponent(maybeKey);
-          }
-
-          String value = '';
-          final maybeValue = keyValue.elementAtOrNull(1);
-          if (maybeValue != null) {
-            value = Uri.decodeQueryComponent(maybeValue);
-          }
-
-          return IndiHttpParameter.newWith(key: key, value: value);
-        });
-
-        for (int i = 0; i < parameters.length; i++) {
-          if (i < testScenario.request.parameters.length) {
-            // If the index exists in both lists, update the original list
-            testScenario.request.parameters[i] =
-                testScenario.request.parameters[i].copyWith(
-              key: parameters.elementAt(i).key,
-              value: parameters.elementAt(i).value,
-            );
-          } else {
-            // If the index is only in the new list, add the item to the original list
-            testScenario.request.parameters.add(IndiHttpParameter.newWith(
-              key: parameters.elementAt(i).key,
-              value: parameters.elementAt(i).value,
-            ));
-          }
-        }
-
-        ref.read(testGroupsProvider.notifier).updateTestGroup(testGroup);
-      },
       decoration: const InputDecoration(
         hintText: 'Enter URL',
         border: InputBorder.none,

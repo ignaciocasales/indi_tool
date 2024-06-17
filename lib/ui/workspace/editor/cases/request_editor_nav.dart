@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/body_pane.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/headers_pane.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/params_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/cases/parameters_pane.dart';
 
 class RequestEditorNav extends StatefulWidget {
   const RequestEditorNav({super.key});
@@ -32,13 +32,13 @@ class _RequestEditorNavState extends State<RequestEditorNav>
             controller: _controller,
             tabs: const [
               Tab(
-                text: "Params",
+                text: 'Params',
               ),
               Tab(
-                text: "Headers",
+                text: 'Headers',
               ),
               Tab(
-                text: "Body",
+                text: 'Body',
               ),
             ],
           ),
@@ -46,7 +46,7 @@ class _RequestEditorNavState extends State<RequestEditorNav>
             child: TabBarView(
               controller: _controller,
               children: const [
-                Params(),
+                Parameters(),
                 Headers(),
                 Body(),
               ],

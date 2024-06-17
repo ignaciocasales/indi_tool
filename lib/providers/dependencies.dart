@@ -1,6 +1,7 @@
 import 'package:indi_tool/schema/request.dart';
 import 'package:indi_tool/schema/test_group.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/services/http/http_service.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,6 +15,36 @@ Future<Isar> isar(IsarRef ref) async {
     schemas: [TestGroupSchema],
     directory: dir.path,
   );
+}
+
+@riverpod
+GenericHttpService genericHttpService(GenericHttpServiceRef ref) {
+  return GenericHttpService();
+}
+
+@riverpod
+class HttpService extends _$HttpService {
+  @override
+  GenericHttpService build() {
+    return ref.watch(genericHttpServiceProvider);
+  }
+
+  Future<String> sendRequest() async {
+    final http = ref.watch(genericHttpServiceProvider);
+
+    final WorkItem workItem = ref.watch(selectedWorkItemProvider)!;
+
+    if (workItem.type != WorkItemType.testScenario) {
+      throw Exception('No test case selected');
+    }
+
+    final TestScenario testScenario = ref.watch(testGroupsProvider.select(
+            (value) => value.value
+            ?.firstWhere((element) => element.id == workItem.parent!.id)
+            .testScenarios[workItem.id]))!;
+
+    return http.sendRequest(testScenario);
+  }
 }
 
 @riverpod
@@ -102,5 +133,5 @@ class WorkItem {
 
 enum WorkItemType {
   testGroup,
-  testCase,
+  testScenario,
 }
