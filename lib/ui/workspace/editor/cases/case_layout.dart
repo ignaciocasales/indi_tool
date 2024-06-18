@@ -31,7 +31,7 @@ class CaseLayout extends ConsumerWidget {
               child: FilledButton(
                 onPressed: () {
                   // Do something
-                  ref.read(httpServiceProvider.notifier).sendRequest();
+                  ref.read(loadTestingManagerProvider.notifier).sendRequest();
                 },
                 child: const Row(
                   children: [

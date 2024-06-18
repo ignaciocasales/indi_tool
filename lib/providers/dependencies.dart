@@ -1,9 +1,15 @@
+
 import 'package:indi_tool/schema/request.dart';
 import 'package:indi_tool/schema/test_group.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
+
 import 'package:indi_tool/services/http/http_service.dart';
+import 'package:indi_tool/services/load_testing.dart';
+
 import 'package:isar/isar.dart';
+
 import 'package:path_provider/path_provider.dart';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'dependencies.g.dart';
@@ -18,20 +24,23 @@ Future<Isar> isar(IsarRef ref) async {
 }
 
 @riverpod
-GenericHttpService genericHttpService(GenericHttpServiceRef ref) {
+GenericHttpService httpService(HttpServiceRef ref) {
   return GenericHttpService();
 }
 
 @riverpod
-class HttpService extends _$HttpService {
+LoadTestingService loadTestingPod(LoadTestingPodRef ref) {
+  return LoadTestingService(ref.watch(httpServiceProvider));
+}
+
+@riverpod
+class LoadTestingManager extends _$LoadTestingManager {
   @override
-  GenericHttpService build() {
-    return ref.watch(genericHttpServiceProvider);
+  LoadTestingService build() {
+    return ref.read(loadTestingPodProvider);
   }
 
-  Future<String> sendRequest() async {
-    final http = ref.watch(genericHttpServiceProvider);
-
+  Future<List<IndiHttpResponse>> sendRequest() async {
     final WorkItem workItem = ref.watch(selectedWorkItemProvider)!;
 
     if (workItem.type != WorkItemType.testScenario) {
@@ -39,11 +48,11 @@ class HttpService extends _$HttpService {
     }
 
     final TestScenario testScenario = ref.watch(testGroupsProvider.select(
-            (value) => value.value
+        (value) => value.value
             ?.firstWhere((element) => element.id == workItem.parent!.id)
             .testScenarios[workItem.id]))!;
 
-    return http.sendRequest(testScenario);
+    return await state.loadTest(testScenario);
   }
 }
 
