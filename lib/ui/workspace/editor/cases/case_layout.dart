@@ -102,8 +102,6 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
       request: testScenario.request.copyWith(url: value),
     );
 
-    _urlController.text = testScenario.request.url;
-
     final parameters = Uri.parse(value)
         .query
         .split('&')
@@ -128,6 +126,10 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
 
     for (int i = 0; i < parameters.length; i++) {
       if (i < testScenario.request.parameters.length) {
+        if (!testScenario.request.parameters.elementAt(i).enabled) {
+          continue;
+        }
+
         // If the index exists in both lists, update the original list
         testScenario.request.parameters[i] =
             testScenario.request.parameters[i].copyWith(

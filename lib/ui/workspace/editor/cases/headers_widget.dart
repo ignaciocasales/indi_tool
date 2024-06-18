@@ -29,6 +29,7 @@ class HeadersWidget extends ConsumerWidget {
       (i) {
         final bool isLast = i == headers.length;
         return TableRow(
+          key: ValueKey(i),
           children: [
             CheckBoxEditingWidget(
               value: headers.elementAtOrNull(i)?.enabled ?? false,
@@ -55,6 +56,10 @@ class HeadersWidget extends ConsumerWidget {
                 final header = headers.elementAtOrNull(i);
 
                 if (header == null) {
+                  if (value.isEmpty) {
+                    return;
+                  }
+
                   headers.add(IndiHttpHeader.newWith(
                     key: value,
                   ));
@@ -72,6 +77,10 @@ class HeadersWidget extends ConsumerWidget {
                 final header = headers.elementAtOrNull(i);
 
                 if (header == null) {
+                  if (value.isEmpty) {
+                    return;
+                  }
+
                   headers.add(IndiHttpHeader.newWith(
                     value: value,
                   ));
@@ -89,6 +98,10 @@ class HeadersWidget extends ConsumerWidget {
                 final header = headers.elementAtOrNull(i);
 
                 if (header == null) {
+                  if (value.isEmpty) {
+                    return;
+                  }
+
                   headers.add(IndiHttpHeader.newWith(
                     description: value,
                   ));
@@ -108,9 +121,10 @@ class HeadersWidget extends ConsumerWidget {
                       Icons.delete_outline_sharp,
                       size: 16,
                     ),
-                    onPressed: () => {
-                      headers.removeAt(i),
-                      _onFieldEdited(workItem, testGroup, headers, ref),
+                    onPressed: () {
+                      headers.removeAt(i);
+
+                      _onFieldEdited(workItem, testGroup, headers, ref);
                     },
                   )
           ],

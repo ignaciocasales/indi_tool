@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:indi_tool/providers/dependencies.dart';
+
 import 'package:indi_tool/schema/request_param.dart';
 import 'package:indi_tool/schema/test_group.dart';
 
-class ParametersWidget extends ConsumerStatefulWidget {
+class ParametersWidget extends ConsumerWidget {
   const ParametersWidget({super.key});
 
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _ParametersWidgetState();
-}
-
-class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
   void _onFieldEdited(
     WorkItem workItem,
     TestGroup testGroup,
     List<IndiHttpParameter> parameters,
+    WidgetRef ref,
   ) {
     var original = testGroup.testScenarios[workItem.id];
 
@@ -48,6 +46,12 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
 
     var updatedUri = Uri.parse(request.url).replace(query: query).toString();
 
+    if (parameters.where((e) => e.enabled).isEmpty) {
+      if (updatedUri.endsWith('?')) {
+        updatedUri = updatedUri.substring(0, updatedUri.length - 1);
+      }
+    }
+
     testGroup.testScenarios[workItem.id] =
         testGroup.testScenarios[workItem.id].copyWith(
       request: testGroup.testScenarios[workItem.id].request
@@ -58,7 +62,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final workItem = ref.watch(selectedWorkItemProvider)!;
     final TestGroup testGroup = ref.watch(testGroupsProvider.select((value) =>
         value.value
@@ -106,6 +110,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
       (i) {
         final bool isLast = i == parameters.length;
         return TableRow(
+          key: ValueKey(i),
           children: [
             CheckBoxEditingWidget(
               value: parameters.elementAtOrNull(i)?.enabled ?? false,
@@ -122,7 +127,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                         parameters[i] = param.copyWith(enabled: value!);
                       }
 
-                      _onFieldEdited(workItem, testGroup, parameters);
+                      _onFieldEdited(workItem, testGroup, parameters, ref);
                     },
             ),
             CellEditingWidget(
@@ -132,6 +137,10 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                 final param = parameters.elementAtOrNull(i);
 
                 if (param == null) {
+                  if (value.isEmpty) {
+                    return;
+                  }
+
                   parameters.add(IndiHttpParameter.newWith(
                     key: value,
                   ));
@@ -139,7 +148,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                   parameters[i] = param.copyWith(key: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, parameters);
+                _onFieldEdited(workItem, testGroup, parameters, ref);
               },
             ),
             CellEditingWidget(
@@ -149,6 +158,10 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                 final param = parameters.elementAtOrNull(i);
 
                 if (param == null) {
+                  if (value.isEmpty) {
+                    return;
+                  }
+
                   parameters.add(IndiHttpParameter.newWith(
                     value: value,
                   ));
@@ -156,7 +169,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                   parameters[i] = param.copyWith(value: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, parameters);
+                _onFieldEdited(workItem, testGroup, parameters, ref);
               },
             ),
             CellEditingWidget(
@@ -166,6 +179,10 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                   final param = parameters.elementAtOrNull(i);
 
                   if (param == null) {
+                    if (value.isEmpty) {
+                      return;
+                    }
+
                     parameters.add(IndiHttpParameter.newWith(
                       description: value,
                     ));
@@ -173,7 +190,7 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                     parameters[i] = param.copyWith(description: value);
                   }
 
-                  _onFieldEdited(workItem, testGroup, parameters);
+                  _onFieldEdited(workItem, testGroup, parameters, ref);
                 }),
             isLast
                 ? const SizedBox()
@@ -184,9 +201,10 @@ class _ParametersWidgetState extends ConsumerState<ParametersWidget> {
                       Icons.delete_outline_sharp,
                       size: 16,
                     ),
-                    onPressed: () => {
-                      parameters.removeAt(i),
-                      _onFieldEdited(workItem, testGroup, parameters),
+                    onPressed: () {
+                      parameters.removeAt(i);
+
+                      _onFieldEdited(workItem, testGroup, parameters, ref);
                     },
                   )
           ],
@@ -241,20 +259,32 @@ class _CellEditingWidgetState extends ConsumerState<CellEditingWidget> {
 
   @override
   void initState() {
-    _controller = TextEditingController();
+    _controller = TextEditingController(text: widget.text);
+    _controller.addListener(_onCellEdited);
     super.initState();
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onCellEdited);
     _controller.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    _controller.text = widget.text;
+  void didUpdateWidget(CellEditingWidget old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) {
+      _controller.text = widget.text;
+    }
+  }
 
+  void _onCellEdited() {
+    widget.onChanged(_controller.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return TextFormField(
       key: Key('${widget.hint}-${_uniqueKey.toString()}'),
       controller: _controller,
@@ -264,13 +294,12 @@ class _CellEditingWidgetState extends ConsumerState<CellEditingWidget> {
         contentPadding: const EdgeInsets.all(8.0),
         border: InputBorder.none,
       ),
-      onChanged: widget.onChanged,
     );
   }
 }
 
-class CheckBoxEditingWidget extends ConsumerStatefulWidget {
-  const CheckBoxEditingWidget({
+class CheckBoxEditingWidget extends StatelessWidget {
+  CheckBoxEditingWidget({
     required this.value,
     required this.onChanged,
     super.key,
@@ -278,22 +307,14 @@ class CheckBoxEditingWidget extends ConsumerStatefulWidget {
 
   final bool value;
   final void Function(bool?)? onChanged;
-
-  @override
-  ConsumerState createState() {
-    return _CheckBoxEditingWidgetState();
-  }
-}
-
-class _CheckBoxEditingWidgetState extends ConsumerState<CheckBoxEditingWidget> {
   final _uniqueKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
     return Checkbox(
       key: Key('enabled-${_uniqueKey.toString()}'),
-      value: widget.value,
-      onChanged: widget.onChanged,
+      value: value,
+      onChanged: onChanged,
     );
   }
 }
