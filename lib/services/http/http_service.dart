@@ -24,7 +24,13 @@ class GenericHttpService {
 
       final HttpClientResponse response = await request.close();
 
+      // TODO: Remove this comment.
       // return await response.transform(utf8.decoder).join();
+
+      // Adding fake delay to simulate network latency
+      // TODO: Remove this.
+      await Future.delayed(const Duration(milliseconds: 2000));
+
       return response;
     } finally {
       client.close();
