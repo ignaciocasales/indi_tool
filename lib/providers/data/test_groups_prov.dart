@@ -62,9 +62,7 @@ class TestGroups extends _$TestGroups {
     workspace.testGroups[workspace.testGroups.indexWhere(matchesGroupId)] =
         testGroup;
 
-    await isar.write((isar) async {
-      isar.workspaces.put(workspace);
-    });
+    await ref.read(workspacesProvider.notifier).updateWorkspace(workspace);
 
     state = AsyncValue.data(workspace.testGroups);
   }
