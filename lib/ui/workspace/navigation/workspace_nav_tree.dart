@@ -79,17 +79,14 @@ class _MinimalTreeViewState extends ConsumerState<MinimalTreeView> {
       },
     ).toList();
 
-    root.children.clear();
-
-    for (final group in groups) {
-      root.children.add(group);
-    }
+    treeController.roots = groups;
 
     return Expanded(
       child: AnimatedTreeView<TreeNode>(
         treeController: treeController,
         nodeBuilder: (BuildContext context, TreeEntry<TreeNode> entry) {
           return TreeIndentation(
+            key: ValueKey(entry.node),
             entry: entry,
             child: Row(
               children: [
