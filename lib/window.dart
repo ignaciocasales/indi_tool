@@ -15,9 +15,13 @@ void setupWindow() async {
 
     final size = await windowManager.getSize();
 
-    final double width = size.width * 0.65;
+    // FIXME
+    // final double width = size.width * 0.65;
+    final double width = size.width;
 
-    final double height = size.height * 0.65;
+    // FIXME
+    // final double height = size.height * 0.65;
+    final double height = size.height;
 
     WindowOptions windowOptions = WindowOptions(
       size: Size(width, height),

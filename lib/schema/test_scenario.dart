@@ -42,7 +42,6 @@ class TestScenario {
   }
 
   static TestScenario newWith({
-    String? id,
     String? name,
     String? description,
     int? numberOfRequests,
@@ -50,7 +49,7 @@ class TestScenario {
     IndiHttpRequest? request,
   }) {
     return TestScenario(
-      id: id ?? const Uuid().v4(),
+      id: const Uuid().v4(),
       name: name ?? '',
       description: description ?? '',
       numberOfRequests: numberOfRequests ?? 1,

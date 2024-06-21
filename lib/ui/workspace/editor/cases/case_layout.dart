@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/dependencies.dart';
+import 'package:indi_tool/providers/navigation/work_item_prov.dart';
 import 'package:indi_tool/schema/request_param.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/services/params_builder.dart';
+import 'package:indi_tool/ui/workspace/editor/cases/chart/chart.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/http_dropdown.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/request_editor_nav.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/response_layout.dart';
@@ -51,8 +55,20 @@ class CaseLayout extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               RequestEditorNav(),
-              VerticalDivider(),
+              VerticalDivider(
+                width: 0,
+              ),
               ResponseLayout(),
+            ],
+          ),
+        ),
+        const Divider(
+          height: 0,
+        ),
+        const Expanded(
+          child: Row(
+            children: [
+              ChartWidget(),
             ],
           ),
         ),
@@ -86,76 +102,40 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
   }
 
   void _updateUrl() {
-    final String value = _urlController.text;
+    final String url = _urlController.text;
 
     final workItem = ref.read(selectedWorkItemProvider)!;
 
-    final TestScenario testScenario = ref.read(testGroupsProvider.select(
-        (value) => value.value
-            ?.firstWhere((element) => element.id == workItem.parent!.id)
-            .testScenarios[workItem.id]))!;
+    final TestScenario testScenario = ref.watch(testScenariosProvider
+        .select((q) => q.value?.firstWhere((e) => e.id == workItem.id)))!;
 
-    final testGroup = ref.read(testGroupsProvider.select((value) => value.value
-        ?.firstWhere((element) => element.id == workItem.parent!.id)))!;
-
-    testGroup.testScenarios[workItem.id] = testScenario.copyWith(
-      request: testScenario.request.copyWith(url: value),
+    final List<IndiHttpParameter> parameters = ParamsBuilder.syncWithUrl(
+      url,
+      testScenario.request.parameters,
     );
 
-    final parameters = Uri.parse(value)
-        .query
-        .split('&')
-        .where((element) => element.isNotEmpty)
-        .map((param) {
-      final List<String> keyValue = param.split('=');
+    final TestScenario updated = testScenario.copyWith(
+      request: testScenario.request.copyWith(url: url, parameters: parameters),
+    );
 
-      String key = '';
-      final maybeKey = keyValue.elementAtOrNull(0);
-      if (maybeKey != null) {
-        key = Uri.decodeQueryComponent(maybeKey);
-      }
-
-      String value = '';
-      final maybeValue = keyValue.elementAtOrNull(1);
-      if (maybeValue != null) {
-        value = Uri.decodeQueryComponent(maybeValue);
-      }
-
-      return IndiHttpParameter.newWith(key: key, value: value);
-    });
-
-    for (int i = 0; i < parameters.length; i++) {
-      if (i < testScenario.request.parameters.length) {
-        if (!testScenario.request.parameters.elementAt(i).enabled) {
-          continue;
-        }
-
-        // If the index exists in both lists, update the original list
-        testScenario.request.parameters[i] =
-            testScenario.request.parameters[i].copyWith(
-          key: parameters.elementAt(i).key,
-          value: parameters.elementAt(i).value,
-        );
-      } else {
-        // If the index is only in the new list, add the item to the original list
-        testScenario.request.parameters.add(IndiHttpParameter.newWith(
-          key: parameters.elementAt(i).key,
-          value: parameters.elementAt(i).value,
-        ));
-      }
-    }
-
-    ref.read(testGroupsProvider.notifier).updateTestGroup(testGroup);
+    ref.read(testScenariosProvider.notifier).updateTestScenario(updated);
   }
 
   @override
   Widget build(BuildContext context) {
     final workItem = ref.watch(selectedWorkItemProvider)!;
 
-    final TestScenario testScenario = ref.watch(testGroupsProvider.select(
-        (value) => value.value
-            ?.firstWhere((element) => element.id == workItem.parent!.id)
-            .testScenarios[workItem.id]))!;
+    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+      if (value.value == null || value.value!.isEmpty) {
+        return null;
+      }
+
+      return value.value?.firstWhere((element) => element.id == workItem.id);
+    }));
+
+    if (testScenario == null) {
+      return const SizedBox();
+    }
 
     if (_urlController.text != testScenario.request.url) {
       _urlController.text = testScenario.request.url;

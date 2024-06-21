@@ -1,5 +1,3 @@
-
-
 import 'package:indi_tool/schema/http_method.dart';
 import 'package:indi_tool/schema/request_header.dart';
 import 'package:indi_tool/schema/request_param.dart';

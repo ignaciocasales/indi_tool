@@ -11,7 +11,7 @@ class Workspace extends StatelessWidget {
     return const Expanded(
       child: Row(children: [
         WorkspaceNav(),
-        VerticalDivider(),
+        VerticalDivider(width: 0),
         EditorLayout(),
       ]),
     );

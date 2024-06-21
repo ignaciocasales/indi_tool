@@ -1,75 +1,51 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:indi_tool/providers/dependencies.dart';
-
+import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
+import 'package:indi_tool/providers/navigation/work_item_prov.dart';
 import 'package:indi_tool/schema/request_param.dart';
-import 'package:indi_tool/schema/test_group.dart';
+import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/services/url_builder.dart';
 
 class ParametersWidget extends ConsumerWidget {
   const ParametersWidget({super.key});
 
   void _onFieldEdited(
-    WorkItem workItem,
-    TestGroup testGroup,
+    TestScenario testScenario,
     List<IndiHttpParameter> parameters,
     WidgetRef ref,
   ) {
-    var original = testGroup.testScenarios[workItem.id];
-
-    var request = original.request;
-
-    testGroup.testScenarios[workItem.id] =
-        original.copyWith(request: request.copyWith(parameters: parameters));
-
-    String query = '';
-    for (var param in parameters) {
-      if (param.enabled == false) {
-        continue;
-      }
-
-      if (param.key.isEmpty) {
-        continue;
-      }
-
-      query += param.key;
-
-      if (param.value.isNotEmpty) {
-        query += '=${param.value}';
-      }
-
-      if (parameters.indexOf(param) < parameters.length - 1) {
-        query += '&';
-      }
-    }
-
-    var updatedUri = Uri.parse(request.url).replace(query: query).toString();
-
-    if (parameters.where((e) => e.enabled).isEmpty) {
-      if (updatedUri.endsWith('?')) {
-        updatedUri = updatedUri.substring(0, updatedUri.length - 1);
-      }
-    }
-
-    testGroup.testScenarios[workItem.id] =
-        testGroup.testScenarios[workItem.id].copyWith(
-      request: testGroup.testScenarios[workItem.id].request
-          .copyWith(url: updatedUri),
+    final String updatedUri = UrlBuilder.syncWithParameters(
+      testScenario.request.url,
+      parameters,
     );
 
-    ref.read(testGroupsProvider.notifier).updateTestGroup(testGroup);
+    final TestScenario updated = testScenario.copyWith(
+      request: testScenario.request.copyWith(
+        url: updatedUri,
+        parameters: parameters,
+      ),
+    );
+
+    ref.read(testScenariosProvider.notifier).updateTestScenario(updated);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final workItem = ref.watch(selectedWorkItemProvider)!;
-    final TestGroup testGroup = ref.watch(testGroupsProvider.select((value) =>
-        value.value
-            ?.firstWhere((element) => element.id == workItem.parent!.id)))!;
 
-    final List<IndiHttpParameter> parameters =
-        testGroup.testScenarios[workItem.id].request.parameters;
+    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+      if (value.value == null || value.value!.isEmpty) {
+        return null;
+      }
+
+      return value.value?.firstWhere((element) => element.id == workItem.id);
+    }));
+
+    if (testScenario == null) {
+      return const SizedBox();
+    }
+
+    final List<IndiHttpParameter> parameters = testScenario.request.parameters;
 
     const TableRow headerRow = TableRow(
       children: [
@@ -127,7 +103,7 @@ class ParametersWidget extends ConsumerWidget {
                         parameters[i] = param.copyWith(enabled: value!);
                       }
 
-                      _onFieldEdited(workItem, testGroup, parameters, ref);
+                      _onFieldEdited(testScenario, parameters, ref);
                     },
             ),
             CellEditingWidget(
@@ -148,7 +124,7 @@ class ParametersWidget extends ConsumerWidget {
                   parameters[i] = param.copyWith(key: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, parameters, ref);
+                _onFieldEdited(testScenario, parameters, ref);
               },
             ),
             CellEditingWidget(
@@ -169,7 +145,7 @@ class ParametersWidget extends ConsumerWidget {
                   parameters[i] = param.copyWith(value: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, parameters, ref);
+                _onFieldEdited(testScenario, parameters, ref);
               },
             ),
             CellEditingWidget(
@@ -190,7 +166,7 @@ class ParametersWidget extends ConsumerWidget {
                     parameters[i] = param.copyWith(description: value);
                   }
 
-                  _onFieldEdited(workItem, testGroup, parameters, ref);
+                  _onFieldEdited(testScenario, parameters, ref);
                 }),
             isLast
                 ? const SizedBox()
@@ -204,7 +180,7 @@ class ParametersWidget extends ConsumerWidget {
                     onPressed: () {
                       parameters.removeAt(i);
 
-                      _onFieldEdited(workItem, testGroup, parameters, ref);
+                      _onFieldEdited(testScenario, parameters, ref);
                     },
                   )
           ],

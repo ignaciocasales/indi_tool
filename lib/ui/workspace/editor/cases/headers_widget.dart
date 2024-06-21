@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/dependencies.dart';
+import 'package:indi_tool/models/navigation/work_item.dart';
+import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
+import 'package:indi_tool/providers/navigation/work_item_prov.dart';
 import 'package:indi_tool/schema/request_header.dart';
-import 'package:indi_tool/schema/test_group.dart';
+import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/parameters_widget.dart';
 
 class HeadersWidget extends ConsumerWidget {
@@ -17,12 +19,19 @@ class HeadersWidget extends ConsumerWidget {
       throw Exception('No test scenario selected');
     }
 
-    final TestGroup testGroup = ref.watch(testGroupsProvider.select((value) =>
-        value.value
-            ?.firstWhere((element) => element.id == workItem.parent!.id)))!;
+    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+      if (value.value == null || value.value!.isEmpty) {
+        return null;
+      }
 
-    final List<IndiHttpHeader> headers =
-        testGroup.testScenarios[workItem.id].request.headers;
+      return value.value?.firstWhere((element) => element.id == workItem.id);
+    }));
+
+    if (testScenario == null) {
+      return const SizedBox();
+    }
+
+    final List<IndiHttpHeader> headers = testScenario.request.headers;
 
     final List<TableRow> valueRows = List.generate(
       headers.length + 1,
@@ -46,7 +55,7 @@ class HeadersWidget extends ConsumerWidget {
                         headers[i] = header.copyWith(enabled: value!);
                       }
 
-                      _onFieldEdited(workItem, testGroup, headers, ref);
+                      _onFieldEdited(testScenario, headers, ref);
                     },
             ),
             CellEditingWidget(
@@ -67,7 +76,7 @@ class HeadersWidget extends ConsumerWidget {
                   headers[i] = header.copyWith(key: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, headers, ref);
+                _onFieldEdited(testScenario, headers, ref);
               },
             ),
             CellEditingWidget(
@@ -88,7 +97,7 @@ class HeadersWidget extends ConsumerWidget {
                   headers[i] = header.copyWith(value: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, headers, ref);
+                _onFieldEdited(testScenario, headers, ref);
               },
             ),
             CellEditingWidget(
@@ -109,7 +118,7 @@ class HeadersWidget extends ConsumerWidget {
                   headers[i] = header.copyWith(description: value);
                 }
 
-                _onFieldEdited(workItem, testGroup, headers, ref);
+                _onFieldEdited(testScenario, headers, ref);
               },
             ),
             isLast
@@ -124,7 +133,7 @@ class HeadersWidget extends ConsumerWidget {
                     onPressed: () {
                       headers.removeAt(i);
 
-                      _onFieldEdited(workItem, testGroup, headers, ref);
+                      _onFieldEdited(testScenario, headers, ref);
                     },
                   )
           ],
@@ -157,19 +166,15 @@ class HeadersWidget extends ConsumerWidget {
   }
 
   void _onFieldEdited(
-    WorkItem workItem,
-    TestGroup testGroup,
+    TestScenario testScenario,
     List<IndiHttpHeader> headers,
     WidgetRef ref,
   ) {
-    var original = testGroup.testScenarios[workItem.id];
+    final TestScenario updated = testScenario.copyWith(
+      request: testScenario.request.copyWith(headers: headers),
+    );
 
-    var request = original.request;
-
-    testGroup.testScenarios[workItem.id] =
-        original.copyWith(request: request.copyWith(headers: headers));
-
-    ref.read(testGroupsProvider.notifier).updateTestGroup(testGroup);
+    ref.read(testScenariosProvider.notifier).updateTestScenario(updated);
   }
 }
 

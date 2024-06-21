@@ -1,36 +1,37 @@
 import 'package:indi_tool/schema/request.dart';
 import 'package:indi_tool/schema/request_header.dart';
 import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/test_group.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:isar/isar.dart';
-import 'package:uuid/uuid.dart';
 
-part 'test_group.g.dart';
+part 'workspace.g.dart';
 
-@embedded
-class TestGroup {
-  TestGroup({
+@collection
+class Workspace {
+  Workspace({
     required this.id,
     required this.name,
     this.description = '',
-    required this.testScenarios,
+    required this.testGroups,
   });
 
-  final String id;
+  final int id;
   final String name;
   final String description;
-  final List<TestScenario> testScenarios;
+  final List<TestGroup> testGroups;
 
-  static TestGroup newWith({
+  static Workspace newWith({
+    required int id,
     String? name,
     String? description,
-    List<TestScenario>? testScenarios,
+    List<TestGroup>? testGroups,
   }) {
-    return TestGroup(
-      id: const Uuid().v4(),
+    return Workspace(
+      id: id,
       name: name ?? '',
       description: description ?? '',
-      testScenarios: testScenarios ?? List<TestScenario>.empty(growable: true),
+      testGroups: testGroups ?? List<TestGroup>.empty(growable: true),
     );
   }
 }
