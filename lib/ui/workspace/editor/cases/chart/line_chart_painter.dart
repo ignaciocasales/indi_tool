@@ -37,8 +37,10 @@ class LineChartPainter extends CustomPainter {
   final paddingRight = 10.0;
 
   final tooltipLabelStyle = const TextStyle(color: Colors.white, fontSize: 12);
-  final xAxisLabelStyle = const TextStyle(color: Color(0xff83808C), fontSize: 8);
-  final yAxisLabelStyle = const TextStyle(color: Color(0xffAAA8B1), fontSize: 10);
+  final xAxisLabelStyle =
+      const TextStyle(color: Color(0xff83808C), fontSize: 8);
+  final yAxisLabelStyle =
+      const TextStyle(color: Color(0xffAAA8B1), fontSize: 10);
 
   late final pointInnerPaint = Paint()
     ..color = _mainColor
@@ -94,7 +96,8 @@ class LineChartPainter extends CustomPainter {
     final touchyCanvas = TouchyCanvas(context, canvas);
 
     // frame
-    final clipRRect = RRect.fromLTRBR(0, 0, size.width, size.height, const Radius.circular(4));
+    final clipRRect = RRect.fromLTRBR(
+        0, 0, size.width, size.height, const Radius.circular(4));
     canvas.clipRRect(clipRRect);
 
     // fill background color
@@ -114,9 +117,11 @@ class LineChartPainter extends CustomPainter {
     // height ratio between max - min
     final heightRatio = heightColumn / (ceilMax - floorMin);
 
-    final center = Offset(paddingLeft + widthColumn / 2, paddingTop + heightColumn / 2);
+    final center =
+        Offset(paddingLeft + widthColumn / 2, paddingTop + heightColumn / 2);
 
-    final points = _computePoints(center, widthColumn, heightColumn, heightRatio);
+    final points =
+        _computePoints(center, widthColumn, heightColumn, heightRatio);
 
     final yPositions = _computeYPositions(
       paddingTop: paddingTop,
@@ -216,13 +221,14 @@ class LineChartPainter extends CustomPainter {
   }
 
   void _drawVerticalOutline(
-      Canvas canvas,
-      Offset center,
-      double width,
-      double height,
-      ) {
+    Canvas canvas,
+    Offset center,
+    double width,
+    double height,
+  ) {
     for (var _ in myWeightProgress) {
-      final rect = Rect.fromCenter(center: center, width: width, height: height);
+      final rect =
+          Rect.fromCenter(center: center, width: width, height: height);
       canvas.drawRect(rect, outlinePaint);
       center += Offset(width, 0);
     }
@@ -238,7 +244,8 @@ class LineChartPainter extends CustomPainter {
     for (var i = 0; i < labels.length; i++) {
       final label = labels[i];
       final yPoint = positions[i];
-      final textPainter = _getTextPainter(label, yAxisLabelStyle, labelMaxWidth);
+      final textPainter =
+          _getTextPainter(label, yAxisLabelStyle, labelMaxWidth);
       final position = Offset(0, yPoint.dy - textPainter.height / 2);
       textPainter.paint(canvas, position);
       center += Offset(labelMaxWidth, 0);
@@ -256,7 +263,8 @@ class LineChartPainter extends CustomPainter {
     for (var i = 0; i < labels.length; i++) {
       final label = labels[i];
       final point = points[i];
-      final textPainter = _getTextPainter(label, xAxisLabelStyle, labelMaxWidth);
+      final textPainter =
+          _getTextPainter(label, xAxisLabelStyle, labelMaxWidth);
       final position = Offset(point.dx - textPainter.width / 2, labelMarginTop);
       textPainter.paint(canvas, position);
       center += Offset(labelMaxWidth, 0);
@@ -276,7 +284,8 @@ class LineChartPainter extends CustomPainter {
       final label = labels[i];
       final point = points[i];
 
-      final textPainter = _getTextPainter(label, tooltipLabelStyle, labelMaxWidth);
+      final textPainter =
+          _getTextPainter(label, tooltipLabelStyle, labelMaxWidth);
       final myWeight = myWeightProgress[i];
       final position = point +
           Offset(-textPainter.width / 2, -textPainter.height / 2) +
@@ -302,10 +311,13 @@ class LineChartPainter extends CustomPainter {
         const triangleW = 10;
         const triangleH = 5;
         final Path trianglePath = Path()
-          ..moveTo(point.dx - triangleW / 2, point.dy - spaceBetweenPointAndTooltip)
+          ..moveTo(
+              point.dx - triangleW / 2, point.dy - spaceBetweenPointAndTooltip)
           ..lineTo(point.dx, point.dy - spaceBetweenPointAndTooltip + triangleH)
-          ..lineTo(point.dx + triangleW / 2, point.dy - spaceBetweenPointAndTooltip)
-          ..lineTo(point.dx - triangleW / 2, point.dy - spaceBetweenPointAndTooltip);
+          ..lineTo(
+              point.dx + triangleW / 2, point.dy - spaceBetweenPointAndTooltip)
+          ..lineTo(
+              point.dx - triangleW / 2, point.dy - spaceBetweenPointAndTooltip);
         canvas.drawPath(trianglePath, tooltipPaint);
 
         // draw text label
@@ -346,7 +358,8 @@ class LineChartPainter extends CustomPainter {
         double startY = paddingTop;
         const dashHeight = 3, dashSpace = 3;
         while (startY < drawableHeight + paddingTop) {
-          canvas.drawLine(Offset(point.dx, startY), Offset(point.dx, startY + 2), dottedLinePaint);
+          canvas.drawLine(Offset(point.dx, startY),
+              Offset(point.dx, startY + 2), dottedLinePaint);
           startY += dashHeight + dashSpace;
         }
       }
@@ -369,18 +382,24 @@ class LineChartPainter extends CustomPainter {
 
   TextPainter _getTextPainter(String text, TextStyle style, double maxWidth) {
     final textSpan = TextSpan(text: text, style: style);
-    final textPainter = TextPainter(text: textSpan, textAlign: TextAlign.center, textDirection: TextDirection.ltr);
+    final textPainter = TextPainter(
+        text: textSpan,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr);
     textPainter.layout(minWidth: 0, maxWidth: maxWidth);
     return textPainter;
   }
 
   List<String> _computeTooltipLabels(List<MyWeight> myWeightProgress) {
-    return myWeightProgress.map((e) => "${e.weight.toStringAsFixed(1)} kg").toList();
+    return myWeightProgress
+        .map((e) => "${e.weight.toStringAsFixed(1)} kg")
+        .toList();
   }
 
   List<String> _computeXLabels(List<MyWeight> myWeightProgress) {
     return myWeightProgress
-        .map((e) => "${DateFormat.d().format(e.dateTime)}\n ${DateFormat.MMM().format(e.dateTime)}")
+        .map((e) =>
+            "${DateFormat.d().format(e.dateTime)}\n ${DateFormat.MMM().format(e.dateTime)}")
         .toList();
   }
 
@@ -395,7 +414,10 @@ class LineChartPainter extends CustomPainter {
     return result;
   }
 
-  List<Offset> _computeYPositions({required double paddingTop, required double heightRatio, required int qty}) {
+  List<Offset> _computeYPositions(
+      {required double paddingTop,
+      required double heightRatio,
+      required int qty}) {
     final points = <Offset>[];
     for (var i = 1; i <= qty; i++) {
       final dp = Offset(0, paddingTop);
@@ -406,11 +428,11 @@ class LineChartPainter extends CustomPainter {
   }
 
   List<Offset> _computePoints(
-      Offset center,
-      double widthColumn,
-      double heightColumn,
-      double heightRatio,
-      ) {
+    Offset center,
+    double widthColumn,
+    double heightColumn,
+    double heightRatio,
+  ) {
     final points = <Offset>[];
     for (var myWeight in myWeightProgress) {
       final yy = heightColumn - (myWeight.weight - floorMin) * heightRatio;

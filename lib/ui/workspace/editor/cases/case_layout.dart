@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/work_item_prov.dart';
 import 'package:indi_tool/providers/services/load_testing_prov.dart';
-import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/indi_http_param.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/params_builder.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/chart/chart.dart';
@@ -109,7 +109,7 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
     final TestScenario testScenario = ref.watch(testScenariosProvider
         .select((q) => q.value?.firstWhere((e) => e.id == workItem.id)))!;
 
-    final List<IndiHttpParameter> parameters = ParamsBuilder.syncWithUrl(
+    final List<IndiHttpParam> parameters = ParamsBuilder.syncWithUrl(
       url,
       testScenario.request.parameters,
     );

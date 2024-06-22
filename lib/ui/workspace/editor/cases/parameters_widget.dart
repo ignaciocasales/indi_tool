@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/indi_http_param.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/url_builder.dart';
 
@@ -11,7 +11,7 @@ class ParametersWidget extends ConsumerWidget {
 
   void _onFieldEdited(
     TestScenario testScenario,
-    List<IndiHttpParameter> parameters,
+    List<IndiHttpParam> parameters,
     WidgetRef ref,
   ) {
     final String updatedUri = UrlBuilder.syncWithParameters(
@@ -33,7 +33,8 @@ class ParametersWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final workItem = ref.watch(selectedWorkItemProvider)!;
 
-    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+    final TestScenario? testScenario =
+        ref.watch(testScenariosProvider.select((value) {
       if (value.value == null || value.value!.isEmpty) {
         return null;
       }
@@ -45,7 +46,7 @@ class ParametersWidget extends ConsumerWidget {
       return const SizedBox();
     }
 
-    final List<IndiHttpParameter> parameters = testScenario.request.parameters;
+    final List<IndiHttpParam> parameters = testScenario.request.parameters;
 
     const TableRow headerRow = TableRow(
       children: [
@@ -96,7 +97,7 @@ class ParametersWidget extends ConsumerWidget {
                       final param = parameters.elementAtOrNull(i);
 
                       if (param == null) {
-                        parameters.add(IndiHttpParameter.newWith(
+                        parameters.add(IndiHttpParam.newWith(
                           enabled: value!,
                         ));
                       } else {
@@ -117,7 +118,7 @@ class ParametersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  parameters.add(IndiHttpParameter.newWith(
+                  parameters.add(IndiHttpParam.newWith(
                     key: value,
                   ));
                 } else {
@@ -138,7 +139,7 @@ class ParametersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  parameters.add(IndiHttpParameter.newWith(
+                  parameters.add(IndiHttpParam.newWith(
                     value: value,
                   ));
                 } else {
@@ -159,7 +160,7 @@ class ParametersWidget extends ConsumerWidget {
                       return;
                     }
 
-                    parameters.add(IndiHttpParameter.newWith(
+                    parameters.add(IndiHttpParam.newWith(
                       description: value,
                     ));
                   } else {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:indi_tool/schema/body_type.dart';
+import 'package:indi_tool/models/common/body_type.dart';
 
 class Body extends StatelessWidget {
   const Body({super.key});

@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';
 
-part 'request_header.g.dart';
+part 'indi_http_header.g.dart';
 
 @embedded
 class IndiHttpHeader {

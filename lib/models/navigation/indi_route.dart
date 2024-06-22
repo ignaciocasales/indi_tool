@@ -1,5 +1,1 @@
-enum IndiRoute {
-  home,
-  workspace,
-  settings
-}
+enum IndiRoute { home, workspace, settings }

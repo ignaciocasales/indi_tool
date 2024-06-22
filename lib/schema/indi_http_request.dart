@@ -1,10 +1,10 @@
-import 'package:indi_tool/schema/http_method.dart';
-import 'package:indi_tool/schema/request_header.dart';
-import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/models/common/http_method.dart';
+import 'package:indi_tool/schema/indi_http_header.dart';
+import 'package:indi_tool/schema/indi_http_param.dart';
 import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';
 
-part 'request.g.dart';
+part 'indi_http_request.g.dart';
 
 @embedded
 class IndiHttpRequest {
@@ -23,7 +23,7 @@ class IndiHttpRequest {
   final HttpMethod method;
   final String url;
   final String body;
-  final List<IndiHttpParameter> parameters;
+  final List<IndiHttpParam> parameters;
   final List<IndiHttpHeader> headers;
 
   IndiHttpRequest copyWith({
@@ -31,7 +31,7 @@ class IndiHttpRequest {
     HttpMethod? method,
     String? url,
     String? body,
-    List<IndiHttpParameter>? parameters,
+    List<IndiHttpParam>? parameters,
     List<IndiHttpHeader>? headers,
   }) {
     return IndiHttpRequest(
@@ -50,7 +50,7 @@ class IndiHttpRequest {
     HttpMethod? method,
     String? url,
     String? body,
-    List<IndiHttpParameter>? parameters,
+    List<IndiHttpParam>? parameters,
     List<IndiHttpHeader>? headers,
   }) {
     return IndiHttpRequest(

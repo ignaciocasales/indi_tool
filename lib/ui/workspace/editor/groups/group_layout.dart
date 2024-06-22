@@ -42,7 +42,9 @@ class GroupLayout extends ConsumerWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  ref.read(testScenariosProvider.notifier).addTestScenario(testGroup);
+                  ref
+                      .read(testScenariosProvider.notifier)
+                      .addTestScenario(testGroup);
                 },
                 child: const Text('Add a Test Case'),
               ),

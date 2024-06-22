@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:indi_tool/core/isolate_pool.dart';
-import 'package:indi_tool/schema/request.dart';
-import 'package:indi_tool/schema/response.dart';
+import 'package:indi_tool/schema/indi_http_request.dart';
+import 'package:indi_tool/schema/indi_http_response.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/http/http_service.dart';
-import 'package:indi_tool/services/http_task.dart';
+import 'package:indi_tool/services/http/http_task.dart';
 
 class LoadTestingService {
   final GenericHttpService _httpService;

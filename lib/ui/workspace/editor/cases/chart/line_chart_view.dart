@@ -16,7 +16,9 @@ class LineChartView extends StatefulWidget {
   @override
   State<LineChartView> createState() => _LineChartViewState();
 }
-class _LineChartViewState extends State<LineChartView> with SingleTickerProviderStateMixin {
+
+class _LineChartViewState extends State<LineChartView>
+    with SingleTickerProviderStateMixin {
   // this list keep the original value generated
   late final List<MyWeight> _myWeightProgressGenerated = _genDataList();
 
@@ -26,7 +28,8 @@ class _LineChartViewState extends State<LineChartView> with SingleTickerProvider
   double _maxWeight = -double.maxFinite;
   double _minWeight = double.maxFinite;
 
-  late final _controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+  late final _controller = AnimationController(
+      duration: const Duration(milliseconds: 500), vsync: this);
   late final _animation = Tween<double>(begin: 0.0, end: 1.0);
 
   @override
@@ -49,9 +52,11 @@ class _LineChartViewState extends State<LineChartView> with SingleTickerProvider
     const minWeight = 40;
     const maxWeight = 50;
     for (int i = 0; i < 7; i++) {
-      final randomWeight =
-          (random.nextInt(maxWeight - minWeight) + minWeight) + double.parse(random.nextDouble().toStringAsFixed(1));
-      final myWeight = MyWeight(dateTime: DateTime.now().add(Duration(days: i)), weight: randomWeight);
+      final randomWeight = (random.nextInt(maxWeight - minWeight) + minWeight) +
+          double.parse(random.nextDouble().toStringAsFixed(1));
+      final myWeight = MyWeight(
+          dateTime: DateTime.now().add(Duration(days: i)),
+          weight: randomWeight);
       progress.add(myWeight);
       _minWeight = randomWeight < _minWeight ? randomWeight : _minWeight;
       _maxWeight = randomWeight > _maxWeight ? randomWeight : _maxWeight;

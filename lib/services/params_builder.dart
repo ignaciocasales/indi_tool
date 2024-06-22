@@ -1,13 +1,13 @@
-import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/indi_http_param.dart';
 
 class ParamsBuilder {
   ParamsBuilder._();
 
-  static List<IndiHttpParameter> syncWithUrl(
+  static List<IndiHttpParam> syncWithUrl(
     final String url,
-    final List<IndiHttpParameter> originalParameters,
+    final List<IndiHttpParam> originalParameters,
   ) {
-    final List<IndiHttpParameter> newParameters = Uri.parse(url)
+    final List<IndiHttpParam> newParameters = Uri.parse(url)
         .query
         .split('&')
         .where((element) => element.isNotEmpty)
@@ -26,10 +26,10 @@ class ParamsBuilder {
         value = Uri.decodeQueryComponent(maybeValue);
       }
 
-      return IndiHttpParameter.newWith(key: key, value: value);
+      return IndiHttpParam.newWith(key: key, value: value);
     }).toList();
 
-    final List<IndiHttpParameter> updated = List.empty(growable: true);
+    final List<IndiHttpParam> updated = List.empty(growable: true);
 
     for (int i = 0; i < newParameters.length; i++) {
       if (i < originalParameters.length) {
@@ -45,7 +45,7 @@ class ParamsBuilder {
         );
       } else {
         // If the index is only in the new list, add the item to the original list
-        updated.add(IndiHttpParameter.newWith(
+        updated.add(IndiHttpParam.newWith(
           key: newParameters.elementAt(i).key,
           value: newParameters.elementAt(i).value,
         ));

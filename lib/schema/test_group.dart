@@ -1,6 +1,6 @@
-import 'package:indi_tool/schema/request.dart';
-import 'package:indi_tool/schema/request_header.dart';
-import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/indi_http_header.dart';
+import 'package:indi_tool/schema/indi_http_param.dart';
+import 'package:indi_tool/schema/indi_http_request.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';

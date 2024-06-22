@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:indi_tool/schema/request.dart';
+import 'package:indi_tool/schema/indi_http_request.dart';
 
 class GenericHttpService {
   Future<HttpClientResponse> sendRequest(IndiHttpRequest indiRequest) async {

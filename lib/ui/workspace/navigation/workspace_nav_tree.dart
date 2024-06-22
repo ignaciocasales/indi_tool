@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
-import 'package:indi_tool/models/navigation/work_item.dart';
-import 'package:indi_tool/providers/data/workspace_prov.dart';
-import 'package:indi_tool/providers/data/workspaces_prov.dart';
-import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/schema/test_group.dart';
-import 'package:indi_tool/schema/workspace.dart';
+import 'package:indi_tool/providers/state/test_groups_explorer_prov.dart';
 
 class MinimalTreeView extends ConsumerStatefulWidget {
   const MinimalTreeView({super.key});
@@ -17,73 +12,33 @@ class MinimalTreeView extends ConsumerStatefulWidget {
 }
 
 class _MinimalTreeViewState extends ConsumerState<MinimalTreeView> {
-  late final TreeController<TreeNode> treeController;
-  late final TreeNode root = TreeNode(title: '/', onTap: (_) {});
+  late final TreeNodeController _treeController;
 
   @override
   void initState() {
     super.initState();
 
-    treeController = TreeController<TreeNode>(
-      roots: root.children,
+    _treeController = TreeNodeController(
+      roots: List<TreeNode>.empty(growable: true),
       childrenProvider: (TreeNode node) => node.children,
     );
   }
 
   @override
   void dispose() {
-    treeController.dispose();
+    _treeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final int id = ref.watch(selectedWorkspaceProvider)!;
+    final List<TreeNode> groups = ref.watch(testGroupsExplorerProvider);
 
-    final Workspace workspace = ref.watch(workspacesProvider
-        .select((e) => e.value?.firstWhere((e) => e.id == id)))!;
-
-    final List<TestGroup> testGroups = workspace.testGroups;
-
-    final List<TreeNode> groups = testGroups.map(
-      (group) {
-        var parent = WorkItem(
-          id: group.id,
-          type: WorkItemType.testGroup,
-        );
-
-        final List<TreeNode> scenarios = group.testScenarios.map(
-          (scenario) {
-            return TreeNode(
-              title: scenario.name,
-              onTap: (node) {
-                ref.read(selectedWorkItemProvider.notifier).select(
-                      WorkItem(
-                        id: scenario.id,
-                        type: WorkItemType.testScenario,
-                        parent: parent,
-                      ),
-                    );
-              },
-            );
-          },
-        ).toList();
-
-        return TreeNode(
-          title: group.name,
-          children: scenarios,
-          onTap: (node) {
-            ref.read(selectedWorkItemProvider.notifier).select(parent);
-          },
-        );
-      },
-    ).toList();
-
-    treeController.roots = groups;
+    _treeController.roots = groups;
 
     return Expanded(
       child: AnimatedTreeView<TreeNode>(
-        treeController: treeController,
+        treeController: _treeController,
         nodeBuilder: (BuildContext context, TreeEntry<TreeNode> entry) {
           return TreeIndentation(
             key: ValueKey(entry.node),
@@ -92,11 +47,15 @@ class _MinimalTreeViewState extends ConsumerState<MinimalTreeView> {
               children: [
                 if (entry.hasChildren)
                   ExpandIcon(
-                    key: GlobalObjectKey(entry.node),
-                    isExpanded: entry.isExpanded,
-                    onPressed: (_) =>
-                        treeController.toggleExpansion(entry.node),
-                  )
+                      key: GlobalObjectKey(entry.node),
+                      isExpanded: entry.node.isExpanded,
+                      onPressed: (_) {
+                        ref
+                            .read(testGroupsExplorerProvider.notifier)
+                            .toggleExpansion(
+                              entry.node,
+                            );
+                      })
                 else
                   const SizedBox(),
                 Expanded(
@@ -117,5 +76,19 @@ class _MinimalTreeViewState extends ConsumerState<MinimalTreeView> {
         duration: const Duration(milliseconds: 100),
       ),
     );
+  }
+}
+
+class TreeNodeController extends TreeController<TreeNode> {
+  TreeNodeController({required super.roots, required super.childrenProvider});
+
+  @override
+  bool getExpansionState(TreeNode node) => node.isExpanded;
+
+  // Do not call `notifyListeners` from this method as it is called many
+  // times recursively in cascading operations.
+  @override
+  void setExpansionState(TreeNode node, bool expanded) {
+    node = node.copyWith(isExpanded: expanded);
   }
 }

@@ -3,5 +3,6 @@ class MyWeight {
   final double weight;
   bool isFocusing;
 
-  MyWeight({required this.dateTime, required this.weight, this.isFocusing = false});
+  MyWeight(
+      {required this.dateTime, required this.weight, this.isFocusing = false});
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/exceptions/invalid_work_item_type.dart';
+import 'package:indi_tool/models/common/http_method.dart';
 import 'package:indi_tool/models/navigation/work_item.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/schema/http_method.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 
 class HttpMethodDropdown extends ConsumerWidget {
@@ -20,7 +20,8 @@ class HttpMethodDropdown extends ConsumerWidget {
       throw InvalidWorkItemType(workItem.type);
     }
 
-    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+    final TestScenario? testScenario =
+        ref.watch(testScenariosProvider.select((value) {
       if (value.value == null || value.value!.isEmpty) {
         return null;
       }
@@ -59,7 +60,9 @@ class HttpMethodDropdown extends ConsumerWidget {
               request: testScenario.request.copyWith(method: newValue!),
             );
 
-            ref.read(testScenariosProvider.notifier).updateTestScenario(updated);
+            ref
+                .read(testScenariosProvider.notifier)
+                .updateTestScenario(updated);
           },
           inputDecorationTheme: const InputDecorationTheme(
             border: InputBorder.none,

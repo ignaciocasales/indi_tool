@@ -28,8 +28,8 @@ class TestScenarios extends _$TestScenarios {
     final TestGroup testGroup = workspaces
         .map((e) => e.testGroups)
         .expand((e) => e)
-        .firstWhere((e) => e.testScenarios.indexWhere((e) => e.id == workItem.id) != -1);
-
+        .firstWhere((e) =>
+            e.testScenarios.indexWhere((e) => e.id == workItem.id) != -1);
 
     return testGroup.testScenarios;
   }

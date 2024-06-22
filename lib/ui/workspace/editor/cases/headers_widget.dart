@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/work_item.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/schema/request_header.dart';
+import 'package:indi_tool/schema/indi_http_header.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/ui/workspace/editor/cases/parameters_widget.dart';
 
@@ -19,7 +19,8 @@ class HeadersWidget extends ConsumerWidget {
       throw Exception('No test scenario selected');
     }
 
-    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+    final TestScenario? testScenario =
+        ref.watch(testScenariosProvider.select((value) {
       if (value.value == null || value.value!.isEmpty) {
         return null;
       }

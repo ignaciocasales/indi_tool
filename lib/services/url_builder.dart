@@ -1,9 +1,10 @@
-import 'package:indi_tool/schema/request_param.dart';
+import 'package:indi_tool/schema/indi_http_param.dart';
 
 class UrlBuilder {
   UrlBuilder._();
 
-  static String syncWithParameters(final String url, final List<IndiHttpParameter> parameters) {
+  static String syncWithParameters(
+      final String url, final List<IndiHttpParam> parameters) {
     String query = '';
     for (var param in parameters) {
       if (param.enabled == false) {

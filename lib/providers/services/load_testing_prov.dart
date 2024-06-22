@@ -1,7 +1,7 @@
 import 'package:indi_tool/models/navigation/work_item.dart';
 import 'package:indi_tool/providers/injection/dependency_prov.dart';
 import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/schema/response.dart';
+import 'package:indi_tool/schema/indi_http_response.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/load_testing.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

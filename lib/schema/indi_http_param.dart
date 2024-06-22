@@ -1,11 +1,11 @@
 import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';
 
-part 'request_param.g.dart';
+part 'indi_http_param.g.dart';
 
 @embedded
-class IndiHttpParameter {
-  IndiHttpParameter({
+class IndiHttpParam {
+  IndiHttpParam({
     required this.id,
     this.key = '',
     this.value = '',
@@ -19,13 +19,13 @@ class IndiHttpParameter {
   final bool enabled;
   final String description;
 
-  IndiHttpParameter copyWith({
+  IndiHttpParam copyWith({
     String? key,
     String? value,
     bool? enabled,
     String? description,
   }) {
-    return IndiHttpParameter(
+    return IndiHttpParam(
       id: id,
       key: key ?? this.key,
       value: value ?? this.value,
@@ -34,13 +34,13 @@ class IndiHttpParameter {
     );
   }
 
-  static IndiHttpParameter newWith({
+  static IndiHttpParam newWith({
     String? key,
     String? value,
     bool? enabled,
     String? description,
   }) {
-    return IndiHttpParameter(
+    return IndiHttpParam(
       id: const Uuid().v4(),
       key: key ?? '',
       value: value ?? '',
@@ -59,7 +59,7 @@ class IndiHttpParameter {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is IndiHttpParameter &&
+      other is IndiHttpParam &&
           runtimeType == other.runtimeType &&
           id == other.id &&
           key == other.key &&
