@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
-import 'package:indi_tool/providers/dependencies.dart';
 import 'package:indi_tool/providers/navigation/work_item_prov.dart';
+import 'package:indi_tool/providers/services/load_testing_prov.dart';
 import 'package:indi_tool/schema/request_param.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/params_builder.dart';
@@ -125,7 +125,8 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
   Widget build(BuildContext context) {
     final workItem = ref.watch(selectedWorkItemProvider)!;
 
-    final TestScenario? testScenario = ref.watch(testScenariosProvider.select((value) {
+    final TestScenario? testScenario =
+        ref.watch(testScenariosProvider.select((value) {
       if (value.value == null || value.value!.isEmpty) {
         return null;
       }

@@ -6,7 +6,7 @@ import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/load_testing.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'dependencies.g.dart';
+part 'load_testing_prov.g.dart';
 
 @riverpod
 class LoadTestingManager extends _$LoadTestingManager {
