@@ -22,20 +22,34 @@ dependencies:
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 
-  # Isar Database
-  isar: 4.0.0-dev.14
-  isar_flutter_libs: 4.0.0-dev.14
+  # SQLite database
+  sqflite_common_ffi:
+  sqflite_common:
 
   # Path provider for common file paths
   path_provider: ^2.0.15
 
+  # Path manipulation
+  path: ^1.9.0
+
   # Manages the app's window
   window_manager: ^0.3.9
+
+  # Uuid generator
   uuid: ^4.4.0
+
+  # HTTP requests
   http: ^1.2.1
+
+  # For interacting with canvas
   touchable: ^1.0.2
-  intl: ^0.19.0
+
+  # For creating a tree view
   flutter_fancy_tree_view: ^1.6.0
+
+  # Internationalization
+  intl: ^0.19.0
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +67,7 @@ dev_dependencies:
 
   # Custom Linting
   custom_lint: ^0.6.4
+  json_serializable: ^6.8.0
 
 flutter:
   uses-material-design: true

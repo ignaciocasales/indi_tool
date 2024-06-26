@@ -1,22 +1,33 @@
 import 'package:indi_tool/models/common/http_method.dart';
 import 'package:indi_tool/schema/indi_http_header.dart';
 import 'package:indi_tool/schema/indi_http_param.dart';
-import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 part 'indi_http_request.g.dart';
 
-@embedded
+@JsonSerializable(
+  includeIfNull: false,
+  fieldRename: FieldRename.snake,
+)
 class IndiHttpRequest {
+  static const String tableName = 'indi_http_requests';
+
   IndiHttpRequest({
-    required this.id,
-    this.name = '',
-    this.method = HttpMethod.get,
-    this.url = '',
-    this.body = '',
-    required this.parameters,
-    required this.headers,
-  });
+    String? id,
+    String? name,
+    HttpMethod? method,
+    String? url,
+    String? body,
+    List<IndiHttpParam>? parameters,
+    List<IndiHttpHeader>? headers,
+  })  : id = id ?? const Uuid().v4(),
+        name = name ?? '',
+        method = method ?? HttpMethod.get,
+        url = url ?? '',
+        body = body ?? '',
+        parameters = parameters ?? List<IndiHttpParam>.empty(growable: true),
+        headers = headers ?? List<IndiHttpHeader>.empty(growable: true);
 
   final String id;
   final String name;
@@ -25,6 +36,16 @@ class IndiHttpRequest {
   final String body;
   final List<IndiHttpParam> parameters;
   final List<IndiHttpHeader> headers;
+
+  factory IndiHttpRequest.fromJson(Map<String, dynamic> json) =>
+      _$IndiHttpRequestFromJson(json);
+
+  Map<String, dynamic> toInsert(final String testScenarioId) {
+    final map = _$IndiHttpRequestToJson(this);
+    map.removeWhere((key, value) => key == 'parameters' || key == 'headers');
+    map['test_scenario_id'] = testScenarioId;
+    return map;
+  }
 
   IndiHttpRequest copyWith({
     String? name,
@@ -44,46 +65,4 @@ class IndiHttpRequest {
       headers: headers ?? this.headers,
     );
   }
-
-  static IndiHttpRequest newWith({
-    String? name,
-    HttpMethod? method,
-    String? url,
-    String? body,
-    List<IndiHttpParam>? parameters,
-    List<IndiHttpHeader>? headers,
-  }) {
-    return IndiHttpRequest(
-      id: const Uuid().v4(),
-      name: name ?? '',
-      method: method ?? HttpMethod.get,
-      url: url ?? '',
-      body: body ?? '',
-      parameters: parameters ?? List.empty(growable: true),
-      headers: headers ?? List.empty(growable: true),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is IndiHttpRequest &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          method == other.method &&
-          url == other.url &&
-          body == other.body &&
-          parameters == other.parameters &&
-          headers == other.headers;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      name.hashCode ^
-      method.hashCode ^
-      url.hashCode ^
-      body.hashCode ^
-      parameters.hashCode ^
-      headers.hashCode;
 }

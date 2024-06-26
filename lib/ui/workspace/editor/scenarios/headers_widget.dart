@@ -1,38 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/models/navigation/work_item.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
-import 'package:indi_tool/providers/navigation/work_item_prov.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/schema/indi_http_header.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/parameters_widget.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/parameters_widget.dart';
 
 class HeadersWidget extends ConsumerWidget {
   const HeadersWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workItem = ref.watch(selectedWorkItemProvider)!;
+    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
 
-    if (workItem.type != WorkItemType.testScenario) {
-      // It should not be possible to reach this widget without a test scenario.
-      throw Exception('No test scenario selected');
-    }
-
-    final TestScenario? testScenario =
-        ref.watch(testScenariosProvider.select((value) {
-      if (value.value == null || value.value!.isEmpty) {
-        return null;
-      }
-
-      return value.value?.firstWhere((element) => element.id == workItem.id);
-    }));
-
-    if (testScenario == null) {
+    if (scenarioId == null) {
       return const SizedBox();
     }
 
-    final List<IndiHttpHeader> headers = testScenario.request.headers;
+    final AsyncValue<TestScenario> asyncScenario =
+        ref.watch(testScenarioProvider(scenarioId));
+
+    final List<IndiHttpHeader> headers = asyncScenario.maybeWhen(
+      data: (scenario) => scenario.request.headers,
+      orElse: () => [],
+    );
 
     final List<TableRow> valueRows = List.generate(
       headers.length + 1,
@@ -49,14 +40,14 @@ class HeadersWidget extends ConsumerWidget {
                       final header = headers.elementAtOrNull(i);
 
                       if (header == null) {
-                        headers.add(IndiHttpHeader.newWith(
+                        headers.add(IndiHttpHeader(
                           enabled: value!,
                         ));
                       } else {
                         headers[i] = header.copyWith(enabled: value!);
                       }
 
-                      _onFieldEdited(testScenario, headers, ref);
+                      _onFieldEdited(headers, ref);
                     },
             ),
             CellEditingWidget(
@@ -70,14 +61,14 @@ class HeadersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  headers.add(IndiHttpHeader.newWith(
+                  headers.add(IndiHttpHeader(
                     key: value,
                   ));
                 } else {
                   headers[i] = header.copyWith(key: value);
                 }
 
-                _onFieldEdited(testScenario, headers, ref);
+                _onFieldEdited(headers, ref);
               },
             ),
             CellEditingWidget(
@@ -91,14 +82,14 @@ class HeadersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  headers.add(IndiHttpHeader.newWith(
+                  headers.add(IndiHttpHeader(
                     value: value,
                   ));
                 } else {
                   headers[i] = header.copyWith(value: value);
                 }
 
-                _onFieldEdited(testScenario, headers, ref);
+                _onFieldEdited(headers, ref);
               },
             ),
             CellEditingWidget(
@@ -112,14 +103,14 @@ class HeadersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  headers.add(IndiHttpHeader.newWith(
+                  headers.add(IndiHttpHeader(
                     description: value,
                   ));
                 } else {
                   headers[i] = header.copyWith(description: value);
                 }
 
-                _onFieldEdited(testScenario, headers, ref);
+                _onFieldEdited(headers, ref);
               },
             ),
             isLast
@@ -134,7 +125,7 @@ class HeadersWidget extends ConsumerWidget {
                     onPressed: () {
                       headers.removeAt(i);
 
-                      _onFieldEdited(testScenario, headers, ref);
+                      _onFieldEdited(headers, ref);
                     },
                   )
           ],
@@ -167,15 +158,24 @@ class HeadersWidget extends ConsumerWidget {
   }
 
   void _onFieldEdited(
-    TestScenario testScenario,
     List<IndiHttpHeader> headers,
     WidgetRef ref,
-  ) {
-    final TestScenario updated = testScenario.copyWith(
-      request: testScenario.request.copyWith(headers: headers),
+  ) async {
+    final String? groupId = ref.watch(selectedTestGroupProvider);
+    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+
+    if (groupId == null || scenarioId == null) {
+      return;
+    }
+
+    final TestScenario scenario =
+        await ref.watch(testScenarioProvider(scenarioId).future);
+
+    final TestScenario updated = scenario.copyWith(
+      request: scenario.request.copyWith(headers: headers),
     );
 
-    ref.read(testScenariosProvider.notifier).updateTestScenario(updated);
+    ref.read(testScenariosProvider(groupId).notifier).updateScenario(updated);
   }
 }
 

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:indi_tool/core/isolate_pool_state.dart';
-import 'package:indi_tool/core/pooled_job.dart';
-import 'package:indi_tool/core/single_task_worker.dart';
+import 'package:indi_tool/core/async/isolate_pool_state.dart';
+import 'package:indi_tool/core/async/single_task_worker.dart';
+import 'package:indi_tool/core/async/task.dart';
 
 class IsolatePool {
   final int _size;
@@ -23,9 +23,13 @@ class IsolatePool {
 
     _queue.add((task, completer));
 
+    // Attempt to run next.
+    // If the queue is started and there is a worker available.
     _runNext();
 
     return completer.future.then((value) {
+      // Attempt to run next.
+      // If there is another task in the queue and there is a worker available.
       _runNext();
 
       return value;
@@ -33,12 +37,15 @@ class IsolatePool {
   }
 
   void _runNext() {
-    final SingleTaskWorker? worker =
-        _workers.where((w) => !w.isBusy).firstOrNull;
-    if (worker != null && _queue.isNotEmpty) {
-      final (task, completer) = _queue.removeFirst();
+    final List<SingleTaskWorker> workers =
+        _workers.where((w) => !w.isBusy).toList();
 
-      worker.sendRequest(task, completer);
+    for (final SingleTaskWorker w in workers) {
+      if (_queue.isNotEmpty) {
+        final (task, completer) = _queue.removeFirst();
+
+        w.sendRequest(task, completer);
+      }
     }
   }
 
@@ -50,6 +57,10 @@ class IsolatePool {
     }
 
     _state = IsolatePoolState.started;
+
+    // Attempt to run next.
+    // If the queue had items prior to starting the pool.
+    _runNext();
   }
 
   void stop() {

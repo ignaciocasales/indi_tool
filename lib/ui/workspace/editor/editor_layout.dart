@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/models/navigation/work_item.dart';
-import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/case_layout.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/scenarios_layout.dart';
 import 'package:indi_tool/ui/workspace/editor/groups/group_layout.dart';
 
 class EditorLayout extends ConsumerWidget {
@@ -10,15 +9,19 @@ class EditorLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final WorkItem? workItem = ref.watch(selectedWorkItemProvider);
+    // final TestGroup? group = ref.watch(selectedTestGroupProvider);
+    // final TestScenario? scenario = ref.watch(selectedTestScenarioProvider);
 
-    var layout = switch (workItem) {
-      WorkItem(type: final type) when type == WorkItemType.testGroup =>
+    final tuple = (
+      ref.watch(selectedTestGroupProvider),
+      ref.watch(selectedTestScenarioProvider)
+    );
+
+    var layout = switch (tuple) {
+      (final group, final scenario) when group != null && scenario == null =>
         const GroupLayout(),
-      WorkItem(type: final type) when type == WorkItemType.testScenario =>
-        const CaseLayout(),
-      null => const Center(child: Text('Select a request to view details')),
-      _ => throw Exception('Invalid work item type'),
+      (final _, final scenario) when scenario != null => const ScenarioLayout(),
+      _ => const Center(child: Text('Select an item to view its details')),
     };
 
     return Expanded(

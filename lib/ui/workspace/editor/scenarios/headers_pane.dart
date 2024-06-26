@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/headers_widget.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/headers_widget.dart';
 
 class Headers extends StatelessWidget {
   const Headers({super.key});

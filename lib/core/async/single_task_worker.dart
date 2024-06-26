@@ -1,11 +1,20 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:indi_tool/core/pooled_job.dart';
+import 'package:indi_tool/core/async/task.dart';
+import 'package:uuid/uuid.dart';
 
 class SingleTaskWorker {
-  final SendPort _commands;
+  SingleTaskWorker._(
+    this._responses,
+    this._commands,
+  ) {
+    _responses.listen(_handleResponsesFromIsolate);
+  }
+
   final ReceivePort _responses;
+  final SendPort _commands;
+  final String id = const Uuid().v4();
 
   bool _closed = false;
 
@@ -51,10 +60,6 @@ class SingleTaskWorker {
         await connection.future;
 
     return SingleTaskWorker._(receivePort, sendPort);
-  }
-
-  SingleTaskWorker._(this._responses, this._commands) {
-    _responses.listen(_handleResponsesFromIsolate);
   }
 
   void _handleResponsesFromIsolate(dynamic message) {

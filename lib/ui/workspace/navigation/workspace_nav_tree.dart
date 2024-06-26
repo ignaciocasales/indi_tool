@@ -2,25 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
-import 'package:indi_tool/providers/state/test_groups_explorer_prov.dart';
+import 'package:indi_tool/providers/state/workspace_nav_tree_state.dart';
+import 'package:indi_tool/ui/workspace/navigation/workspace_nav_tree_entry.dart';
 
-class MinimalTreeView extends ConsumerStatefulWidget {
-  const MinimalTreeView({super.key});
+class WorkspaceNavTree extends ConsumerStatefulWidget {
+  const WorkspaceNavTree({super.key});
 
   @override
-  ConsumerState<MinimalTreeView> createState() => _MinimalTreeViewState();
+  ConsumerState<WorkspaceNavTree> createState() => _MinimalTreeViewState();
 }
 
-class _MinimalTreeViewState extends ConsumerState<MinimalTreeView> {
-  late final TreeNodeController _treeController;
+class _MinimalTreeViewState extends ConsumerState<WorkspaceNavTree> {
+  late final TreeController<TreeNode> _treeController;
 
   @override
   void initState() {
     super.initState();
 
-    _treeController = TreeNodeController(
-      roots: List<TreeNode>.empty(growable: true),
-      childrenProvider: (TreeNode node) => node.children,
+    final roots = ref.read(treeNodesProvider).valueOrNull;
+    _treeController = TreeController<TreeNode>(
+      roots: roots ?? List<TreeNode>.empty(growable: true),
+      childrenProvider: (TreeNode node) {
+        return node.children;
+      },
     );
   }
 
@@ -32,63 +36,22 @@ class _MinimalTreeViewState extends ConsumerState<MinimalTreeView> {
 
   @override
   Widget build(BuildContext context) {
-    final List<TreeNode> groups = ref.watch(testGroupsExplorerProvider);
-
-    _treeController.roots = groups;
+    ref.listen(treeNodesProvider, (_, newValue) async {
+      _treeController.roots = newValue.value ?? [];
+    });
 
     return Expanded(
       child: AnimatedTreeView<TreeNode>(
         treeController: _treeController,
-        nodeBuilder: (BuildContext context, TreeEntry<TreeNode> entry) {
-          return TreeIndentation(
-            key: ValueKey(entry.node),
+        nodeBuilder: (_, TreeEntry<TreeNode> entry) {
+          return WorkspaceNavTreeEntry(
             entry: entry,
-            child: Row(
-              children: [
-                if (entry.hasChildren)
-                  ExpandIcon(
-                      key: GlobalObjectKey(entry.node),
-                      isExpanded: entry.node.isExpanded,
-                      onPressed: (_) {
-                        ref
-                            .read(testGroupsExplorerProvider.notifier)
-                            .toggleExpansion(
-                              entry.node,
-                            );
-                      })
-                else
-                  const SizedBox(),
-                Expanded(
-                  child: InkWell(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(entry.node.title),
-                    ),
-                    onTap: () {
-                      entry.node.onTap(entry.node);
-                    },
-                  ),
-                ),
-              ],
-            ),
+            treeController: _treeController,
           );
         },
-        duration: const Duration(milliseconds: 100),
+        padding: const EdgeInsets.all(8),
+        duration: const Duration(milliseconds: 300),
       ),
     );
-  }
-}
-
-class TreeNodeController extends TreeController<TreeNode> {
-  TreeNodeController({required super.roots, required super.childrenProvider});
-
-  @override
-  bool getExpansionState(TreeNode node) => node.isExpanded;
-
-  // Do not call `notifyListeners` from this method as it is called many
-  // times recursively in cascading operations.
-  @override
-  void setExpansionState(TreeNode node, bool expanded) {
-    node = node.copyWith(isExpanded: expanded);
   }
 }

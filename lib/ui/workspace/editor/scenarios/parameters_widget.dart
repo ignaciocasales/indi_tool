@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
-import 'package:indi_tool/providers/navigation/work_item_prov.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/schema/indi_http_param.dart';
 import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/services/url_builder.dart';
@@ -9,44 +9,21 @@ import 'package:indi_tool/services/url_builder.dart';
 class ParametersWidget extends ConsumerWidget {
   const ParametersWidget({super.key});
 
-  void _onFieldEdited(
-    TestScenario testScenario,
-    List<IndiHttpParam> parameters,
-    WidgetRef ref,
-  ) {
-    final String updatedUri = UrlBuilder.syncWithParameters(
-      testScenario.request.url,
-      parameters,
-    );
-
-    final TestScenario updated = testScenario.copyWith(
-      request: testScenario.request.copyWith(
-        url: updatedUri,
-        parameters: parameters,
-      ),
-    );
-
-    ref.read(testScenariosProvider.notifier).updateTestScenario(updated);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workItem = ref.watch(selectedWorkItemProvider)!;
+    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
 
-    final TestScenario? testScenario =
-        ref.watch(testScenariosProvider.select((value) {
-      if (value.value == null || value.value!.isEmpty) {
-        return null;
-      }
-
-      return value.value?.firstWhere((element) => element.id == workItem.id);
-    }));
-
-    if (testScenario == null) {
-      return const SizedBox();
+    if (scenarioId == null) {
+      throw StateError('No scenario selected');
     }
 
-    final List<IndiHttpParam> parameters = testScenario.request.parameters;
+    final AsyncValue<TestScenario> asyncScenario =
+        ref.watch(testScenarioProvider(scenarioId));
+
+    final List<IndiHttpParam> parameters = asyncScenario.maybeWhen(
+      data: (scenario) => scenario.request.parameters,
+      orElse: () => [],
+    );
 
     const TableRow headerRow = TableRow(
       children: [
@@ -97,14 +74,14 @@ class ParametersWidget extends ConsumerWidget {
                       final param = parameters.elementAtOrNull(i);
 
                       if (param == null) {
-                        parameters.add(IndiHttpParam.newWith(
+                        parameters.add(IndiHttpParam(
                           enabled: value!,
                         ));
                       } else {
                         parameters[i] = param.copyWith(enabled: value!);
                       }
 
-                      _onFieldEdited(testScenario, parameters, ref);
+                      _onFieldEdited(parameters, ref);
                     },
             ),
             CellEditingWidget(
@@ -118,14 +95,14 @@ class ParametersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  parameters.add(IndiHttpParam.newWith(
+                  parameters.add(IndiHttpParam(
                     key: value,
                   ));
                 } else {
                   parameters[i] = param.copyWith(key: value);
                 }
 
-                _onFieldEdited(testScenario, parameters, ref);
+                _onFieldEdited(parameters, ref);
               },
             ),
             CellEditingWidget(
@@ -139,14 +116,14 @@ class ParametersWidget extends ConsumerWidget {
                     return;
                   }
 
-                  parameters.add(IndiHttpParam.newWith(
+                  parameters.add(IndiHttpParam(
                     value: value,
                   ));
                 } else {
                   parameters[i] = param.copyWith(value: value);
                 }
 
-                _onFieldEdited(testScenario, parameters, ref);
+                _onFieldEdited(parameters, ref);
               },
             ),
             CellEditingWidget(
@@ -160,14 +137,14 @@ class ParametersWidget extends ConsumerWidget {
                       return;
                     }
 
-                    parameters.add(IndiHttpParam.newWith(
+                    parameters.add(IndiHttpParam(
                       description: value,
                     ));
                   } else {
                     parameters[i] = param.copyWith(description: value);
                   }
 
-                  _onFieldEdited(testScenario, parameters, ref);
+                  _onFieldEdited(parameters, ref);
                 }),
             isLast
                 ? const SizedBox()
@@ -181,7 +158,7 @@ class ParametersWidget extends ConsumerWidget {
                     onPressed: () {
                       parameters.removeAt(i);
 
-                      _onFieldEdited(testScenario, parameters, ref);
+                      _onFieldEdited(parameters, ref);
                     },
                   )
           ],
@@ -211,6 +188,39 @@ class ParametersWidget extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _onFieldEdited(
+    List<IndiHttpParam> parameters,
+    WidgetRef ref,
+  ) async {
+    final String? groupId = ref.watch(selectedTestGroupProvider);
+    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+
+    if (groupId == null || scenarioId == null) {
+      return;
+    }
+
+    final TestScenario testScenario =
+        await ref.watch(testScenarioProvider(scenarioId).future);
+
+    if (parameters == testScenario.request.parameters) {
+      return;
+    }
+
+    final String updatedUri = UrlBuilder.syncWithParameters(
+      testScenario.request.url,
+      parameters,
+    );
+
+    final TestScenario updated = testScenario.copyWith(
+      request: testScenario.request.copyWith(
+        url: updatedUri,
+        parameters: parameters,
+      ),
+    );
+
+    ref.read(testScenariosProvider(groupId).notifier).updateScenario(updated);
   }
 }
 

@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/chart/my_weight.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/chart/my_weight.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:touchable/touchable.dart';
 

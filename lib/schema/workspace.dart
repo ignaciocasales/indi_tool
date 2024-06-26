@@ -1,37 +1,49 @@
-import 'package:indi_tool/schema/indi_http_header.dart';
-import 'package:indi_tool/schema/indi_http_param.dart';
-import 'package:indi_tool/schema/indi_http_request.dart';
 import 'package:indi_tool/schema/test_group.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
-import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 part 'workspace.g.dart';
 
-@collection
+@JsonSerializable(
+  includeIfNull: false,
+  fieldRename: FieldRename.snake,
+)
 class Workspace {
-  Workspace({
-    required this.id,
-    required this.name,
-    this.description = '',
-    required this.testGroups,
-  });
+  static const String tableName = 'workspaces';
 
-  final int id;
+  Workspace({
+    String? id,
+    String? name,
+    String? description,
+    List<TestGroup>? testGroups,
+  })  : id = id ?? const Uuid().v4(),
+        name = name ?? '',
+        description = description ?? '',
+        testGroups = testGroups ?? List<TestGroup>.empty(growable: true);
+
+  final String id;
   final String name;
   final String description;
   final List<TestGroup> testGroups;
 
-  static Workspace newWith({
-    required int id,
+  factory Workspace.fromJson(Map<String, dynamic> json) =>
+      _$WorkspaceFromJson(json);
+
+  Map<String, dynamic> toInsert() {
+    final map = _$WorkspaceToJson(this);
+    map.removeWhere((key, value) => key == 'test_groups');
+    return map;
+  }
+
+  Workspace copyWith({
     String? name,
     String? description,
     List<TestGroup>? testGroups,
   }) {
     return Workspace(
-      id: id,
-      name: name ?? '',
-      description: description ?? '',
-      testGroups: testGroups ?? List<TestGroup>.empty(growable: true),
+      name: name ?? this.name,
+      description: description ?? this.description,
+      testGroups: testGroups ?? this.testGroups,
     );
   }
 }

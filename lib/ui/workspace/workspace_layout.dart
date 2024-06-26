@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'editor/editor_layout.dart';
 import 'navigation/workspace_nav.dart';
 
-class Workspace extends StatelessWidget {
-  const Workspace({super.key});
+class WorkspaceLayout extends StatelessWidget {
+  const WorkspaceLayout({super.key});
 
   @override
   Widget build(BuildContext context) {

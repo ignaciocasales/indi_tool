@@ -1,19 +1,15 @@
-import 'package:indi_tool/schema/workspace.dart';
+import 'package:indi_tool/services/db/sqlite_db.dart';
 import 'package:indi_tool/services/http/http_service.dart';
 import 'package:indi_tool/services/load_testing.dart';
-import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 part 'dependency_prov.g.dart';
 
-@riverpod
-Future<Isar> isar(IsarRef ref) async {
-  final dir = await getApplicationDocumentsDirectory();
-  return Isar.open(
-    schemas: [WorkspaceSchema],
-    directory: dir.path,
-  );
+@Riverpod(keepAlive: true)
+Future<Database> sqlite(SqliteRef ref) async {
+  final Database database = await SqliteDb.init();
+  return database;
 }
 
 @riverpod

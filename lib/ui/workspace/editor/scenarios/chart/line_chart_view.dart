@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/chart/line_chart_painter.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/chart/my_weight.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/chart/line_chart_painter.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/chart/my_weight.dart';
 import 'package:touchable/touchable.dart';
 
 class LineChartView extends StatefulWidget {

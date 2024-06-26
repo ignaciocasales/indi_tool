@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/body_pane.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/headers_pane.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/parameters_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/body_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/headers_pane.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/parameters_pane.dart';
 
 class RequestEditorNav extends StatefulWidget {
   const RequestEditorNav({super.key});

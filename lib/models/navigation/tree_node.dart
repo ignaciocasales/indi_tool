@@ -2,33 +2,32 @@ import 'package:uuid/uuid.dart';
 
 class TreeNode {
   final String id;
-  final String title;
+  final Type type;
   final List<TreeNode> children;
   final Function(TreeNode) onTap;
-  final bool isExpanded;
+  final Function(TreeNode) onDelete;
 
   TreeNode({
-    required this.title,
-    id,
-    children,
-    onTap,
-    isExpanded,
-  })  : id = id ?? const Uuid().v4(),
-        children = children ?? List<TreeNode>.empty(growable: true),
-        onTap = onTap ?? ((_) {}),
-        isExpanded = isExpanded ?? false;
-
-  TreeNode copyWith({
-    String? title,
+    String? id,
+    Type? type,
     List<TreeNode>? children,
     Function(TreeNode)? onTap,
-    bool? isExpanded,
+    Function(TreeNode)? onDelete,
+  })  : id = id ?? const Uuid().v4(),
+        type = type ?? dynamic,
+        children = children ?? List<TreeNode>.empty(growable: true),
+        onTap = onTap ?? ((_) {}),
+        onDelete = onDelete ?? ((_) {});
+
+  TreeNode copyWith({
+    List<TreeNode>? children,
+    Function(TreeNode)? onTap,
+    Function(TreeNode)? onDelete,
   }) {
     return TreeNode(
-      title: title ?? this.title,
       children: children ?? this.children,
       onTap: onTap ?? this.onTap,
-      isExpanded: isExpanded ?? this.isExpanded,
+      onDelete: onDelete ?? this.onDelete,
     );
   }
 

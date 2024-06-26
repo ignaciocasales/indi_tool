@@ -1,23 +1,41 @@
-import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 part 'indi_http_param.g.dart';
 
-@embedded
+@JsonSerializable(
+  includeIfNull: false,
+  fieldRename: FieldRename.snake,
+)
 class IndiHttpParam {
+  static const String tableName = 'indi_http_params';
+
   IndiHttpParam({
-    required this.id,
-    this.key = '',
-    this.value = '',
-    this.enabled = true,
-    this.description = '',
-  });
+    String? id,
+    String? key,
+    String? value,
+    bool? enabled,
+    String? description,
+  })  : id = id ?? const Uuid().v4(),
+        key = key ?? '',
+        value = value ?? '',
+        enabled = enabled ?? true,
+        description = description ?? '';
 
   final String id;
   final String key;
   final String value;
   final bool enabled;
   final String description;
+
+  factory IndiHttpParam.fromJson(Map<String, dynamic> json) =>
+      _$IndiHttpParamFromJson(json);
+
+  Map<String, dynamic> toInsert(final String indiHttpRequestId) {
+    final map = _$IndiHttpParamToJson(this);
+    map['indi_http_request_id'] = indiHttpRequestId;
+    return map;
+  }
 
   IndiHttpParam copyWith({
     String? key,
@@ -33,45 +51,4 @@ class IndiHttpParam {
       description: description ?? this.description,
     );
   }
-
-  static IndiHttpParam newWith({
-    String? key,
-    String? value,
-    bool? enabled,
-    String? description,
-  }) {
-    return IndiHttpParam(
-      id: const Uuid().v4(),
-      key: key ?? '',
-      value: value ?? '',
-      enabled: enabled ?? true,
-      description: description ?? '',
-    );
-  }
-
-  bool hasValue() {
-    return key.isNotEmpty ||
-        value.isNotEmpty ||
-        description.isNotEmpty ||
-        enabled;
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is IndiHttpParam &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          key == other.key &&
-          value == other.value &&
-          enabled == other.enabled &&
-          description == other.description;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      key.hashCode ^
-      value.hashCode ^
-      enabled.hashCode ^
-      description.hashCode;
 }

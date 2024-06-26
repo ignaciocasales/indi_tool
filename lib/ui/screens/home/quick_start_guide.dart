@@ -6,32 +6,31 @@ class QuickStartGuide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
-        Divider(height: 0, color: Theme.of(context).colorScheme.primary),
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
             'Quick Start Guide',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        const SizedBox(height: 10),
-        const QuickStartStep(
+        SizedBox(height: 10),
+        QuickStartStep(
           title: '1. Create a Workspace',
           description: 'Begin by creating a workspace to organize your tests.',
         ),
-        const QuickStartStep(
+        QuickStartStep(
           title: '2. Configure a Test',
           description:
               'Set up your test parameters, including endpoints, load size, and duration.',
         ),
-        const QuickStartStep(
+        QuickStartStep(
           title: '3. Run the Test',
           description:
               'Execute the test and monitor its progress in real-time.',
         ),
-        const QuickStartStep(
+        QuickStartStep(
           title: '4. Analyze Results',
           description:
               'Review detailed reports to understand the performance and identify any issues.',

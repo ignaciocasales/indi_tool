@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/cases/chart/line_chart_view.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/chart/line_chart_view.dart';
 
 class ChartWidget extends StatefulWidget {
   const ChartWidget({super.key});

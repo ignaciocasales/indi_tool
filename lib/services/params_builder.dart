@@ -26,7 +26,7 @@ class ParamsBuilder {
         value = Uri.decodeQueryComponent(maybeValue);
       }
 
-      return IndiHttpParam.newWith(key: key, value: value);
+      return IndiHttpParam(key: key, value: value);
     }).toList();
 
     final List<IndiHttpParam> updated = List.empty(growable: true);
@@ -45,7 +45,7 @@ class ParamsBuilder {
         );
       } else {
         // If the index is only in the new list, add the item to the original list
-        updated.add(IndiHttpParam.newWith(
+        updated.add(IndiHttpParam(
           key: newParameters.elementAt(i).key,
           value: newParameters.elementAt(i).value,
         ));
