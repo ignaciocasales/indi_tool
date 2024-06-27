@@ -1,18 +1,9 @@
 import 'package:indi_tool/models/common/http_method.dart';
-import 'package:indi_tool/schema/indi_http_header.dart';
-import 'package:indi_tool/schema/indi_http_param.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:indi_tool/models/workspace/indi_http_header.dart';
+import 'package:indi_tool/models/workspace/indi_http_param.dart';
 import 'package:uuid/uuid.dart';
 
-part 'indi_http_request.g.dart';
-
-@JsonSerializable(
-  includeIfNull: false,
-  fieldRename: FieldRename.snake,
-)
 class IndiHttpRequest {
-  static const String tableName = 'indi_http_requests';
-
   IndiHttpRequest({
     String? id,
     String? name,
@@ -36,16 +27,6 @@ class IndiHttpRequest {
   final String body;
   final List<IndiHttpParam> parameters;
   final List<IndiHttpHeader> headers;
-
-  factory IndiHttpRequest.fromJson(Map<String, dynamic> json) =>
-      _$IndiHttpRequestFromJson(json);
-
-  Map<String, dynamic> toInsert(final String testScenarioId) {
-    final map = _$IndiHttpRequestToJson(this);
-    map.removeWhere((key, value) => key == 'parameters' || key == 'headers');
-    map['test_scenario_id'] = testScenarioId;
-    return map;
-  }
 
   IndiHttpRequest copyWith({
     String? name,

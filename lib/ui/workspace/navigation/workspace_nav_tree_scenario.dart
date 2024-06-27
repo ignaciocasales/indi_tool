@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class WorkspaceNavTreeScenario extends ConsumerWidget {
   const WorkspaceNavTreeScenario({
@@ -19,8 +19,9 @@ class WorkspaceNavTreeScenario extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final TestScenario? testScenario =
-        ref.watch(testScenarioProvider(entry.node.id)).valueOrNull;
+    final TestScenario? testScenario = ref
+        .watch(testScenarioRepositoryProvider(id: entry.node.id))
+        .valueOrNull;
 
     if (testScenario == null) {
       return const Text('Scenario not found');

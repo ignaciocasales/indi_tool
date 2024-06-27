@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/data/test_groups_prov.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/test_group.dart';
+import 'package:indi_tool/models/workspace/test_group.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class WorkspaceNavMenu extends ConsumerWidget {
   const WorkspaceNavMenu({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String? workspaceId = ref.watch(selectedWorkspaceProvider);
+    final int? workspaceId = ref.watch(selectedWorkspaceProvider);
 
     if (workspaceId == null) {
       throw StateError('No workspace selected');
@@ -36,12 +36,13 @@ class WorkspaceNavMenu extends ConsumerWidget {
         MenuItemButton(
           child: const Text('Test Group'),
           onPressed: () async {
-            final TestGroup testGroup =
-                await ref.read(testGroupsProvider.notifier).addGroup(TestGroup(
-                      name: 'New Test Group',
-                    ));
+            final int id = await ref
+                .read(testGroupsRepositoryProvider.notifier)
+                .createTestGroup(TestGroup(
+                  name: 'New Test Group',
+                ));
 
-            ref.read(selectedTestGroupProvider.notifier).select(testGroup.id);
+            ref.read(selectedTestGroupProvider.notifier).select(id);
           },
         ),
       ],

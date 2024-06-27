@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/providers/services/load_testing_prov.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/editor/name_editing_widget.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/editor/url_editing_widget.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/http_dropdown.dart';
@@ -39,7 +39,7 @@ class ScenarioLayout extends ConsumerWidget {
               padding: const EdgeInsets.all(8.0),
               child: FilledButton(
                 onPressed: () async {
-                  final String? scenarioId =
+                  final int? scenarioId =
                       ref.watch(selectedTestScenarioProvider);
 
                   if (scenarioId == null) {
@@ -47,7 +47,7 @@ class ScenarioLayout extends ConsumerWidget {
                   }
 
                   final TestScenario scenario =
-                      await ref.read(testScenarioProvider(scenarioId).future);
+                      await ref.read(testScenarioRepositoryProvider().future);
 
                   ref
                       .read(loadTestingProvider.notifier)

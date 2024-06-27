@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
+import 'package:indi_tool/models/workspace/indi_http_param.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/indi_http_param.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/services/params_builder.dart';
 
 class UrlEditingWidget extends ConsumerStatefulWidget {
@@ -21,13 +21,13 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
     super.initState();
     _urlController = TextEditingController();
 
-    final String? scenarioId = ref.read(selectedTestScenarioProvider);
+    final int? scenarioId = ref.read(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
-    ref.read(testScenarioProvider(scenarioId).future).then((scenario) {
+    ref.read(testScenarioRepositoryProvider().future).then((scenario) {
       _urlController.text = scenario.request.url;
     });
 
@@ -43,13 +43,13 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
-    ref.listen(testScenarioProvider(scenarioId), (_, asyncVal) {
+    ref.listen(testScenarioRepositoryProvider(), (_, asyncVal) {
       asyncVal.whenData((scenario) {
         if (_urlController.text != scenario.request.url) {
           _urlController.text = scenario.request.url;
@@ -74,15 +74,15 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
       return;
     }
 
-    final String? groupId = ref.watch(selectedTestGroupProvider);
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? groupId = ref.watch(selectedTestGroupProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null || groupId == null) {
       return;
     }
 
     final TestScenario scenario =
-        await ref.watch(testScenarioProvider(scenarioId).future);
+        await ref.read(testScenarioRepositoryProvider().future);
 
     if (url == scenario.request.url) {
       return;
@@ -97,6 +97,8 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
       request: scenario.request.copyWith(url: url, parameters: parameters),
     );
 
-    ref.read(testScenariosProvider(groupId).notifier).updateScenario(updated);
+    ref
+        .read(testScenariosRepositoryProvider().notifier)
+        .updateTestScenario(updated);
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
+import 'package:indi_tool/models/workspace/indi_http_param.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/indi_http_param.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/services/url_builder.dart';
 
 class ParametersWidget extends ConsumerWidget {
@@ -11,14 +11,14 @@ class ParametersWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
     final AsyncValue<TestScenario> asyncScenario =
-        ref.watch(testScenarioProvider(scenarioId));
+        ref.watch(testScenarioRepositoryProvider());
 
     final List<IndiHttpParam> parameters = asyncScenario.maybeWhen(
       data: (scenario) => scenario.request.parameters,
@@ -194,15 +194,15 @@ class ParametersWidget extends ConsumerWidget {
     List<IndiHttpParam> parameters,
     WidgetRef ref,
   ) async {
-    final String? groupId = ref.watch(selectedTestGroupProvider);
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? groupId = ref.watch(selectedTestGroupProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (groupId == null || scenarioId == null) {
       return;
     }
 
     final TestScenario testScenario =
-        await ref.watch(testScenarioProvider(scenarioId).future);
+        await ref.read(testScenarioRepositoryProvider().future);
 
     if (parameters == testScenario.request.parameters) {
       return;
@@ -220,7 +220,9 @@ class ParametersWidget extends ConsumerWidget {
       ),
     );
 
-    ref.read(testScenariosProvider(groupId).notifier).updateScenario(updated);
+    ref
+        .read(testScenariosRepositoryProvider().notifier)
+        .updateTestScenario(updated);
   }
 }
 

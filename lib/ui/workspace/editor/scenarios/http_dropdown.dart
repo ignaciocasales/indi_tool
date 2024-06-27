@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/common/http_method.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class HttpMethodDropdown extends ConsumerWidget {
   HttpMethodDropdown({super.key});
@@ -22,20 +22,20 @@ class HttpMethodDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String? groupId = ref.watch(selectedTestGroupProvider);
+    final int? groupId = ref.watch(selectedTestGroupProvider);
 
     if (groupId == null) {
       throw StateError('No group selected');
     }
 
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
     final AsyncValue<TestScenario> asyncScenario =
-        ref.watch(testScenarioProvider(scenarioId));
+        ref.watch(testScenarioRepositoryProvider());
 
     return asyncScenario.when(
       data: (scenario) {
@@ -48,8 +48,8 @@ class HttpMethodDropdown extends ConsumerWidget {
             );
 
             ref
-                .read(testScenariosProvider(groupId).notifier)
-                .updateScenario(updated);
+                .read(testScenariosRepositoryProvider().notifier)
+                .updateTestScenario(updated);
           },
         );
       },

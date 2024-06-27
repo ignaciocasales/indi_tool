@@ -1,15 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-part 'indi_http_header.g.dart';
-
-@JsonSerializable(
-  includeIfNull: false,
-  fieldRename: FieldRename.snake,
-)
 class IndiHttpHeader {
-  static const String tableName = 'indi_http_headers';
-
   IndiHttpHeader({
     String? id,
     String? key,
@@ -27,15 +18,6 @@ class IndiHttpHeader {
   final String value;
   final bool enabled;
   final String description;
-
-  factory IndiHttpHeader.fromJson(Map<String, dynamic> json) =>
-      _$IndiHttpHeaderFromJson(json);
-
-  Map<String, dynamic> toInsert(final String indiHttpRequestId) {
-    final map = _$IndiHttpHeaderToJson(this);
-    map['indi_http_request_id'] = indiHttpRequestId;
-    return map;
-  }
 
   IndiHttpHeader copyWith({
     String? key,

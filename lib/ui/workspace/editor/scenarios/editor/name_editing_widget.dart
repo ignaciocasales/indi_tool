@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class NameEditingWidget extends ConsumerStatefulWidget {
   const NameEditingWidget({super.key});
@@ -19,13 +19,13 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
     super.initState();
     _nameController = TextEditingController();
 
-    final String? scenarioId = ref.read(selectedTestScenarioProvider);
+    final int? scenarioId = ref.read(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
-    ref.read(testScenarioProvider(scenarioId).future).then((scenario) {
+    ref.read(testScenarioRepositoryProvider().future).then((scenario) {
       _nameController.text = scenario.name;
     });
 
@@ -41,13 +41,13 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
-    ref.listen(testScenarioProvider(scenarioId), (_, asyncVal) async {
+    ref.listen(testScenarioRepositoryProvider(), (_, asyncVal) async {
       asyncVal.maybeWhen(
           data: (scenario) {
             if (_nameController.text != scenario.name) {
@@ -74,15 +74,15 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
       return;
     }
 
-    final String? groupId = ref.watch(selectedTestGroupProvider);
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? groupId = ref.watch(selectedTestGroupProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null || groupId == null) {
       return;
     }
 
     final TestScenario scenario =
-        await ref.watch(testScenarioProvider(scenarioId).future);
+        await ref.read(testScenarioRepositoryProvider().future);
 
     if (name == scenario.name) {
       return;
@@ -90,6 +90,8 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
 
     final TestScenario updated = scenario.copyWith(name: name);
 
-    ref.read(testScenariosProvider(groupId).notifier).updateScenario(updated);
+    ref
+        .read(testScenariosRepositoryProvider().notifier)
+        .updateTestScenario(updated);
   }
 }

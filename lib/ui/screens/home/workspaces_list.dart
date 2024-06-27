@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/indi_route.dart';
-import 'package:indi_tool/providers/data/workspaces_prov.dart';
+import 'package:indi_tool/models/workspace/workspace.dart';
 import 'package:indi_tool/providers/navigation/app_router_prov.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/workspace.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/ui/screens/home/workspaces_empty.dart';
 
 class WorkspacesList extends ConsumerWidget {
@@ -13,7 +13,7 @@ class WorkspacesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<Workspace>> workspaces =
-        ref.watch(workspacesProvider);
+        ref.watch(workspaceRepositoryProvider);
 
     final List<Widget> items = switch (workspaces) {
       AsyncData(value: final wspaces) when wspaces.isEmpty => List.empty(),
@@ -30,7 +30,7 @@ class WorkspacesList extends ConsumerWidget {
                   onTap: () {
                     ref
                         .read(selectedWorkspaceProvider.notifier)
-                        .select(workspace.id);
+                        .select(workspace.id!);
                     ref
                         .read(selectedRouteProvider.notifier)
                         .select(IndiRoute.workspace);
@@ -94,13 +94,20 @@ class WorkspacesList extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             ElevatedButton(
-                              onPressed: () {
-                                ref
-                                    .read(workspacesProvider.notifier)
-                                    .addWorkspace(Workspace(
+                              onPressed: () async {
+                                final int id = await ref
+                                    .read(workspaceRepositoryProvider.notifier)
+                                    .createWorkspace(Workspace(
                                       name: 'New Workspace',
                                     ));
-                                // TODO: Redirect to the new workspace.
+
+                                ref
+                                    .read(selectedWorkspaceProvider.notifier)
+                                    .select(id);
+
+                                ref
+                                    .read(selectedRouteProvider.notifier)
+                                    .select(IndiRoute.workspace);
                               },
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,

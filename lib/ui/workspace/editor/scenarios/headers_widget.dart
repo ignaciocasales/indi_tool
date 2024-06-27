@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/data/test_scenarios_prov.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/schema/indi_http_header.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/models/workspace/indi_http_header.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/parameters_widget.dart';
 
 class HeadersWidget extends ConsumerWidget {
@@ -11,14 +11,14 @@ class HeadersWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
       return const SizedBox();
     }
 
     final AsyncValue<TestScenario> asyncScenario =
-        ref.watch(testScenarioProvider(scenarioId));
+        ref.watch(testScenarioRepositoryProvider());
 
     final List<IndiHttpHeader> headers = asyncScenario.maybeWhen(
       data: (scenario) => scenario.request.headers,
@@ -161,21 +161,23 @@ class HeadersWidget extends ConsumerWidget {
     List<IndiHttpHeader> headers,
     WidgetRef ref,
   ) async {
-    final String? groupId = ref.watch(selectedTestGroupProvider);
-    final String? scenarioId = ref.watch(selectedTestScenarioProvider);
+    final int? groupId = ref.watch(selectedTestGroupProvider);
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (groupId == null || scenarioId == null) {
       return;
     }
 
     final TestScenario scenario =
-        await ref.watch(testScenarioProvider(scenarioId).future);
+        await ref.watch(testScenarioRepositoryProvider().future);
 
     final TestScenario updated = scenario.copyWith(
       request: scenario.request.copyWith(headers: headers),
     );
 
-    ref.read(testScenariosProvider(groupId).notifier).updateScenario(updated);
+    ref
+        .read(testScenariosRepositoryProvider().notifier)
+        .updateTestScenario(updated);
   }
 }
 

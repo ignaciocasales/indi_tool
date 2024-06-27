@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
-import 'package:indi_tool/providers/data/test_groups_prov.dart';
-import 'package:indi_tool/schema/test_group.dart';
+import 'package:indi_tool/models/workspace/test_group.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class WorkspaceNavTreeGroup extends ConsumerWidget {
   const WorkspaceNavTreeGroup({
@@ -20,7 +20,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TestGroup? testGroup =
-        ref.watch(testGroupProvider(entry.node.id)).valueOrNull;
+        ref.watch(testGroupRepositoryProvider(entry.node.id)).valueOrNull;
 
     if (testGroup == null) {
       return const Text('Group not found');

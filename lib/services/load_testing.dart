@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:indi_tool/core/async/isolate_pool.dart';
-import 'package:indi_tool/schema/indi_http_request.dart';
-import 'package:indi_tool/schema/indi_http_response.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/models/workspace/indi_http_request.dart';
+import 'package:indi_tool/models/workspace/indi_http_response.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/services/http/http_service.dart';
 import 'package:indi_tool/services/http/http_task.dart';
 

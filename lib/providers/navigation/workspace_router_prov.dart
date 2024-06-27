@@ -5,11 +5,11 @@ part 'workspace_router_prov.g.dart';
 @Riverpod(keepAlive: true)
 class SelectedWorkspace extends _$SelectedWorkspace {
   @override
-  String? build() {
+  int? build() {
     return null;
   }
 
-  void select(final String id) {
+  void select(final int id) {
     state = id;
   }
 
@@ -21,11 +21,11 @@ class SelectedWorkspace extends _$SelectedWorkspace {
 @riverpod
 class SelectedTestGroup extends _$SelectedTestGroup {
   @override
-  String? build() {
+  int? build() {
     return null;
   }
 
-  void select(final String id) {
+  void select(final int id) {
     state = id;
   }
 
@@ -37,11 +37,11 @@ class SelectedTestGroup extends _$SelectedTestGroup {
 @riverpod
 class SelectedTestScenario extends _$SelectedTestScenario {
   @override
-  String? build() {
+  int? build() {
     return null;
   }
 
-  void select(final String id) {
+  void select(final int id) {
     state = id;
   }
 

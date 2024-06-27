@@ -1,15 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-part 'indi_http_param.g.dart';
-
-@JsonSerializable(
-  includeIfNull: false,
-  fieldRename: FieldRename.snake,
-)
 class IndiHttpParam {
-  static const String tableName = 'indi_http_params';
-
   IndiHttpParam({
     String? id,
     String? key,
@@ -27,15 +19,6 @@ class IndiHttpParam {
   final String value;
   final bool enabled;
   final String description;
-
-  factory IndiHttpParam.fromJson(Map<String, dynamic> json) =>
-      _$IndiHttpParamFromJson(json);
-
-  Map<String, dynamic> toInsert(final String indiHttpRequestId) {
-    final map = _$IndiHttpParamToJson(this);
-    map['indi_http_request_id'] = indiHttpRequestId;
-    return map;
-  }
 
   IndiHttpParam copyWith({
     String? key,
