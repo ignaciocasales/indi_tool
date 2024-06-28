@@ -18,7 +18,7 @@ class ParametersWidget extends ConsumerWidget {
     }
 
     final AsyncValue<TestScenario> asyncScenario =
-        ref.watch(testScenarioRepositoryProvider());
+        ref.watch(testScenarioProvider(scenarioId: scenarioId));
 
     final List<IndiHttpParam> parameters = asyncScenario.maybeWhen(
       data: (scenario) => scenario.request.parameters,
@@ -202,7 +202,7 @@ class ParametersWidget extends ConsumerWidget {
     }
 
     final TestScenario testScenario =
-        await ref.read(testScenarioRepositoryProvider().future);
+        await ref.read(testScenarioProvider(scenarioId: scenarioId).future);
 
     if (parameters == testScenario.request.parameters) {
       return;
@@ -221,8 +221,8 @@ class ParametersWidget extends ConsumerWidget {
     );
 
     ref
-        .read(testScenariosRepositoryProvider().notifier)
-        .updateTestScenario(updated);
+        .read(testScenarioRepositoryProvider)
+        .updateTestScenario(testScenario: updated, testGroupId: groupId);
   }
 }
 

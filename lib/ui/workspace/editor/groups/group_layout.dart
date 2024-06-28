@@ -17,7 +17,7 @@ class GroupLayout extends ConsumerWidget {
     }
 
     final AsyncValue<TestGroup> asyncGroup =
-        ref.watch(testGroupRepositoryProvider(groupId));
+        ref.watch(testGroupProvider(testGroupId: groupId));
 
     return asyncGroup.when(
       data: (group) {
@@ -28,14 +28,15 @@ class GroupLayout extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(group.name),
-                  const SizedBox(
-                    height: 10,
-                  ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () async {
                       final int id = await ref
-                          .read(testScenariosRepositoryProvider().notifier)
-                          .createTestScenario(TestScenario(name: 'New Scenario'));
+                          .read(testScenarioRepositoryProvider)
+                          .createTestScenario(
+                            testScenario: TestScenario(name: 'New Scenario'),
+                            testGroupId: groupId,
+                          );
 
                       ref
                           .read(selectedTestScenarioProvider.notifier)

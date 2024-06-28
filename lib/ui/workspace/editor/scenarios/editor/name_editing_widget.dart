@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class NameEditingWidget extends ConsumerStatefulWidget {
@@ -13,6 +13,7 @@ class NameEditingWidget extends ConsumerStatefulWidget {
 
 class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
   late TextEditingController _nameController;
+  bool _enabled = false;
 
   @override
   void initState() {
@@ -25,8 +26,11 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
       throw StateError('No scenario selected');
     }
 
-    ref.read(testScenarioRepositoryProvider().future).then((scenario) {
+    ref
+        .read(testScenarioProvider(scenarioId: scenarioId).future)
+        .then((scenario) {
       _nameController.text = scenario.name;
+      _enabled = true;
     });
 
     _nameController.addListener(_updateName);
@@ -47,14 +51,19 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
       throw StateError('No scenario selected');
     }
 
-    ref.listen(testScenarioRepositoryProvider(), (_, asyncVal) async {
-      asyncVal.maybeWhen(
-          data: (scenario) {
-            if (_nameController.text != scenario.name) {
-              _nameController.text = scenario.name;
-            }
-          },
-          orElse: () {});
+    ref.listen(testScenarioProvider(scenarioId: scenarioId),
+        (_, asyncVal) async {
+      asyncVal.whenData((scenario) {
+        if (!_enabled) {
+          setState(() {
+            _enabled = true;
+          });
+        }
+
+        if (_nameController.text != scenario.name) {
+          _nameController.text = scenario.name;
+        }
+      });
     });
 
     return TextField(
@@ -82,7 +91,7 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
     }
 
     final TestScenario scenario =
-        await ref.read(testScenarioRepositoryProvider().future);
+        await ref.read(testScenarioProvider(scenarioId: scenarioId).future);
 
     if (name == scenario.name) {
       return;
@@ -91,7 +100,7 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
     final TestScenario updated = scenario.copyWith(name: name);
 
     ref
-        .read(testScenariosRepositoryProvider().notifier)
-        .updateTestScenario(updated);
+        .read(testScenarioRepositoryProvider)
+        .updateTestScenario(testScenario: updated, testGroupId: groupId);
   }
 }

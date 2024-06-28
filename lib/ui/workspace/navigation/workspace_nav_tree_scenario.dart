@@ -20,7 +20,7 @@ class WorkspaceNavTreeScenario extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TestScenario? testScenario = ref
-        .watch(testScenarioRepositoryProvider(id: entry.node.id))
+        .watch(testScenarioProvider(scenarioId: entry.node.id))
         .valueOrNull;
 
     if (testScenario == null) {

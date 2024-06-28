@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/models/workspace/test_group.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class WorkspaceNavMenu extends ConsumerWidget {
@@ -36,11 +36,13 @@ class WorkspaceNavMenu extends ConsumerWidget {
         MenuItemButton(
           child: const Text('Test Group'),
           onPressed: () async {
-            final int id = await ref
-                .read(testGroupsRepositoryProvider.notifier)
-                .createTestGroup(TestGroup(
-                  name: 'New Test Group',
-                ));
+            final int id =
+                await ref.read(testGroupRepositoryProvider).createTestGroup(
+                      testGroup: TestGroup(
+                        name: 'New Test Group',
+                      ),
+                      workspaceId: workspaceId,
+                    );
 
             ref.read(selectedTestGroupProvider.notifier).select(id);
           },

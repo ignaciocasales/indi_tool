@@ -46,8 +46,8 @@ class ScenarioLayout extends ConsumerWidget {
                     return;
                   }
 
-                  final TestScenario scenario =
-                      await ref.read(testScenarioRepositoryProvider().future);
+                  final TestScenario scenario = await ref.read(
+                      testScenarioProvider(scenarioId: scenarioId).future);
 
                   ref
                       .read(loadTestingProvider.notifier)

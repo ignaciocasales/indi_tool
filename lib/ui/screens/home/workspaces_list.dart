@@ -13,7 +13,7 @@ class WorkspacesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<List<Workspace>> workspaces =
-        ref.watch(workspaceRepositoryProvider);
+        ref.watch(workspaceListProvider);
 
     final List<Widget> items = switch (workspaces) {
       AsyncData(value: final wspaces) when wspaces.isEmpty => List.empty(),
@@ -96,10 +96,10 @@ class WorkspacesList extends ConsumerWidget {
                             ElevatedButton(
                               onPressed: () async {
                                 final int id = await ref
-                                    .read(workspaceRepositoryProvider.notifier)
-                                    .createWorkspace(Workspace(
+                                    .read(workspaceRepositoryProvider)
+                                    .createWorkspaceEntry(
                                       name: 'New Workspace',
-                                    ));
+                                    );
 
                                 ref
                                     .read(selectedWorkspaceProvider.notifier)

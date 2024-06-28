@@ -32,8 +32,11 @@ class TreeNode {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TreeNode && runtimeType == other.runtimeType && id == other.id;
+      other is TreeNode &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => id.hashCode ^ type.hashCode;
 }

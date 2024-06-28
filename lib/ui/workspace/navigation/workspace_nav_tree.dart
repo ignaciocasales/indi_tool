@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
-import 'package:indi_tool/providers/state/workspace_nav_tree_state.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
+import 'package:indi_tool/providers/state/explorer_tree_prov.dart';
 import 'package:indi_tool/ui/workspace/navigation/workspace_nav_tree_entry.dart';
 
 class WorkspaceNavTree extends ConsumerStatefulWidget {
@@ -19,7 +20,12 @@ class _MinimalTreeViewState extends ConsumerState<WorkspaceNavTree> {
   void initState() {
     super.initState();
 
-    final roots = ref.read(treeNodesProvider).valueOrNull;
+    final int? workspaceId = ref.read(selectedWorkspaceProvider);
+
+    final roots = workspaceId == null
+        ? null
+        : ref.read(explorerTreeProvider(workspaceId: workspaceId)).valueOrNull;
+
     _treeController = TreeController<TreeNode>(
       roots: roots ?? List<TreeNode>.empty(growable: true),
       childrenProvider: (TreeNode node) {
@@ -36,7 +42,14 @@ class _MinimalTreeViewState extends ConsumerState<WorkspaceNavTree> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(treeNodesProvider, (_, newValue) async {
+    final int? workspaceId = ref.read(selectedWorkspaceProvider);
+
+    if (workspaceId == null) {
+      throw StateError('No workspace selected');
+    }
+
+    ref.listen(explorerTreeProvider(workspaceId: workspaceId),
+        (_, newValue) async {
       _treeController.roots = newValue.value ?? [];
     });
 

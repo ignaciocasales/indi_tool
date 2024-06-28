@@ -15,22 +15,12 @@ class UrlEditingWidget extends ConsumerStatefulWidget {
 
 class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
   late TextEditingController _urlController;
+  var _enabled = false;
 
   @override
   void initState() {
     super.initState();
     _urlController = TextEditingController();
-
-    final int? scenarioId = ref.read(selectedTestScenarioProvider);
-
-    if (scenarioId == null) {
-      throw StateError('No scenario selected');
-    }
-
-    ref.read(testScenarioRepositoryProvider().future).then((scenario) {
-      _urlController.text = scenario.request.url;
-    });
-
     _urlController.addListener(_updateUrl);
   }
 
@@ -46,19 +36,26 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
     final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
     if (scenarioId == null) {
-      throw StateError('No scenario selected');
+      throw Exception('No scenario selected');
     }
 
-    ref.listen(testScenarioRepositoryProvider(), (_, asyncVal) {
-      asyncVal.whenData((scenario) {
-        if (_urlController.text != scenario.request.url) {
-          _urlController.text = scenario.request.url;
+    ref.listen(indiHttpRequestProvider(scenarioId: scenarioId), (_, asyncVal) {
+      asyncVal.whenData((request) {
+        if (!_enabled) {
+          setState(() {
+            _enabled = true;
+          });
+        }
+
+        if (_urlController.text != request.url) {
+          _urlController.text = request.url;
         }
       });
     });
 
     return TextFormField(
       key: Key('url-$scenarioId'),
+      enabled: _enabled,
       controller: _urlController,
       decoration: const InputDecoration(
         hintText: 'Enter URL',
@@ -82,7 +79,7 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
     }
 
     final TestScenario scenario =
-        await ref.read(testScenarioRepositoryProvider().future);
+        await ref.read(testScenarioProvider(scenarioId: scenarioId).future);
 
     if (url == scenario.request.url) {
       return;
@@ -98,7 +95,7 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
     );
 
     ref
-        .read(testScenariosRepositoryProvider().notifier)
-        .updateTestScenario(updated);
+        .read(testScenarioRepositoryProvider)
+        .updateTestScenario(testScenario: updated, testGroupId: groupId);
   }
 }

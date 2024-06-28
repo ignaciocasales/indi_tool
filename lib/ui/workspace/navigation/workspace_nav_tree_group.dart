@@ -3,6 +3,8 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
 import 'package:indi_tool/models/workspace/test_group.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class WorkspaceNavTreeGroup extends ConsumerWidget {
@@ -20,7 +22,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final TestGroup? testGroup =
-        ref.watch(testGroupRepositoryProvider(entry.node.id)).valueOrNull;
+        ref.watch(testGroupProvider(testGroupId: entry.node.id)).valueOrNull;
 
     if (testGroup == null) {
       return const Text('Group not found');
@@ -33,7 +35,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
       child: Row(
         children: [
           _getLeadingFor(entry),
-          _getTrailingFor(entry, testGroup),
+          _getTrailingFor(entry, testGroup, ref),
         ],
       ),
     );
@@ -46,7 +48,6 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
 
     return ExpandIcon(
       key: GlobalObjectKey(entry.node),
-      // isExpanded: treeController.getExpansionState(entry.node),
       isExpanded: entry.isExpanded,
       onPressed: (_) {
         treeController.toggleExpansion(entry.node);
@@ -57,6 +58,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
   Widget _getTrailingFor(
     final TreeEntry<TreeNode> entry,
     final TestGroup testGroup,
+    final WidgetRef ref,
   ) {
     return Expanded(
       child: InkWell(
@@ -71,7 +73,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              _getMenuAnchorFor(entry),
+              _getMenuAnchorFor(entry, ref),
             ],
           ),
         ),
@@ -82,7 +84,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
     );
   }
 
-  Widget _getMenuAnchorFor(final TreeEntry<TreeNode> entry) {
+  Widget _getMenuAnchorFor(final TreeEntry<TreeNode> entry, WidgetRef ref) {
     return MenuAnchor(
       builder: (BuildContext ctx, MenuController controller, Widget? child) {
         return IconButton(
@@ -99,6 +101,24 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
         );
       },
       menuChildren: [
+        MenuItemButton(
+          child: Row(
+            children: [
+              Icon(Icons.add_rounded),
+              SizedBox(width: 8),
+              Text('Add Scenario'),
+            ],
+          ),
+          onPressed: () async {
+            final id = await ref
+                .read(testScenarioRepositoryProvider)
+                .createTestScenario(
+                  testScenario: TestScenario(name: 'New Scenario'),
+                  testGroupId: entry.node.id,
+                );
+            ref.read(selectedTestScenarioProvider.notifier).select(id);
+          },
+        ),
         MenuItemButton(
           child: const Row(
             children: [

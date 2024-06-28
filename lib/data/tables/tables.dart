@@ -54,6 +54,10 @@ class IndiHttpParamTable extends Table {
 
   TextColumn get value => text()();
 
+  BoolColumn get enabled => boolean()();
+
+  TextColumn get description => text()();
+
   IntColumn get indiHttpRequest => integer()
       .references(IndiHttpRequestTable, #id, onDelete: KeyAction.cascade)();
 }
@@ -64,6 +68,10 @@ class IndiHttpHeaderTable extends Table {
   TextColumn get key => text()();
 
   TextColumn get value => text()();
+
+  BoolColumn get enabled => boolean()();
+
+  TextColumn get description => text()();
 
   IntColumn get indiHttpRequest => integer()
       .references(IndiHttpRequestTable, #id, onDelete: KeyAction.cascade)();

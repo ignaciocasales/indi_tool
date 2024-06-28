@@ -35,7 +35,7 @@ class HttpMethodDropdown extends ConsumerWidget {
     }
 
     final AsyncValue<TestScenario> asyncScenario =
-        ref.watch(testScenarioRepositoryProvider());
+        ref.watch(testScenarioProvider(scenarioId: scenarioId));
 
     return asyncScenario.when(
       data: (scenario) {
@@ -47,9 +47,10 @@ class HttpMethodDropdown extends ConsumerWidget {
               request: scenario.request.copyWith(method: newValue!),
             );
 
-            ref
-                .read(testScenariosRepositoryProvider().notifier)
-                .updateTestScenario(updated);
+            ref.read(testScenarioRepositoryProvider).updateTestScenario(
+                  testScenario: updated,
+                  testGroupId: groupId,
+                );
           },
         );
       },

@@ -1,19 +1,16 @@
-import 'package:uuid/uuid.dart';
-
 class IndiHttpHeader {
   IndiHttpHeader({
-    String? id,
+    this.id,
     String? key,
     String? value,
     bool? enabled,
     String? description,
-  })  : id = id ?? const Uuid().v4(),
-        key = key ?? '',
+  })  : key = key ?? '',
         value = value ?? '',
         enabled = enabled ?? true,
         description = description ?? '';
 
-  final String id;
+  final int? id;
   final String key;
   final String value;
   final bool enabled;

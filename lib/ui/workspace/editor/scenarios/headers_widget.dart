@@ -18,7 +18,7 @@ class HeadersWidget extends ConsumerWidget {
     }
 
     final AsyncValue<TestScenario> asyncScenario =
-        ref.watch(testScenarioRepositoryProvider());
+        ref.watch(testScenarioProvider(scenarioId: scenarioId));
 
     final List<IndiHttpHeader> headers = asyncScenario.maybeWhen(
       data: (scenario) => scenario.request.headers,
@@ -168,16 +168,16 @@ class HeadersWidget extends ConsumerWidget {
       return;
     }
 
-    final TestScenario scenario =
-        await ref.watch(testScenarioRepositoryProvider().future);
+    final TestScenario scenario = await ref
+        .watch(testScenarioProvider(scenarioId: scenarioId).future);
 
     final TestScenario updated = scenario.copyWith(
       request: scenario.request.copyWith(headers: headers),
     );
 
     ref
-        .read(testScenariosRepositoryProvider().notifier)
-        .updateTestScenario(updated);
+        .read(testScenarioRepositoryProvider)
+        .updateTestScenario(testScenario: updated, testGroupId: groupId);
   }
 }
 
