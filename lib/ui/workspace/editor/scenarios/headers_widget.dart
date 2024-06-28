@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/models/workspace/indi_http_header.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/parameters_widget.dart';
 
@@ -168,8 +168,8 @@ class HeadersWidget extends ConsumerWidget {
       return;
     }
 
-    final TestScenario scenario = await ref
-        .watch(testScenarioProvider(scenarioId: scenarioId).future);
+    final TestScenario scenario =
+        await ref.watch(testScenarioProvider(scenarioId: scenarioId).future);
 
     final TestScenario updated = scenario.copyWith(
       request: scenario.request.copyWith(headers: headers),

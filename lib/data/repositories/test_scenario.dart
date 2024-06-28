@@ -20,21 +20,6 @@ class TestScenarioRepository {
           .watchHttpRequest(scenarioId: scenarioId)
           .map((request) => scenario.copyWith(request: request));
     });
-    return _indiHttpRequestRepository
-        .watchHttpRequest(scenarioId: scenarioId)
-        .switchMap((request) {
-      return _db.managers.testScenarioTable
-          .filter((f) => f.id(scenarioId))
-          .watchSingle()
-          .map((d) {
-        final TestScenario scenario = TestScenarioMapper.fromEntry(d);
-        return scenario.copyWith(request: request);
-      });
-    });
-    return _db.managers.testScenarioTable
-        .filter((f) => f.id(scenarioId))
-        .watchSingle()
-        .map((d) => TestScenarioMapper.fromEntry(d));
   }
 
   Future<int> createTestScenario({

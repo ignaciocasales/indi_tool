@@ -102,7 +102,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
       },
       menuChildren: [
         MenuItemButton(
-          child: Row(
+          child: const Row(
             children: [
               Icon(Icons.add_rounded),
               SizedBox(width: 8),

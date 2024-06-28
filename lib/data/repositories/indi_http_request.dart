@@ -1,8 +1,5 @@
 import 'package:indi_tool/data/mapper/indi_http_request.dart';
 import 'package:indi_tool/data/source/database.dart';
-import 'package:indi_tool/models/common/http_method.dart';
-import 'package:indi_tool/models/workspace/indi_http_header.dart';
-import 'package:indi_tool/models/workspace/indi_http_param.dart';
 import 'package:indi_tool/models/workspace/indi_http_request.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -33,30 +30,6 @@ class IndiHttpRequestRepository {
         List<IndiHttpHeaderTableData> headers,
       ) {
         return IndiHttpRequestMapper.fromEntry(request, params, headers);
-        return IndiHttpRequest(
-          id: request.id,
-          method: HttpMethod.fromString(request.method),
-          url: request.url,
-          body: request.body,
-          parameters: params.map((e) {
-            return IndiHttpParam(
-              id: e.id,
-              key: e.key,
-              value: e.value,
-              enabled: e.enabled,
-              description: e.description,
-            );
-          }).toList(),
-          headers: headers.map((e) {
-            return IndiHttpHeader(
-              id: e.id,
-              key: e.key,
-              value: e.value,
-              enabled: e.enabled,
-              description: e.description,
-            );
-          }).toList(),
-        );
       },
     );
   }

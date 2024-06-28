@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/common/http_method.dart';
-import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class HttpMethodDropdown extends ConsumerWidget {

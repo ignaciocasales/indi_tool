@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:indi_tool/core/async/task.dart';
-import 'package:uuid/uuid.dart';
 
 class SingleTaskWorker {
   SingleTaskWorker._(
@@ -14,7 +13,6 @@ class SingleTaskWorker {
 
   final ReceivePort _responses;
   final SendPort _commands;
-  final String id = const Uuid().v4();
 
   bool _closed = false;
 

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/scenario_layout.dart';
 import 'package:indi_tool/ui/workspace/editor/groups/group_layout.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/scenario_layout.dart';
 
 class EditorLayout extends ConsumerWidget {
   const EditorLayout({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final TestGroup? group = ref.watch(selectedTestGroupProvider);
-    // final TestScenario? scenario = ref.watch(selectedTestScenarioProvider);
-
     final tuple = (
       ref.watch(selectedTestGroupProvider),
       ref.watch(selectedTestScenarioProvider)

@@ -2,7 +2,6 @@ import 'package:indi_tool/models/workspace/indi_http_response.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/di/di_prov.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 part 'load_testing_prov.g.dart';
 
@@ -42,18 +41,15 @@ class LoadTesting extends _$LoadTesting {
 
 class LoadTestingState {
   LoadTestingState._({
-    required this.id,
     required this.isRunning,
     required this.responses,
   });
 
-  final String id;
   final bool isRunning;
   final List<IndiHttpResponse> responses;
 
   factory LoadTestingState.newWith({responses}) {
     return LoadTestingState._(
-      id: const Uuid().v4(),
       isRunning: false,
       responses: responses ?? List<IndiHttpResponse>.empty(growable: true),
     );
@@ -64,7 +60,6 @@ class LoadTestingState {
     List<IndiHttpResponse>? responses,
   }) {
     return LoadTestingState._(
-      id: id,
       isRunning: isRunning ?? this.isRunning,
       responses: responses ?? this.responses,
     );

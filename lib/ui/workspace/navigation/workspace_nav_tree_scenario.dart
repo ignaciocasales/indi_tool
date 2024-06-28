@@ -19,9 +19,8 @@ class WorkspaceNavTreeScenario extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final TestScenario? testScenario = ref
-        .watch(testScenarioProvider(scenarioId: entry.node.id))
-        .valueOrNull;
+    final TestScenario? testScenario =
+        ref.watch(testScenarioProvider(scenarioId: entry.node.id)).valueOrNull;
 
     if (testScenario == null) {
       return const Text('Scenario not found');
