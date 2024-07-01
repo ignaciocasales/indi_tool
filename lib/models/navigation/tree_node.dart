@@ -1,42 +1,42 @@
-import 'package:uuid/uuid.dart';
-
 class TreeNode {
-  final String id;
-  final String title;
-  final List<TreeNode> children;
-  final Function(TreeNode) onTap;
-  final bool isExpanded;
-
   TreeNode({
-    required this.title,
-    id,
-    children,
-    onTap,
-    isExpanded,
-  })  : id = id ?? const Uuid().v4(),
-        children = children ?? List<TreeNode>.empty(growable: true),
-        onTap = onTap ?? ((_) {}),
-        isExpanded = isExpanded ?? false;
-
-  TreeNode copyWith({
-    String? title,
+    required this.id,
+    Type? type,
     List<TreeNode>? children,
     Function(TreeNode)? onTap,
-    bool? isExpanded,
+    Function(TreeNode)? onDelete,
+  })  : type = type ?? dynamic,
+        children = children ?? List<TreeNode>.empty(growable: true),
+        onTap = onTap ?? ((_) {}),
+        onDelete = onDelete ?? ((_) {});
+
+  final int id;
+  final Type type;
+  final List<TreeNode> children;
+  final Function(TreeNode) onTap;
+  final Function(TreeNode) onDelete;
+
+  TreeNode copyWith({
+    List<TreeNode>? children,
+    Function(TreeNode)? onTap,
+    Function(TreeNode)? onDelete,
   }) {
     return TreeNode(
-      title: title ?? this.title,
+      id: id,
       children: children ?? this.children,
       onTap: onTap ?? this.onTap,
-      isExpanded: isExpanded ?? this.isExpanded,
+      onDelete: onDelete ?? this.onDelete,
     );
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TreeNode && runtimeType == other.runtimeType && id == other.id;
+      other is TreeNode &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => id.hashCode ^ type.hashCode;
 }

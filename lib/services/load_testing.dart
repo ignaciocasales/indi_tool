@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:indi_tool/core/isolate_pool.dart';
-import 'package:indi_tool/schema/indi_http_request.dart';
-import 'package:indi_tool/schema/indi_http_response.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
+import 'package:indi_tool/core/async/isolate_pool.dart';
+import 'package:indi_tool/models/workspace/indi_http_request.dart';
+import 'package:indi_tool/models/workspace/indi_http_response.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/services/http/http_service.dart';
 import 'package:indi_tool/services/http/http_task.dart';
 
@@ -13,39 +12,41 @@ class LoadTestingService {
 
   LoadTestingService(this._httpService);
 
-  Future<List<IndiHttpResponse>> loadTest(TestScenario testScenario) async {
-    final results = <IndiHttpResponse>[];
+  late IsolatePool? _pool;
 
+  Stream<IndiHttpResponse> loadTest(final TestScenario scenario) async* {
     // TODO: Remove overrides.
-    final int n = testScenario.numberOfRequests + 10;
-    final int t = testScenario.threadPoolSize + 1;
+    final int n = scenario.numberOfRequests + 10;
+    final int t = scenario.threadPoolSize + 1;
 
-    final IndiHttpRequest request = testScenario.request;
+    final IndiHttpRequest request = scenario.request;
 
-    final IsolatePool pool = IsolatePool(t);
+    _pool = IsolatePool(t);
 
-    await pool.start();
+    try {
+      final futures = List<Future<IndiHttpResponse>>.empty(growable: true);
+      for (int i = 0; i < n; i++) {
+        final task = HttpTask(request, _httpService);
 
-    final futures = <Future<IndiHttpResponse>>[];
-    for (int i = 0; i < n; i++) {
-      final task = HttpTask(request, _httpService);
-
-      futures.add(pool.schedule(task));
-    }
-
-    // Collect the results
-    // TODO: Figure out streaming values.
-    final responses = await Future.wait(futures);
-    results.addAll(responses);
-
-    pool.stop();
-
-    for (var response in responses) {
-      if (kDebugMode) {
-        print('Response: ${response.status}');
+        futures.add(_pool!.schedule(task));
       }
-    }
 
-    return results;
+      await _pool!.start();
+
+      for (final future in futures) {
+        yield await future;
+      }
+    } catch (e) {
+      // TODO: Show some log.
+      rethrow;
+    } finally {
+      _pool!.stop();
+      _pool = null;
+    }
+  }
+
+  void cancelLoadTest() {
+    _pool?.stop();
+    _pool = null;
   }
 }

@@ -9,23 +9,31 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Expanded(
+    return Expanded(
       child: Row(
         children: [
-          Expanded(flex: 2, child: Column()),
+          const Expanded(flex: 2, child: Column()),
           Expanded(
             flex: 6,
             child: Column(
               children: [
-                WelcomeMessage(),
-                SizedBox(height: 20),
-                QuickStartGuide(),
-                SizedBox(height: 20),
-                WorkspacesList(),
+                const WelcomeMessage(),
+                const SizedBox(height: 20),
+                Divider(
+                  height: 0,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const QuickStartGuide(),
+                const SizedBox(height: 20),
+                Divider(
+                  height: 0,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const WorkspacesList(),
               ],
             ),
           ),
-          Expanded(flex: 2, child: Column()),
+          const Expanded(flex: 2, child: Column()),
         ],
       ),
     );

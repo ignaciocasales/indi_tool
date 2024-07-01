@@ -1,4 +1,4 @@
-import 'package:indi_tool/schema/indi_http_param.dart';
+import 'package:indi_tool/models/workspace/indi_http_param.dart';
 
 class UrlBuilder {
   UrlBuilder._();

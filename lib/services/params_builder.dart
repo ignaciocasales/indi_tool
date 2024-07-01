@@ -1,4 +1,4 @@
-import 'package:indi_tool/schema/indi_http_param.dart';
+import 'package:indi_tool/models/workspace/indi_http_param.dart';
 
 class ParamsBuilder {
   ParamsBuilder._();
@@ -26,7 +26,7 @@ class ParamsBuilder {
         value = Uri.decodeQueryComponent(maybeValue);
       }
 
-      return IndiHttpParam.newWith(key: key, value: value);
+      return IndiHttpParam(key: key, value: value);
     }).toList();
 
     final List<IndiHttpParam> updated = List.empty(growable: true);
@@ -39,13 +39,13 @@ class ParamsBuilder {
         }
 
         // If the index exists in both lists, update the original list
-        originalParameters[i] = originalParameters[i].copyWith(
+        updated.add(originalParameters[i].copyWith(
           key: newParameters.elementAt(i).key,
           value: newParameters.elementAt(i).value,
-        );
+        ));
       } else {
         // If the index is only in the new list, add the item to the original list
-        updated.add(IndiHttpParam.newWith(
+        updated.add(IndiHttpParam(
           key: newParameters.elementAt(i).key,
           value: newParameters.elementAt(i).value,
         ));

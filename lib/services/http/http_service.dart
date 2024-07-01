@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:indi_tool/schema/indi_http_request.dart';
+import 'package:indi_tool/models/workspace/indi_http_request.dart';
+import 'package:indi_tool/models/workspace/indi_http_response.dart';
 
 class GenericHttpService {
-  Future<HttpClientResponse> sendRequest(IndiHttpRequest indiRequest) async {
-    print('Sending request to ${indiRequest.url} at ${DateTime.now()}');
+  Future<IndiHttpResponse> sendRequest(IndiHttpRequest indiRequest) async {
     final HttpClient client = HttpClient()
       // Allow self-signed certificates. TODO: This will be a setting per request.
       ..badCertificateCallback =
@@ -22,19 +22,32 @@ class GenericHttpService {
         },
       );
 
+      final DateTime start = DateTime.now();
       final HttpClientResponse response = await request.close();
 
-      // TODO: Remove this comment.
-      // return await response.transform(utf8.decoder).join();
+      final double duration =
+          DateTime.now().difference(start).inMilliseconds / 1000;
 
-      // Adding fake delay to simulate network latency
-      // TODO: Remove this.
-      await Future.delayed(const Duration(milliseconds: 2000));
+      final bodyBytes = await response.expand((e) => e).toList();
 
-      return response;
+      final Map<String, String> headers = {};
+      response.headers.forEach((key, value) {
+        headers[key] = value.join(',');
+      });
+
+      final indiResponse = IndiHttpResponse(
+        method: indiRequest.method,
+        status: response.statusCode.toString(),
+        startTime: start.toString(),
+        duration: duration,
+        body: bodyBytes,
+        size: bodyBytes.length,
+        headers: headers,
+      );
+
+      return indiResponse;
     } finally {
       client.close();
-      print('Finished request at ${DateTime.now()}');
     }
   }
 }

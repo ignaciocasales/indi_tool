@@ -18,14 +18,20 @@ class QuickStartStep extends StatelessWidget {
         children: [
           Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(description, style: const TextStyle(fontSize: 14)),
-            ],
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(description, style: const TextStyle(fontSize: 14)),
+              ],
+            ),
           ),
         ],
       ),

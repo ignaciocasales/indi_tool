@@ -1,34 +1,67 @@
-import 'package:indi_tool/models/navigation/work_item.dart';
-import 'package:indi_tool/providers/injection/dependency_prov.dart';
-import 'package:indi_tool/providers/navigation/work_item_prov.dart';
-import 'package:indi_tool/schema/indi_http_response.dart';
-import 'package:indi_tool/schema/test_scenario.dart';
-import 'package:indi_tool/services/load_testing.dart';
+import 'package:indi_tool/models/workspace/indi_http_response.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/di/di_prov.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'load_testing_prov.g.dart';
 
 @riverpod
-class LoadTestingManager extends _$LoadTestingManager {
+class LoadTesting extends _$LoadTesting {
   @override
-  LoadTestingService build() {
-    return ref.read(loadTestingPodProvider);
+  LoadTestingState build() {
+    return LoadTestingState.newWith();
   }
 
-  Future<List<IndiHttpResponse>> sendRequest() async {
-    final WorkItem workItem = ref.watch(selectedWorkItemProvider)!;
-
-    if (workItem.type != WorkItemType.testScenario) {
-      throw Exception('No test case selected');
+  void startLoadTest(final TestScenario scenario) {
+    final service = ref.watch(loadTestingPodProvider);
+    if (state.isRunning) {
+      return;
     }
 
-    /*final TestScenario testScenario = ref.watch(testGroupsProvider.select(
-        (value) => value.value
-            ?.firstWhere((element) => element.id == workItem.parent!.id)
-            .testScenarios[workItem.id]))!;*/
+    if (state.responses.isNotEmpty) {
+      state = state.copyWith(
+        responses: List<IndiHttpResponse>.empty(growable: true),
+      );
+    }
 
-    final TestScenario testScenario = TestScenario.newWith();
+    state = state.copyWith(isRunning: true);
+    service.loadTest(scenario).listen((IndiHttpResponse response) {
+      state = state.copyWith(responses: [...state.responses, response]);
+    }, onDone: () {
+      state = state.copyWith(isRunning: false);
+    });
+  }
 
-    return await state.loadTest(testScenario);
+  void stopLoadTest() {
+    final service = ref.watch(loadTestingPodProvider);
+    service.cancelLoadTest();
+    state = state.copyWith(isRunning: false);
+  }
+}
+
+class LoadTestingState {
+  LoadTestingState._({
+    required this.isRunning,
+    required this.responses,
+  });
+
+  final bool isRunning;
+  final List<IndiHttpResponse> responses;
+
+  factory LoadTestingState.newWith({responses}) {
+    return LoadTestingState._(
+      isRunning: false,
+      responses: responses ?? List<IndiHttpResponse>.empty(growable: true),
+    );
+  }
+
+  LoadTestingState copyWith({
+    bool? isRunning,
+    List<IndiHttpResponse>? responses,
+  }) {
+    return LoadTestingState._(
+      isRunning: isRunning ?? this.isRunning,
+      responses: responses ?? this.responses,
+    );
   }
 }
