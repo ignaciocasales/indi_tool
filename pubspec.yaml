@@ -46,6 +46,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.24
   rxdart: ^0.27.7
   es_compression: ^2.0.12
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:

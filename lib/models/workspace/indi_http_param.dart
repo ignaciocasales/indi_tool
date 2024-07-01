@@ -1,16 +1,19 @@
+import 'package:uuid/uuid.dart';
+
 class IndiHttpParam {
   IndiHttpParam({
-    this.id,
+    String? id,
     String? key,
     String? value,
     bool? enabled,
     String? description,
-  })  : key = key ?? '',
+  })  : id = id ?? const Uuid().v4(),
+        key = key ?? '',
         value = value ?? '',
         enabled = enabled ?? true,
         description = description ?? '';
 
-  final int? id;
+  final String id;
   final String key;
   final String value;
   final bool enabled;
@@ -33,7 +36,7 @@ class IndiHttpParam {
 
   static IndiHttpParam fromJson(final Map<String, dynamic> map) {
     return IndiHttpParam(
-      id: map['id'] as int?,
+      id: map['id'] as String?,
       key: map['key'] as String?,
       value: map['value'] as String?,
       enabled: map['enabled'] as bool?,
@@ -44,7 +47,7 @@ class IndiHttpParam {
   static String toJson(final IndiHttpParam param) {
     return '''
     {
-      "id": ${param.id},
+      "id": "${param.id}",
       "key": "${param.key}",
       "value": "${param.value}",
       "enabled": ${param.enabled},

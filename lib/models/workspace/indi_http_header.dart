@@ -1,16 +1,19 @@
+import 'package:uuid/uuid.dart';
+
 class IndiHttpHeader {
   IndiHttpHeader({
-    this.id,
+    String? id,
     String? key,
     String? value,
     bool? enabled,
     String? description,
-  })  : key = key ?? '',
+  })  : id = id ?? const Uuid().v4(),
+        key = key ?? '',
         value = value ?? '',
         enabled = enabled ?? true,
         description = description ?? '';
 
-  final int? id;
+  final String id;
   final String key;
   final String value;
   final bool enabled;
@@ -31,9 +34,9 @@ class IndiHttpHeader {
     );
   }
 
-  static IndiHttpHeader fromJson(Map<String, dynamic> map) {
+  static IndiHttpHeader fromJson(final Map<String, dynamic> map) {
     return IndiHttpHeader(
-      id: map['id'] as int?,
+      id: map['id'] as String?,
       key: map['key'] as String?,
       value: map['value'] as String?,
       enabled: map['enabled'] as bool?,
@@ -41,14 +44,14 @@ class IndiHttpHeader {
     );
   }
 
-  static String toJson(IndiHttpHeader header) {
+  static String toJson(final IndiHttpHeader header) {
     return '''
     {
-      "id": ${header.id},
+      "id": "${header.id}",
       "key": "${header.key}",
       "value": "${header.value}",
       "enabled": ${header.enabled},
-      "description": "${header.description}",
+      "description": "${header.description}"
     }
     ''';
   }

@@ -39,10 +39,10 @@ class ParamsBuilder {
         }
 
         // If the index exists in both lists, update the original list
-        originalParameters[i] = originalParameters[i].copyWith(
+        updated.add(originalParameters[i].copyWith(
           key: newParameters.elementAt(i).key,
           value: newParameters.elementAt(i).value,
-        );
+        ));
       } else {
         // If the index is only in the new list, add the item to the original list
         updated.add(IndiHttpParam(

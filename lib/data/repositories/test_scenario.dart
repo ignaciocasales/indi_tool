@@ -7,7 +7,6 @@ import 'package:indi_tool/data/source/database.dart';
 import 'package:indi_tool/models/workspace/indi_http_header.dart';
 import 'package:indi_tool/models/workspace/indi_http_param.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
-import 'package:rxdart/transformers.dart';
 
 class TestScenarioRepository {
   const TestScenarioRepository(this._db);
@@ -20,10 +19,6 @@ class TestScenarioRepository {
         .watchSingle()
         .map((d) {
       return TestScenarioMapper.fromEntry(d);
-    }).onErrorResume((error, stackTrace) {
-      print('error: $error');
-      print('stackTrace: $stackTrace');
-      return const Stream.empty();
     });
   }
 

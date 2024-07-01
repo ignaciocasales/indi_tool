@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CellEditingWidget extends ConsumerStatefulWidget {
   const CellEditingWidget({
+    required this.controller,
     required this.hint,
     required this.text,
     required this.onChanged,
     super.key,
   });
 
+  final TextEditingController controller;
   final String hint;
   final String text;
   final void Function(String) onChanged;
@@ -19,19 +21,18 @@ class CellEditingWidget extends ConsumerStatefulWidget {
 
 class _CellEditingWidgetState extends ConsumerState<CellEditingWidget> {
   final _uniqueKey = UniqueKey();
-  late final TextEditingController _controller;
 
   @override
   void initState() {
-    _controller = TextEditingController(text: widget.text);
-    _controller.addListener(_onCellEdited);
+    // _controller = TextEditingController(text: widget.text);
+    widget.controller.addListener(_onCellEdited);
     super.initState();
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onCellEdited);
-    _controller.dispose();
+    widget.controller.removeListener(_onCellEdited);
+    // _controller.dispose();
     super.dispose();
   }
 
@@ -39,19 +40,19 @@ class _CellEditingWidgetState extends ConsumerState<CellEditingWidget> {
   void didUpdateWidget(CellEditingWidget old) {
     super.didUpdateWidget(old);
     if (old.text != widget.text) {
-      _controller.text = widget.text;
+      widget.controller.text = widget.text;
     }
   }
 
   void _onCellEdited() {
-    widget.onChanged(_controller.text);
+    widget.onChanged(widget.controller.text);
   }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: Key('${widget.hint}-${_uniqueKey.toString()}'),
-      controller: _controller,
+      controller: widget.controller,
       decoration: InputDecoration(
         hintText: widget.hint,
         isDense: true,

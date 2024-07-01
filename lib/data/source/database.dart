@@ -13,9 +13,6 @@ part 'database.g.dart';
   WorkspaceTable,
   TestGroupTable,
   TestScenarioTable,
-  // IndiHttpRequestTable,
-  // IndiHttpParamTable,
-  // IndiHttpHeaderTable,
 ])
 class DriftDb extends _$DriftDb {
   DriftDb({

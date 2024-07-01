@@ -20,7 +20,7 @@ class HttpParams extends _$HttpParams {
     return List.from(parameters, growable: true);
   }
 
-  void enable(final int? id, final bool enabled) async {
+  void enable(final String? id, final bool enabled) async {
     final List<IndiHttpParam> parameters = await ref
         .read(testScenarioProvider(scenarioId: _scenarioId)
             .selectAsync((s) => s.request.parameters))
@@ -41,7 +41,7 @@ class HttpParams extends _$HttpParams {
     _onFieldEdited(parameters);
   }
 
-  void updateKey(final int? id, final String key) async {
+  void updateKey(final String? id, final String key) async {
     final List<IndiHttpParam> parameters = await ref
         .read(testScenarioProvider(scenarioId: _scenarioId)
             .selectAsync((s) => s.request.parameters))
@@ -66,7 +66,7 @@ class HttpParams extends _$HttpParams {
     _onFieldEdited(parameters);
   }
 
-  void updateValue(final int? id, final String value) async {
+  void updateValue(final String? id, final String value) async {
     final List<IndiHttpParam> parameters = await ref
         .read(testScenarioProvider(scenarioId: _scenarioId)
             .selectAsync((s) => s.request.parameters))
@@ -91,7 +91,7 @@ class HttpParams extends _$HttpParams {
     _onFieldEdited(parameters);
   }
 
-  void updateDescription(final int? id, final String description) async {
+  void updateDescription(final String? id, final String description) async {
     final List<IndiHttpParam> parameters = await ref
         .read(testScenarioProvider(scenarioId: _scenarioId)
             .selectAsync((s) => s.request.parameters))
@@ -116,7 +116,7 @@ class HttpParams extends _$HttpParams {
     _onFieldEdited(parameters);
   }
 
-  void delete(final int? id) async {
+  void delete(final String? id) async {
     if (id == null) {
       return;
     }
