@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/app.dart';
 import 'package:indi_tool/window.dart';
-
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -15,12 +14,12 @@ void main() {
   // TODO: Encapsulate this in a function / class.
   // TODO: This might break on production.
   if (Platform.isWindows) {
-    ZstdCodec.libraryPath = p.normalize(
-        p.join(Directory.current.path, 'assets', 'libs', 'eszstd_win64.dll'));
+    ZstdCodec.libraryPath = p.normalize(p.join(
+        Directory.current.path, 'assets', 'libs', 'zstd_win64_1_5_6.dll'));
   } else if (Platform.isLinux) {
     // TODO: get the binary for linux (EG: libeszstd.so).
-    ZstdCodec.libraryPath = p.normalize(
-        p.join(Directory.current.path, 'assets', 'libs', 'TODO'));
+    ZstdCodec.libraryPath =
+        p.normalize(p.join(Directory.current.path, 'assets', 'libs', 'TODO'));
   } else {
     throw UnsupportedError('Unsupported platform');
   }
