@@ -37,7 +37,7 @@ class LoadTestingService {
         yield await future;
       }
     } catch (e) {
-      print('Error: $e');
+      // TODO: Show some log.
       rethrow;
     } finally {
       _pool!.stop();

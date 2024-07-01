@@ -19,20 +19,6 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-
-    final int? scenarioId = ref.read(selectedTestScenarioProvider);
-
-    if (scenarioId == null) {
-      throw StateError('No scenario selected');
-    }
-
-    ref
-        .read(testScenarioProvider(scenarioId: scenarioId).future)
-        .then((scenario) {
-      _nameController.text = scenario.name;
-      _enabled = true;
-    });
-
     _nameController.addListener(_updateName);
   }
 
@@ -46,28 +32,25 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
   @override
   Widget build(BuildContext context) {
     final int? scenarioId = ref.watch(selectedTestScenarioProvider);
-
     if (scenarioId == null) {
       throw StateError('No scenario selected');
     }
 
-    ref.listen(testScenarioProvider(scenarioId: scenarioId),
-        (_, asyncVal) async {
-      asyncVal.whenData((scenario) {
-        if (!_enabled) {
-          setState(() {
-            _enabled = true;
-          });
-        }
+    ref.watch(testScenarioProvider(scenarioId: scenarioId)).whenData((data) {
+      if (!_enabled) {
+        setState(() {
+          _enabled = true;
+        });
+      }
 
-        if (_nameController.text != scenario.name) {
-          _nameController.text = scenario.name;
-        }
-      });
+      if (_nameController.text != data.name) {
+        _nameController.text = data.name;
+      }
     });
 
     return TextField(
       key: Key('name-$scenarioId'),
+      enabled: _enabled,
       controller: _nameController,
       decoration: const InputDecoration(
         isDense: true,

@@ -34,14 +34,17 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
       guide: indentGuide,
       child: Row(
         children: [
-          _getLeadingFor(entry),
-          _getTrailingFor(entry, testGroup, ref),
+          _getLeadingFor(context, entry),
+          _getTrailingFor(entry, testGroup, ref, context),
+          const SizedBox(width: 8),
+          _getMenuAnchorFor(entry, ref),
         ],
       ),
     );
   }
 
-  Widget _getLeadingFor(final TreeEntry<TreeNode> entry) {
+  Widget _getLeadingFor(
+      final BuildContext context, final TreeEntry<TreeNode> entry) {
     if (entry.node.children.isEmpty) {
       return const SizedBox();
     }
@@ -49,6 +52,7 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
     return ExpandIcon(
       key: GlobalObjectKey(entry.node),
       isExpanded: entry.isExpanded,
+      color: Theme.of(context).colorScheme.primary,
       onPressed: (_) {
         treeController.toggleExpansion(entry.node);
       },
@@ -59,27 +63,41 @@ class WorkspaceNavTreeGroup extends ConsumerWidget {
     final TreeEntry<TreeNode> entry,
     final TestGroup testGroup,
     final WidgetRef ref,
+    final BuildContext context,
   ) {
+    final selectedGroupId = ref.watch(selectedTestGroupProvider);
+
     return Expanded(
-      child: InkWell(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  testGroup.name,
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _getMenuAnchorFor(entry, ref),
-            ],
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          border: selectedGroupId == testGroup.id
+              ? Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
+                )
+              : null,
         ),
-        onTap: () {
-          entry.node.onTap(entry.node);
-        },
+        child: InkWell(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    testGroup.name,
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          onTap: () {
+            entry.node.onTap(entry.node);
+          },
+        ),
       ),
     );
   }

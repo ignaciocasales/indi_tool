@@ -30,6 +30,11 @@ class ExplorerTree extends _$ExplorerTree {
                       .select(scenario.id!);
                 },
                 onDelete: (node) {
+                  final scenarioId = ref.read(selectedTestScenarioProvider);
+                  if (scenarioId != null && scenarioId == node.id) {
+                    ref.read(selectedTestScenarioProvider.notifier).clear();
+                  }
+
                   ref
                       .read(testScenarioRepositoryProvider)
                       .deleteTestScenario(scenario.id!);
@@ -47,6 +52,17 @@ class ExplorerTree extends _$ExplorerTree {
               ref.read(selectedTestGroupProvider.notifier).select(group.id!);
             },
             onDelete: (node) {
+              final scenarioId = ref.read(selectedTestScenarioProvider);
+              if (scenarioId != null &&
+                  group.testScenarios.any((s) => s.id == scenarioId)) {
+                ref.read(selectedTestScenarioProvider.notifier).clear();
+              }
+
+              final groupId = ref.read(selectedTestGroupProvider);
+              if (groupId != null && groupId == node.id) {
+                ref.read(selectedTestScenarioProvider.notifier).clear();
+              }
+
               ref.read(testGroupRepositoryProvider).deleteTestGroup(group.id!);
             },
           );

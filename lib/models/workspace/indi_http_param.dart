@@ -30,4 +30,26 @@ class IndiHttpParam {
       description: description ?? this.description,
     );
   }
+
+  static IndiHttpParam fromJson(final Map<String, dynamic> map) {
+    return IndiHttpParam(
+      id: map['id'] as int?,
+      key: map['key'] as String?,
+      value: map['value'] as String?,
+      enabled: map['enabled'] as bool?,
+      description: map['description'] as String?,
+    );
+  }
+
+  static String toJson(final IndiHttpParam param) {
+    return '''
+    {
+      "id": ${param.id},
+      "key": "${param.key}",
+      "value": "${param.value}",
+      "enabled": ${param.enabled},
+      "description": "${param.description}"
+    }
+    ''';
+  }
 }

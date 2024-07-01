@@ -34,24 +34,23 @@ class _UrlEditingWidgetState extends ConsumerState<UrlEditingWidget> {
   @override
   Widget build(BuildContext context) {
     final int? scenarioId = ref.watch(selectedTestScenarioProvider);
-
     if (scenarioId == null) {
       throw Exception('No scenario selected');
     }
 
-    ref.listen(indiHttpRequestProvider(scenarioId: scenarioId), (_, asyncVal) {
-      asyncVal.whenData((request) {
-        if (!_enabled) {
-          setState(() {
-            _enabled = true;
-          });
-        }
-
-        if (_urlController.text != request.url) {
-          _urlController.text = request.url;
-        }
-      });
-    });
+    ref.watch(testScenarioProvider(scenarioId: scenarioId)).when(
+        data: (scenario) {
+          if (_urlController.text != scenario.request.url) {
+            _urlController.text = scenario.request.url;
+          }
+          if (!_enabled) {
+            setState(() {
+              _enabled = true;
+            });
+          }
+        },
+        error: (err, st) => {},
+        loading: () => {});
 
     return TextFormField(
       key: Key('url-$scenarioId'),

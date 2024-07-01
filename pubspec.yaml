@@ -45,6 +45,7 @@ dependencies:
   drift: ^2.18.0
   sqlite3_flutter_libs: ^0.5.24
   rxdart: ^0.27.7
+  es_compression: ^2.0.12
 
 dev_dependencies:
   flutter_test:
@@ -66,3 +67,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/libs/eszstd_win64.dll

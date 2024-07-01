@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/parameters_widget.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/parameters.dart';
 
 class Parameters extends StatelessWidget {
   const Parameters({super.key});

@@ -5,7 +5,6 @@ import 'package:indi_tool/models/workspace/indi_http_response.dart';
 
 class GenericHttpService {
   Future<IndiHttpResponse> sendRequest(IndiHttpRequest indiRequest) async {
-    print('Sending request to ${indiRequest.url} at ${DateTime.now()}');
     final HttpClient client = HttpClient()
       // Allow self-signed certificates. TODO: This will be a setting per request.
       ..badCertificateCallback =
@@ -49,7 +48,6 @@ class GenericHttpService {
       return indiResponse;
     } finally {
       client.close();
-      print('Finished request at ${DateTime.now()}');
     }
   }
 }

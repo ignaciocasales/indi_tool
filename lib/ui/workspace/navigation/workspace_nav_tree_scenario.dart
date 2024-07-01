@@ -3,6 +3,7 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/models/navigation/tree_node.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 
 class WorkspaceNavTreeScenario extends ConsumerWidget {
@@ -33,40 +34,56 @@ class WorkspaceNavTreeScenario extends ConsumerWidget {
       child: Row(
         children: [
           _getLeadingFor(entry),
-          _getTrailingFor(entry, testScenario),
+          _getTrailingFor(entry, testScenario, ref, context),
+          const SizedBox(width: 8),
+          _getMenuAnchorFor(entry),
         ],
       ),
     );
   }
 
   Widget _getLeadingFor(final TreeEntry<TreeNode> entry) {
-    return const SizedBox();
+    return const SizedBox(width: 18);
   }
 
   Widget _getTrailingFor(
     final TreeEntry<TreeNode> entry,
     final TestScenario testScenario,
+    final WidgetRef ref,
+    final BuildContext context,
   ) {
+    final selectedScenarioId = ref.watch(selectedTestScenarioProvider);
     return Expanded(
-      child: InkWell(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  testScenario.name,
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _getMenuAnchorFor(entry),
-            ],
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          border: selectedScenarioId == testScenario.id
+              ? Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
+                )
+              : null,
         ),
-        onTap: () {
-          entry.node.onTap(entry.node);
-        },
+        child: InkWell(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    testScenario.name,
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          onTap: () {
+            entry.node.onTap(entry.node);
+          },
+        ),
       ),
     );
   }

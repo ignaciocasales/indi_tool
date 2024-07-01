@@ -11,7 +11,7 @@ DriftDb drift(DriftRef ref) {
   return DriftDb(
     dbName: kDatabaseName,
     inMemory: false,
-    logStatements: false,
+    logStatements: true,
   );
 }
 

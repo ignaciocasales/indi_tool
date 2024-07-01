@@ -1,24 +1,29 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart';
+import 'package:es_compression/zstd.dart';
 import 'package:indi_tool/data/mapper/test_scenario.dart';
-import 'package:indi_tool/data/repositories/indi_http_request.dart';
 import 'package:indi_tool/data/source/database.dart';
+import 'package:indi_tool/models/workspace/indi_http_header.dart';
+import 'package:indi_tool/models/workspace/indi_http_param.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:rxdart/transformers.dart';
 
 class TestScenarioRepository {
-  const TestScenarioRepository(this._db, this._indiHttpRequestRepository);
+  const TestScenarioRepository(this._db);
 
   final DriftDb _db;
-  final IndiHttpRequestRepository _indiHttpRequestRepository;
 
-  Stream<TestScenario> watchTestScenarioWithRequest({required int scenarioId}) {
+  Stream<TestScenario> watchTestScenario({required int scenarioId}) {
     return _db.managers.testScenarioTable
         .filter((f) => f.id(scenarioId))
         .watchSingle()
-        .switchMap((d) {
-      final TestScenario scenario = TestScenarioMapper.fromEntry(d);
-      return _indiHttpRequestRepository
-          .watchHttpRequest(scenarioId: scenarioId)
-          .map((request) => scenario.copyWith(request: request));
+        .map((d) {
+      return TestScenarioMapper.fromEntry(d);
+    }).onErrorResume((error, stackTrace) {
+      print('error: $error');
+      print('stackTrace: $stackTrace');
+      return const Stream.empty();
     });
   }
 
@@ -26,115 +31,53 @@ class TestScenarioRepository {
     required final TestScenario testScenario,
     required final int testGroupId,
   }) async {
-    return _db.transaction(() async {
-      final int scenarioId =
-          await _db.managers.testScenarioTable.create((o) => o(
-                name: testScenario.name,
-                description: testScenario.description,
-                testGroup: testGroupId,
-                numberOfRequests: testScenario.numberOfRequests,
-                threadPoolSize: testScenario.threadPoolSize,
-              ));
-
-      final int requestId =
-          await _db.managers.indiHttpRequestTable.create((o) => o(
-                method: testScenario.request.method.name,
-                url: testScenario.request.url,
-                body: testScenario.request.body,
-                testScenario: scenarioId,
-              ));
-
-      await _db.managers.indiHttpParamTable.bulkCreate((o) {
-        return testScenario.request.parameters
-            .map((p) => o(
-                  key: p.key,
-                  value: p.value,
-                  description: p.description,
-                  enabled: p.enabled,
-                  indiHttpRequest: requestId,
-                ))
-            .toList();
-      });
-
-      await _db.managers.indiHttpHeaderTable.bulkCreate((o) {
-        return testScenario.request.headers
-            .map((h) => o(
-                  key: h.key,
-                  value: h.value,
-                  description: h.description,
-                  enabled: h.enabled,
-                  indiHttpRequest: requestId,
-                ))
-            .toList();
-      });
-
-      return scenarioId;
-    });
+    return await _db.managers.testScenarioTable.create(
+      (o) => o(
+        name: testScenario.name,
+        description: testScenario.description,
+        testGroup: testGroupId,
+        numberOfRequests: testScenario.numberOfRequests,
+        threadPoolSize: testScenario.threadPoolSize,
+        method: testScenario.request.method.name,
+        body: testScenario.request.body,
+        url: testScenario.request.url,
+        httpParams: Uint8List.fromList(zstd.encode(utf8.encode(jsonEncode(
+            testScenario.request.parameters
+                .map((p) => IndiHttpParam.toJson(p))
+                .toList())))),
+        httpHeaders: Uint8List.fromList(zstd.encode(utf8.encode(jsonEncode(
+            testScenario.request.headers
+                .map((p) => IndiHttpHeader.toJson(p))
+                .toList())))),
+      ),
+    );
   }
 
   Future<bool> updateTestScenario({
     required final TestScenario testScenario,
     required final int testGroupId,
   }) async {
-    return _db.transaction(() async {
-      final bool updated =
-          await _db.managers.testScenarioTable.replace(TestScenarioTableData(
+    return await _db.managers.testScenarioTable.replace(
+      TestScenarioTableData(
         id: testScenario.id!,
         name: testScenario.name,
         description: testScenario.description,
         testGroup: testGroupId,
         numberOfRequests: testScenario.numberOfRequests,
         threadPoolSize: testScenario.threadPoolSize,
-      ));
-
-      await _db.managers.indiHttpRequestTable.replace(
-        IndiHttpRequestTableData(
-          id: testScenario.request.id!,
-          method: testScenario.request.method.name,
-          url: testScenario.request.url,
-          body: testScenario.request.body,
-          testScenario: testScenario.id!,
-        ),
-      );
-
-      var params = await _db.managers.indiHttpParamTable
-          .filter((f) => f.id
-              .isIn(testScenario.request.parameters.map((p) => p.id!).toList()))
-          .get();
-      params = params.map((old) {
-        var parameter =
-            testScenario.request.parameters.firstWhere((p) => p.id == old.id);
-        return IndiHttpParamTableData(
-          id: old.id,
-          key: parameter.key,
-          value: parameter.value,
-          enabled: parameter.enabled,
-          description: parameter.description,
-          indiHttpRequest: testScenario.request.id!,
-        );
-      }).toList();
-      await _db.managers.indiHttpParamTable.bulkReplace(params);
-
-      var headers = await _db.managers.indiHttpHeaderTable
-          .filter((f) => f.id
-              .isIn(testScenario.request.headers.map((h) => h.id!).toList()))
-          .get();
-      headers = headers.map((old) {
-        var header =
-            testScenario.request.headers.firstWhere((h) => h.id == old.id);
-        return IndiHttpHeaderTableData(
-          id: old.id,
-          key: header.key,
-          value: header.value,
-          enabled: header.enabled,
-          description: header.description,
-          indiHttpRequest: testScenario.request.id!,
-        );
-      }).toList();
-      await _db.managers.indiHttpHeaderTable.bulkReplace(headers);
-
-      return updated;
-    });
+        method: testScenario.request.method.name,
+        body: testScenario.request.body,
+        url: testScenario.request.url,
+        httpParams: Uint8List.fromList(zstd.encode(utf8.encode(jsonEncode(
+            testScenario.request.parameters
+                .map((p) => IndiHttpParam.toJson(p))
+                .toList())))),
+        httpHeaders: Uint8List.fromList(zstd.encode(utf8.encode(jsonEncode(
+            testScenario.request.headers
+                .map((p) => IndiHttpHeader.toJson(p))
+                .toList())))),
+      ),
+    );
   }
 
   Future<int> deleteTestScenario(final int scenarioId) async {

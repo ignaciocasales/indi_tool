@@ -30,49 +30,59 @@ class TestScenarioTable extends Table {
 
   IntColumn get threadPoolSize => integer()();
 
-  IntColumn get testGroup =>
-      integer().references(TestGroupTable, #id, onDelete: KeyAction.cascade)();
-}
-
-class IndiHttpRequestTable extends Table {
-  IntColumn get id => integer().autoIncrement()();
-
   TextColumn get url => text()();
 
   TextColumn get method => text()();
 
   TextColumn get body => text()();
 
-  IntColumn get testScenario => integer()
-      .references(TestScenarioTable, #id, onDelete: KeyAction.cascade)();
+  BlobColumn get httpParams => blob()();
+
+  BlobColumn get httpHeaders => blob()();
+
+  IntColumn get testGroup =>
+      integer().references(TestGroupTable, #id, onDelete: KeyAction.cascade)();
 }
 
-class IndiHttpParamTable extends Table {
-  IntColumn get id => integer().autoIncrement()();
+// class IndiHttpRequestTable extends Table {
+//   IntColumn get id => integer().autoIncrement()();
+//
+//   TextColumn get url => text()();
+//
+//   TextColumn get method => text()();
+//
+//   TextColumn get body => text()();
+//
+//   IntColumn get testScenario => integer()
+//       .references(TestScenarioTable, #id, onDelete: KeyAction.cascade)();
+// }
 
-  TextColumn get key => text()();
-
-  TextColumn get value => text()();
-
-  BoolColumn get enabled => boolean()();
-
-  TextColumn get description => text()();
-
-  IntColumn get indiHttpRequest => integer()
-      .references(IndiHttpRequestTable, #id, onDelete: KeyAction.cascade)();
-}
-
-class IndiHttpHeaderTable extends Table {
-  IntColumn get id => integer().autoIncrement()();
-
-  TextColumn get key => text()();
-
-  TextColumn get value => text()();
-
-  BoolColumn get enabled => boolean()();
-
-  TextColumn get description => text()();
-
-  IntColumn get indiHttpRequest => integer()
-      .references(IndiHttpRequestTable, #id, onDelete: KeyAction.cascade)();
-}
+// class IndiHttpParamTable extends Table {
+//   IntColumn get id => integer().autoIncrement()();
+//
+//   TextColumn get key => text()();
+//
+//   TextColumn get value => text()();
+//
+//   BoolColumn get enabled => boolean()();
+//
+//   TextColumn get description => text()();
+//
+//   IntColumn get indiHttpRequest => integer()
+//       .references(IndiHttpRequestTable, #id, onDelete: KeyAction.cascade)();
+// }
+//
+// class IndiHttpHeaderTable extends Table {
+//   IntColumn get id => integer().autoIncrement()();
+//
+//   TextColumn get key => text()();
+//
+//   TextColumn get value => text()();
+//
+//   BoolColumn get enabled => boolean()();
+//
+//   TextColumn get description => text()();
+//
+//   IntColumn get indiHttpRequest => integer()
+//       .references(IndiHttpRequestTable, #id, onDelete: KeyAction.cascade)();
+// }

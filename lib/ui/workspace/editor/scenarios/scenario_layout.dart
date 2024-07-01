@@ -4,9 +4,9 @@ import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/providers/services/load_testing_prov.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/editor/name_editing_widget.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/editor/url_editing_widget.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/http_dropdown.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/name.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/url.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/http_method.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/request_editor_nav.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/response_layout.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/result/results_widget.dart';
@@ -16,6 +16,12 @@ class ScenarioLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
+
+    if (scenarioId == null) {
+      throw StateError('No scenario selected');
+    }
+
     return Column(
       children: [
         const Padding(
@@ -25,9 +31,9 @@ class ScenarioLayout extends ConsumerWidget {
         const Divider(height: 0),
         Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: HttpMethodDropdown(),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: HttpMethodEditingWidget(),
             ),
             const Expanded(
               child: Padding(
@@ -39,13 +45,6 @@ class ScenarioLayout extends ConsumerWidget {
               padding: const EdgeInsets.all(8.0),
               child: FilledButton(
                 onPressed: () async {
-                  final int? scenarioId =
-                      ref.watch(selectedTestScenarioProvider);
-
-                  if (scenarioId == null) {
-                    return;
-                  }
-
                   final TestScenario scenario = await ref.read(
                       testScenarioProvider(scenarioId: scenarioId).future);
 

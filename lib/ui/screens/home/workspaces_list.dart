@@ -27,6 +27,46 @@ class WorkspacesList extends ConsumerWidget {
                       Theme.of(context).colorScheme.onSurface.withOpacity(0.01),
                   leading: const Icon(Icons.dashboard_rounded),
                   title: Text(workspace.name),
+                  trailing: MenuAnchor(
+                    builder: (
+                      BuildContext ctx,
+                      MenuController controller,
+                      Widget? child,
+                    ) {
+                      return IconButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        icon: const Icon(Icons.more_horiz_outlined),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      );
+                    },
+                    menuChildren: [
+                      MenuItemButton(
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.delete_rounded,
+                              size: 16,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Delete'),
+                          ],
+                        ),
+                        onPressed: () {
+                          // TODO: show dialog.
+                          ref
+                              .read(workspaceRepositoryProvider)
+                              .deleteWorkspaceEntry(id: workspace.id!);
+                        },
+                      ),
+                    ],
+                  ),
                   onTap: () {
                     ref
                         .read(selectedWorkspaceProvider.notifier)

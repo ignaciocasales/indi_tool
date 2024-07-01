@@ -1,9 +1,7 @@
-import 'package:indi_tool/data/repositories/indi_http_request.dart';
 import 'package:indi_tool/data/repositories/test_group.dart';
 import 'package:indi_tool/data/repositories/test_scenario.dart';
 import 'package:indi_tool/data/repositories/workspace.dart';
 import 'package:indi_tool/data/source/database.dart';
-import 'package:indi_tool/models/workspace/indi_http_request.dart';
 import 'package:indi_tool/models/workspace/test_group.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/models/workspace/workspace.dart';
@@ -48,9 +46,7 @@ TestScenarioRepository testScenarioRepository(
   final TestScenarioRepositoryRef ref,
 ) {
   final DriftDb db = ref.watch(driftProvider);
-  final IndiHttpRequestRepository indiHttpRequestRepository =
-      ref.watch(indiHttpRequestRepositoryProvider);
-  return TestScenarioRepository(db, indiHttpRequestRepository);
+  return TestScenarioRepository(db);
 }
 
 @riverpod
@@ -60,23 +56,5 @@ Stream<TestScenario> testScenario(
 }) {
   return ref
       .watch(testScenarioRepositoryProvider)
-      .watchTestScenarioWithRequest(scenarioId: scenarioId);
-}
-
-@riverpod
-IndiHttpRequestRepository indiHttpRequestRepository(
-  final IndiHttpRequestRepositoryRef ref,
-) {
-  final DriftDb db = ref.watch(driftProvider);
-  return IndiHttpRequestRepository(db);
-}
-
-@riverpod
-Stream<IndiHttpRequest> indiHttpRequest(
-  final IndiHttpRequestRef ref, {
-  required final int scenarioId,
-}) {
-  return ref
-      .watch(indiHttpRequestRepositoryProvider)
-      .watchHttpRequest(scenarioId: scenarioId);
+      .watchTestScenario(scenarioId: scenarioId);
 }

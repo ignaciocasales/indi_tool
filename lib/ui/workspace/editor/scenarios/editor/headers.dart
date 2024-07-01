@@ -4,7 +4,9 @@ import 'package:indi_tool/models/workspace/indi_http_header.dart';
 import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/parameters_widget.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/cell.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/checkbox.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/header_row.dart';
 
 class HeadersWidget extends ConsumerWidget {
   const HeadersWidget({super.key});
@@ -180,38 +182,3 @@ class HeadersWidget extends ConsumerWidget {
         .updateTestScenario(testScenario: updated, testGroupId: groupId);
   }
 }
-
-// TODO: This could be reused in the parameters widget.
-var kHeadersTableRow = const TableRow(
-  children: [
-    Padding(
-      padding: EdgeInsets.all(4.0),
-      child: Text(''),
-    ),
-    Padding(
-      padding: EdgeInsets.all(4.0),
-      child: Text(
-        'Key',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    ),
-    Padding(
-      padding: EdgeInsets.all(4.0),
-      child: Text(
-        'Value',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    ),
-    Padding(
-      padding: EdgeInsets.all(4.0),
-      child: Text(
-        'Description',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    ),
-    Padding(
-      padding: EdgeInsets.all(4.0),
-      child: Text(''),
-    ),
-  ],
-);
