@@ -78,4 +78,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/libs/zstd_win64_1_5_6.dll
+    - assets/libs/zstd/zstd-1_5_4-win64.dll
+    - assets/libs/zstd/zstd-1_5_4-mac64.dylib
+    - assets/libs/zstd/zstd-1_5_4-linux64.so
