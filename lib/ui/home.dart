@@ -5,13 +5,14 @@ import 'package:indi_tool/models/navigation/indi_route.dart';
 import 'package:indi_tool/providers/navigation/app_router_prov.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/ui/navigation/app_router.dart';
+import 'package:indi_tool/ui/scaffold.dart';
 
 class Home extends ConsumerWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    return ScaffoldWrapper(
       appBar: AppBar(
         centerTitle: true,
         title: Text(

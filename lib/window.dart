@@ -11,21 +11,7 @@ void setupWindow() async {
 
     await windowManager.ensureInitialized();
 
-    // await windowManager.maximize();
-
-    // final size = await windowManager.getSize();
-
-    // FIXME
-    // final double width = size.width * 0.65;
-    // final double width = size.width;
-
-    // FIXME
-    // final double height = size.height * 0.65;
-    // final double height = size.height;
-
     WindowOptions windowOptions = const WindowOptions(
-      // size: Size(width, height),
-      minimumSize: Size(800, 600),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
