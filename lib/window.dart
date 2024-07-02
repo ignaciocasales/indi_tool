@@ -7,8 +7,6 @@ import 'package:window_manager/window_manager.dart';
 
 void setupWindow() async {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-    WidgetsFlutterBinding.ensureInitialized();
-
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = const WindowOptions(

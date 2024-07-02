@@ -73,3 +73,29 @@ DatabaseConnection _openConnection(
     ),
   );
 }
+
+class DriftDbInstance {
+  const DriftDbInstance._();
+
+  static DriftDb? _db;
+
+  static void setup({
+    required String dbName,
+    required bool inMemory,
+    required bool logStatements,
+  }) {
+    _db = DriftDb(
+      dbName: dbName,
+      inMemory: inMemory,
+      logStatements: logStatements,
+    );
+  }
+
+  static DriftDb get get {
+    if (_db == null) {
+      throw Exception('Database not initialized');
+    }
+
+    return _db!;
+  }
+}
