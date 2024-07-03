@@ -41,28 +41,30 @@ class Home extends ConsumerWidget {
         ],
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: Column(
-        children: [
-          const Expanded(
-            child: Row(
-              children: [
-                AppRouter(),
-              ],
+      body: Expanded(
+        child: Column(
+          children: [
+            const Expanded(
+              child: Row(
+                children: [
+                  AppRouter(),
+                ],
+              ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // TODO: Add real version number.
-                Text('v0.0.1'),
-              ],
-            ),
-          )
-        ],
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // TODO: Add real version number.
+                  Text('v0.0.1'),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

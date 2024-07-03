@@ -52,7 +52,22 @@ class ScaffoldWrapper extends StatelessWidget {
                           minHeight: height,
                           maxHeight: height,
                         ),
-                        child: body,
+                        // child: body,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  body,
+                                  if (constraints.maxHeight < kMinScreenHeight)
+                                    const SizedBox(width: kScrollThickness)
+                                ],
+                              ),
+                            ),
+                            if (constraints.maxWidth < kMinScreenWidth)
+                              const SizedBox(height: kScrollThickness),
+                          ],
+                        ),
                       ),
                     ),
                   ),
