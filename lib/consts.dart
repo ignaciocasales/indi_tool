@@ -7,3 +7,4 @@ const kDatabaseName = 'main.db';
 
 const kMinScreenWidth = 1024.0;
 const kMinScreenHeight = 768.0;
+const kScrollThickness = 10.0;

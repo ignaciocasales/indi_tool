@@ -14,6 +14,12 @@ class IndiApp extends StatelessWidget {
       useMaterial3: true,
       brightness: Brightness.dark,
       visualDensity: VisualDensity.compact,
+      scrollbarTheme: const ScrollbarThemeData(
+        radius: Radius.zero,
+        thumbVisibility: WidgetStatePropertyAll(true),
+        trackVisibility: WidgetStatePropertyAll(true),
+        thickness: WidgetStatePropertyAll(kScrollThickness),
+      ),
     );
 
     return MaterialApp(
