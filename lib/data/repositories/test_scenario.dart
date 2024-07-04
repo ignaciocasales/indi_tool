@@ -13,6 +13,12 @@ class TestScenarioRepository {
 
   final DriftDb _db;
 
+  Stream<List<TestScenario>> watchTestScenarioList() {
+    return _db.managers.testScenarioTable.watch().map((d) {
+      return TestScenarioMapper.fromEntries(d);
+    });
+  }
+
   Stream<TestScenario> watchTestScenario({required int scenarioId}) {
     return _db.managers.testScenarioTable
         .filter((f) => f.id(scenarioId))
@@ -24,18 +30,18 @@ class TestScenarioRepository {
 
   Future<int> createTestScenario({
     required final TestScenario testScenario,
-    required final int testGroupId,
   }) async {
     return await _db.managers.testScenarioTable.create(
       (o) => o(
         name: testScenario.name,
         description: testScenario.description,
-        testGroup: testGroupId,
         numberOfRequests: testScenario.numberOfRequests,
         threadPoolSize: testScenario.threadPoolSize,
         method: testScenario.request.method.name,
-        body: testScenario.request.body,
         url: testScenario.request.url,
+        bodyType: testScenario.request.bodyType.name,
+        body: Uint8List.fromList(zstd.encode(testScenario.request.body)),
+        timeoutMillis: testScenario.request.timeoutMillis,
         httpParams: Uint8List.fromList(zstd.encode(utf8.encode(jsonEncode(
             testScenario.request.parameters
                 .map((p) => IndiHttpParam.toJson(p))
@@ -50,19 +56,19 @@ class TestScenarioRepository {
 
   Future<bool> updateTestScenario({
     required final TestScenario testScenario,
-    required final int testGroupId,
   }) async {
     return await _db.managers.testScenarioTable.replace(
       TestScenarioTableData(
         id: testScenario.id!,
         name: testScenario.name,
         description: testScenario.description,
-        testGroup: testGroupId,
         numberOfRequests: testScenario.numberOfRequests,
         threadPoolSize: testScenario.threadPoolSize,
         method: testScenario.request.method.name,
-        body: testScenario.request.body,
         url: testScenario.request.url,
+        bodyType: testScenario.request.bodyType.name,
+        body: Uint8List.fromList(zstd.encode(testScenario.request.body)),
+        timeoutMillis: testScenario.request.timeoutMillis,
         httpParams: Uint8List.fromList(zstd.encode(utf8.encode(jsonEncode(
             testScenario.request.parameters
                 .map((p) => IndiHttpParam.toJson(p))

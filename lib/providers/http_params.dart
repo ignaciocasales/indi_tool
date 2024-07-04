@@ -132,10 +132,9 @@ class HttpParams extends _$HttpParams {
   }
 
   void _onFieldEdited(final List<IndiHttpParam> parameters) async {
-    final int? groupId = ref.watch(selectedTestGroupProvider);
     final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
-    if (groupId == null || scenarioId == null) {
+    if (scenarioId == null) {
       return;
     }
 
@@ -156,6 +155,6 @@ class HttpParams extends _$HttpParams {
 
     ref
         .read(testScenarioRepositoryProvider)
-        .updateTestScenario(testScenario: updated, testGroupId: groupId);
+        .updateTestScenario(testScenario: updated);
   }
 }

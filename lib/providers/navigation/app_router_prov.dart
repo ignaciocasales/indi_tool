@@ -7,7 +7,7 @@ part 'app_router_prov.g.dart';
 class SelectedRoute extends _$SelectedRoute {
   @override
   IndiRoute build() {
-    return IndiRoute.home;
+    return IndiRoute.workspace;
   }
 
   void select(IndiRoute route) {

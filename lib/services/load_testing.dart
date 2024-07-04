@@ -15,9 +15,8 @@ class LoadTestingService {
   late IsolatePool? _pool;
 
   Stream<IndiHttpResponse> loadTest(final TestScenario scenario) async* {
-    // TODO: Remove overrides.
-    final int n = scenario.numberOfRequests + 10;
-    final int t = scenario.threadPoolSize + 1;
+    final int n = scenario.numberOfRequests;
+    final int t = scenario.threadPoolSize;
 
     final IndiHttpRequest request = scenario.request;
 
