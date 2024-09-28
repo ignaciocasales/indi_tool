@@ -11,6 +11,6 @@ class HttpTask extends Task<IndiHttpResponse> {
 
   @override
   Future<IndiHttpResponse> execute() async {
-    return await httpService.sendRequest(request);
+    return await httpService.sendRequest(request, sslVerify: false);
   }
 }

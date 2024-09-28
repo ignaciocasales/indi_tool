@@ -4,12 +4,12 @@ import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 import 'package:indi_tool/providers/services/load_testing_prov.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/http_method.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/editor/name.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/editor/url.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/editor/http_method.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/request_editor_nav.dart';
-import 'package:indi_tool/ui/workspace/editor/scenarios/response_layout.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/result/results_widget.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/scenario_properties_layout.dart';
 
 class ScenarioLayout extends ConsumerWidget {
   const ScenarioLayout({super.key});
@@ -52,14 +52,46 @@ class ScenarioLayout extends ConsumerWidget {
                       .read(loadTestingProvider.notifier)
                       .startLoadTest(scenario);
                 },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.green),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  minimumSize: WidgetStateProperty.all(const Size(48, 48)),
+                ),
                 child: const Row(
                   children: [
-                    Text('Start'),
-                    Icon(Icons.play_arrow),
+                    Icon(Icons.play_arrow_outlined),
                   ],
                 ),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FilledButton(
+                onPressed: () async {
+                  // TODO: Implement
+                },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.red),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  minimumSize: WidgetStateProperty.all(const Size(48, 48)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.stop_outlined),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
         const Divider(
@@ -73,7 +105,7 @@ class ScenarioLayout extends ConsumerWidget {
               VerticalDivider(
                 width: 0,
               ),
-              ResponseLayout(),
+              ScenarioPropertiesLayout(),
             ],
           ),
         ),

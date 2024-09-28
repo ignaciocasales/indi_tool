@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
-import 'package:indi_tool/ui/workspace/editor/groups/group_layout.dart';
 import 'package:indi_tool/ui/workspace/editor/scenarios/scenario_layout.dart';
 
 class EditorLayout extends ConsumerWidget {
@@ -9,15 +8,10 @@ class EditorLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tuple = (
-      ref.watch(selectedTestGroupProvider),
-      ref.watch(selectedTestScenarioProvider)
-    );
+    final selected = ref.watch(selectedTestScenarioProvider);
 
-    var layout = switch (tuple) {
-      (final group, final scenario) when group != null && scenario == null =>
-        const GroupLayout(),
-      (final _, final scenario) when scenario != null => const ScenarioLayout(),
+    var layout = switch (selected) {
+      (final scenario) when scenario != null => const ScenarioLayout(),
       _ => const Center(child: Text('Select an item to view its details')),
     };
 

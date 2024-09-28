@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:indi_tool/ui/workspace/navigation/workspace_nav_menu.dart';
-import 'package:indi_tool/ui/workspace/navigation/workspace_nav_search.dart';
 import 'package:indi_tool/ui/workspace/navigation/workspace_nav_tree.dart';
 
 class WorkspaceNav extends StatelessWidget {
@@ -17,12 +16,11 @@ class WorkspaceNav extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                WorkspaceNavSearch(),
-                SizedBox(width: 8),
                 WorkspaceNavMenu(),
               ],
             ),
           ),
+          Divider(),
           WorkspaceNavTree(),
         ],
       ),

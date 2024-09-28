@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/models/workspace/test_group.dart';
+import 'package:indi_tool/models/workspace/indi_http_request.dart';
+import 'package:indi_tool/models/workspace/test_scenario.dart';
 import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
 import 'package:indi_tool/providers/repository/repository_prov.dart';
 
@@ -9,12 +10,6 @@ class WorkspaceNavMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final int? workspaceId = ref.watch(selectedWorkspaceProvider);
-
-    if (workspaceId == null) {
-      throw StateError('No workspace selected');
-    }
-
     return MenuAnchor(
       builder: (
         BuildContext context,
@@ -34,17 +29,21 @@ class WorkspaceNavMenu extends ConsumerWidget {
       },
       menuChildren: [
         MenuItemButton(
-          child: const Text('Test Group'),
+          child: const Text('Test Scenario'),
           onPressed: () async {
             final int id =
-                await ref.read(testGroupRepositoryProvider).createTestGroup(
-                      testGroup: TestGroup(
-                        name: 'New Test Group',
+                await ref.read(testScenarioRepositoryProvider).createTestScenario(
+                      testScenario: TestScenario(
+                        name: 'New Test Scenario',
+                        numberOfRequests: 1,
+                        threadPoolSize: 1,
+                        request: IndiHttpRequest(
+                          timeoutMillis: 30000,
+                        )
                       ),
-                      workspaceId: workspaceId,
                     );
 
-            ref.read(selectedTestGroupProvider.notifier).select(id);
+            ref.read(selectedTestScenarioProvider.notifier).select(id);
           },
         ),
       ],

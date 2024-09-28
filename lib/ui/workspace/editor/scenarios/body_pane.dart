@@ -1,112 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:indi_tool/models/common/body_type.dart';
+import 'package:indi_tool/providers/navigation/workspace_router_prov.dart';
+import 'package:indi_tool/providers/repository/repository_prov.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/body_raw.dart';
+import 'package:indi_tool/ui/workspace/editor/scenarios/editor/body_type.dart';
 
-class Body extends StatelessWidget {
+class Body extends ConsumerWidget {
   const Body({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Column(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final int? scenarioId = ref.watch(selectedTestScenarioProvider);
+
+    if (scenarioId == null) {
+      throw StateError('No scenario selected');
+    }
+
+    final asyncScenario =
+        ref.watch(testScenarioProvider(scenarioId: scenarioId));
+
+    final Widget body = switch (asyncScenario) {
+      AsyncData(value: final scenario)
+          when scenario.request.bodyType == BodyType.raw =>
+        const RawBodyEditingWidget(),
+      _ => const SizedBox(),
+    };
+
+    return Column(
       children: [
-        Row(
+        const Row(
           children: [
             BodyTypeDropdown(),
           ],
         ),
-        TextEditorField(),
+        body,
       ],
-    );
-  }
-}
-
-class BodyTypeDropdown extends StatefulWidget {
-  const BodyTypeDropdown({super.key});
-
-  @override
-  State<BodyTypeDropdown> createState() => _BodyTypeDropdownState();
-}
-
-class _BodyTypeDropdownState extends State<BodyTypeDropdown> {
-  final TextEditingController bodyTypeController = TextEditingController();
-  BodyType dropdownValue = BodyType.values.first;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: DropdownMenu<BodyType>(
-        initialSelection: dropdownValue,
-        controller: bodyTypeController,
-        requestFocusOnTap: true,
-        label: const Text('Type'),
-        onSelected: (BodyType? newValue) {
-          setState(() {
-            dropdownValue = newValue!;
-          });
-        },
-        dropdownMenuEntries:
-            BodyType.values.map<DropdownMenuEntry<BodyType>>((BodyType type) {
-          return DropdownMenuEntry<BodyType>(
-            value: type,
-            label: type.name,
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class TextEditorField extends ConsumerWidget {
-  const TextEditorField({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    var selectedProvider;
-
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextFormField(
-          key: Key('body-${selectedProvider?.id}'),
-          initialValue: selectedProvider?.body ?? '',
-          expands: true,
-          maxLines: null,
-          style: TextStyle(
-            fontFamily: GoogleFonts.sourceCodePro().fontFamily,
-          ),
-          textAlignVertical: TextAlignVertical.top,
-          onChanged: (String value) {
-            // Do something?
-          },
-          decoration: InputDecoration(
-            hintText: 'Enter request body here',
-            focusedBorder: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary.withOpacity(
-                      0.6,
-                    ),
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            filled: true,
-            hoverColor: Colors.transparent,
-            fillColor: Color.alphaBlend(
-                (Theme.of(context).brightness == Brightness.dark
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                        : Theme.of(context).colorScheme.primaryContainer)
-                    .withOpacity(0.05),
-                Theme.of(context).colorScheme.surface),
-          ),
-        ),
-      ),
     );
   }
 }

@@ -10,8 +10,6 @@ import 'package:path_provider/path_provider.dart';
 part 'database.g.dart';
 
 @DriftDatabase(tables: [
-  WorkspaceTable,
-  TestGroupTable,
   TestScenarioTable,
 ])
 class DriftDb extends _$DriftDb {

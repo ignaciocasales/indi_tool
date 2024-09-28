@@ -66,10 +66,9 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
       return;
     }
 
-    final int? groupId = ref.watch(selectedTestGroupProvider);
     final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
-    if (scenarioId == null || groupId == null) {
+    if (scenarioId == null) {
       return;
     }
 
@@ -84,6 +83,6 @@ class _NameEditingWidgetState extends ConsumerState<NameEditingWidget> {
 
     ref
         .read(testScenarioRepositoryProvider)
-        .updateTestScenario(testScenario: updated, testGroupId: groupId);
+        .updateTestScenario(testScenario: updated);
   }
 }

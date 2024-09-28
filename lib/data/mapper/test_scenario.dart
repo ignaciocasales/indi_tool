@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:es_compression/zstd.dart';
 import 'package:indi_tool/data/source/database.dart';
+import 'package:indi_tool/models/common/body_type.dart';
 import 'package:indi_tool/models/common/http_method.dart';
 import 'package:indi_tool/models/workspace/indi_http_header.dart';
 import 'package:indi_tool/models/workspace/indi_http_param.dart';
@@ -21,7 +22,9 @@ class TestScenarioMapper {
       request: IndiHttpRequest(
         method: HttpMethod.fromString(entry.method),
         url: entry.url,
-        body: entry.body,
+        bodyType: BodyType.fromString(entry.bodyType),
+        body: zstd.decode(entry.body.toList()),
+        timeoutMillis: entry.timeoutMillis,
         parameters:
             (json.decode(utf8.decode(zstd.decode(entry.httpParams.toList())))
                     as List<dynamic>)
@@ -36,5 +39,9 @@ class TestScenarioMapper {
                 .toList(),
       ),
     );
+  }
+
+  static List<TestScenario> fromEntries(final List<TestScenarioTableData> entries) {
+    return entries.map(fromEntry).toList();
   }
 }

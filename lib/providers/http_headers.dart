@@ -123,10 +123,9 @@ class HttpHeaders extends _$HttpHeaders {
   }
 
   void _onFieldEdited(final List<IndiHttpHeader> headers) async {
-    final int? groupId = ref.watch(selectedTestGroupProvider);
     final int? scenarioId = ref.watch(selectedTestScenarioProvider);
 
-    if (groupId == null || scenarioId == null) {
+    if (scenarioId == null) {
       return;
     }
 
@@ -139,6 +138,6 @@ class HttpHeaders extends _$HttpHeaders {
 
     ref
         .read(testScenarioRepositoryProvider)
-        .updateTestScenario(testScenario: updated, testGroupId: groupId);
+        .updateTestScenario(testScenario: updated);
   }
 }

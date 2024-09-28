@@ -43,7 +43,7 @@ class WorkspaceNavTreeScenario extends ConsumerWidget {
   }
 
   Widget _getLeadingFor(final TreeEntry<TreeNode> entry) {
-    return const SizedBox(width: 18);
+    return const SizedBox(width: 0);
   }
 
   Widget _getTrailingFor(
