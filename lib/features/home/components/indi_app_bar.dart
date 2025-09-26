@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/app/consts.dart';
+import 'package:indi_tool/consts.dart';
 
 AppBar indiAppBar({required BuildContext context}) {
   return AppBar(

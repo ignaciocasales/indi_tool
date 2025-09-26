@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/app/consts.dart';
-import 'package:indi_tool/views/indi_home_page.dart';
+import 'package:indi_tool/consts.dart';
+import 'package:indi_tool/features/home/presentation/indi_home_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

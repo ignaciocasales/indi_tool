@@ -15,7 +15,7 @@ class TestDetailPage extends StatelessWidget {
           children: [
             Text('Detail page for ${test.name}', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text(test.url),
+            Text(test.httpUrl),
           ],
         ),
       ),
