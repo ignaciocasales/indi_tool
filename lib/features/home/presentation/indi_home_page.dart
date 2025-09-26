@@ -18,7 +18,7 @@ class _IndiHomePageState extends ConsumerState<IndiHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: indiAppBar(context: context),
-      body: Row(children: [IndiSidebar(flex: 1), MainContentArea(flex: 4,)]),
+      body: Row(children: [IndiSidebar(flex: 1), MainContentArea(flex: 4)]),
     );
   }
 }
@@ -33,15 +33,12 @@ class MainContentArea extends ConsumerStatefulWidget {
 }
 
 class _MainContentAreaState extends ConsumerState<MainContentArea> {
-
   @override
   Widget build(BuildContext context) {
-    final selected = ref.watch(selectedTestCaseProvider);
+    final id = ref.watch(selectedTestCaseIdProvider);
     return Expanded(
       flex: widget.flex,
-      child: selected == null
-          ? const ClearContentArea()
-          : TestDataView(test: selected),
+      child: id == null ? const ClearContentArea() : TestDataView(),
     );
   }
 }
