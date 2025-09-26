@@ -173,10 +173,10 @@ class TestCaseNameEdit extends ConsumerStatefulWidget {
   const TestCaseNameEdit({super.key});
 
   @override
-  ConsumerState<TestCaseNameEdit> createState() => _TestCaseNameEdit();
+  ConsumerState<TestCaseNameEdit> createState() => _TestCaseNameEditState();
 }
 
-class _TestCaseNameEdit extends ConsumerState<TestCaseNameEdit> {
+class _TestCaseNameEditState extends ConsumerState<TestCaseNameEdit> {
   late TextEditingController _nameController;
   bool _enabled = false;
 
@@ -246,10 +246,10 @@ class TestCaseMethodEdit extends ConsumerStatefulWidget {
   const TestCaseMethodEdit({super.key});
 
   @override
-  ConsumerState<TestCaseMethodEdit> createState() => _TestCaseMethodEdit();
+  ConsumerState<TestCaseMethodEdit> createState() => _TestCaseMethodEditState();
 }
 
-class _TestCaseMethodEdit extends ConsumerState<TestCaseMethodEdit> {
+class _TestCaseMethodEditState extends ConsumerState<TestCaseMethodEdit> {
   late final TextEditingController _controller;
   bool _enabled = false;
 
@@ -327,10 +327,10 @@ class TestCaseUrlEdit extends ConsumerStatefulWidget {
   const TestCaseUrlEdit({super.key});
 
   @override
-  ConsumerState<TestCaseUrlEdit> createState() => _TestCaseUrlEdit();
+  ConsumerState<TestCaseUrlEdit> createState() => _TestCaseUrlEditState();
 }
 
-class _TestCaseUrlEdit extends ConsumerState<TestCaseUrlEdit> {
+class _TestCaseUrlEditState extends ConsumerState<TestCaseUrlEdit> {
   late TextEditingController _urlController;
   bool _enabled = false;
 
@@ -400,10 +400,10 @@ class TestCaseTrigger extends ConsumerStatefulWidget {
   const TestCaseTrigger({super.key});
 
   @override
-  ConsumerState<TestCaseTrigger> createState() => _TestCaseTrigger();
+  ConsumerState<TestCaseTrigger> createState() => _TestCaseTriggerState();
 }
 
-class _TestCaseTrigger extends ConsumerState<TestCaseTrigger> {
+class _TestCaseTriggerState extends ConsumerState<TestCaseTrigger> {
   @override
   Widget build(BuildContext context) {
     final bool isRunning = ref.watch(isTestCaseRunningProvider);
@@ -422,10 +422,11 @@ class TestCaseTabs extends StatefulWidget {
   const TestCaseTabs({super.key});
 
   @override
-  State<TestCaseTabs> createState() => _TestCaseTabs();
+  State<TestCaseTabs> createState() => _TestCaseTabsState();
 }
 
-class _TestCaseTabs extends State<TestCaseTabs> with TickerProviderStateMixin {
+class _TestCaseTabsState extends State<TestCaseTabs>
+    with TickerProviderStateMixin {
   late final TabController _controller;
 
   @override
@@ -465,10 +466,11 @@ class TestCaseHeadersEdit extends ConsumerStatefulWidget {
   const TestCaseHeadersEdit({super.key});
 
   @override
-  ConsumerState<TestCaseHeadersEdit> createState() => _TestCaseHeadersEdit();
+  ConsumerState<TestCaseHeadersEdit> createState() =>
+      _TestCaseHeadersEditState();
 }
 
-class _TestCaseHeadersEdit extends ConsumerState<TestCaseHeadersEdit> {
+class _TestCaseHeadersEditState extends ConsumerState<TestCaseHeadersEdit> {
   String _draftId = const Uuid().v4();
 
   void _rotateDraftId() {
@@ -494,15 +496,17 @@ class _TestCaseHeadersEdit extends ConsumerState<TestCaseHeadersEdit> {
               child: Column(
                 children: [
                   // Existing headers
-                  ...headers.map((header) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: TestCaseHeaderEdit(
-                      header.id,
-                      key: Key('header-row-${testCase.id}-${header.id}'),
-                      isDraft: false,
-                      onBecameReal: null,
+                  ...headers.map(
+                    (header) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: TestCaseHeaderEdit(
+                        header.id,
+                        key: Key('header-row-${testCase.id}-${header.id}'),
+                        isDraft: false,
+                        onBecameReal: null,
+                      ),
                     ),
-                  )),
+                  ),
                   // Always one draft row at the end
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -528,7 +532,8 @@ class TestCaseHeaderEdit extends ConsumerStatefulWidget {
   final bool isDraft; // true for the trailing empty row
   final VoidCallback? onBecameReal; // tell parent to create a new draft
 
-  const TestCaseHeaderEdit(this.headerId,{
+  const TestCaseHeaderEdit(
+    this.headerId, {
     super.key,
     this.isDraft = false,
     this.onBecameReal,
@@ -574,7 +579,8 @@ class _TestCaseHeaderEditState extends ConsumerState<TestCaseHeaderEdit> {
     if (keyText.isEmpty && valueText.isEmpty) {
       if (index != -1) {
         headers.removeAt(index);
-        ref.read(testCaseListProvider.notifier)
+        ref
+            .read(testCaseListProvider.notifier)
             .updateTestCase(testCase.copyWith(httpHeaders: headers));
       }
       return;
@@ -583,12 +589,11 @@ class _TestCaseHeaderEditState extends ConsumerState<TestCaseHeaderEdit> {
     // If any non-empty
     if (index == -1) {
       // Draft becomes real
-      headers.add(TestCaseHeader(
-        id: widget.headerId,
-        key: keyText,
-        value: valueText,
-      ));
-      ref.read(testCaseListProvider.notifier)
+      headers.add(
+        TestCaseHeader(id: widget.headerId, key: keyText, value: valueText),
+      );
+      ref
+          .read(testCaseListProvider.notifier)
           .updateTestCase(testCase.copyWith(httpHeaders: headers));
 
       // Ask parent to append a fresh draft row (keeps focus in current field)
@@ -596,7 +601,8 @@ class _TestCaseHeaderEditState extends ConsumerState<TestCaseHeaderEdit> {
     } else {
       // Update existing real header
       headers[index] = headers[index].copyWith(key: keyText, value: valueText);
-      ref.read(testCaseListProvider.notifier)
+      ref
+          .read(testCaseListProvider.notifier)
           .updateTestCase(testCase.copyWith(httpHeaders: headers));
     }
   }
@@ -608,7 +614,8 @@ class _TestCaseHeaderEditState extends ConsumerState<TestCaseHeaderEdit> {
     final headers = List<TestCaseHeader>.from(testCase.httpHeaders)
       ..removeWhere((h) => h.id == widget.headerId);
 
-    ref.read(testCaseListProvider.notifier)
+    ref
+        .read(testCaseListProvider.notifier)
         .updateTestCase(testCase.copyWith(httpHeaders: headers));
 
     // Clear the inputs for drafts so they remain as empty placeholders
@@ -633,8 +640,7 @@ class _TestCaseHeaderEditState extends ConsumerState<TestCaseHeaderEdit> {
       if (_valueController.text != header.value) {
         _valueController.text = header.value;
       }
-    }
-    else {
+    } else {
       throw StateError('No scenario selected');
     }
 
@@ -669,10 +675,10 @@ class TestCaseBodyEdit extends ConsumerStatefulWidget {
   const TestCaseBodyEdit({super.key});
 
   @override
-  ConsumerState<TestCaseBodyEdit> createState() => _TestCaseBodyEdit();
+  ConsumerState<TestCaseBodyEdit> createState() => _TestCaseBodyEditState();
 }
 
-class _TestCaseBodyEdit extends ConsumerState<TestCaseBodyEdit> {
+class _TestCaseBodyEditState extends ConsumerState<TestCaseBodyEdit> {
   @override
   Widget build(BuildContext context) {
     return Container();
@@ -684,10 +690,10 @@ class TestCaseConfigurationEdit extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<TestCaseConfigurationEdit> createState() =>
-      _TestCaseConfigurationEdit();
+      _TestCaseConfigurationEditState();
 }
 
-class _TestCaseConfigurationEdit
+class _TestCaseConfigurationEditState
     extends ConsumerState<TestCaseConfigurationEdit> {
   @override
   Widget build(BuildContext context) {
