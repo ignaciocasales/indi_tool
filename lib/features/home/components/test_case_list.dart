@@ -27,7 +27,9 @@ class _TestCaseListState extends ConsumerState<TestCaseListWidget> {
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () => {
-                ref.watch(selectedTestCaseIdProvider.notifier).set(tests[index].id),
+                ref
+                    .watch(selectedTestCaseIdProvider.notifier)
+                    .set(tests[index].id),
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
