@@ -21,7 +21,7 @@ class TestCase {
        httpMethod = httpMethod ?? 'GET',
        httpUrl = httpUrl ?? 'https://httpbin.org/get',
        httpBody = httpBody ?? '',
-       httpTimeoutInMillis = httpTimeoutInMillis ?? 5000,
+       httpTimeoutInMillis = httpTimeoutInMillis ?? 300,
        httpHeaders = httpHeaders ?? [],
        httpParams = httpParams ?? [],
        numberOfRequests = numberOfRequests ?? 1,
