@@ -14,7 +14,7 @@ class TestCaseList extends AsyncNotifier<List<TestCase>> {
       ref.watch(storageProvider.future),
       key: 'test_case_list',
       options: const StorageOptions(
-        cacheTime: StorageCacheTime(Duration(days: 1)),
+        cacheTime: StorageCacheTime.unsafe_forever, // Offline only.
       ),
       encode: (value) =>
           jsonEncode(value.map((e) => TestCase.toJson(e)).toList()),
