@@ -43,10 +43,9 @@ class LoadRunner {
       controller.add(i);
     }
     // close when done scheduling
-    unawaited(Future(() async {
-      await Future<void>.delayed(Duration.zero);
+    scheduleMicrotask(() async {
       await controller.close();
-    }()));
+    });
 
     final List<Future<void>> workers = List.generate(concurrency, (_) async {
       await for (final _ in controller.stream) {
