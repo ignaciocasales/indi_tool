@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:async/async.dart' show StreamGroup;
 import 'package:dio/dio.dart';
 import 'package:indi_tool/models/test_case.dart';
 import 'package:indi_tool/models/test_result.dart';
@@ -10,92 +10,107 @@ class LoadRunner {
 
   final Dio _dio;
 
-  Future<TestCaseResults> run(TestCase testCase) async {
-    final results = TestCaseResults(testCaseId: testCase.id);
+  Stream<TestCaseResult> runStream(TestCase testCase) async* {
+    final dio = _dio;
 
     // Prepare common request parts
-    final Map<String, String> headers = {
+    final headers = {
       for (final h in testCase.httpHeaders.where((h) => h.enabled)) h.key: h.value,
     };
-
-    // Build query params
-    final Map<String, dynamic> queryParams = {
+    final queryParams = {
       for (final p in testCase.httpParams.where((p) => p.enabled)) p.key: p.value,
     };
 
-    // Configure Dio
-    _dio.options = BaseOptions(
+    dio.options = BaseOptions(
       connectTimeout: Duration(milliseconds: testCase.httpTimeoutInMillis),
       receiveTimeout: Duration(milliseconds: testCase.httpTimeoutInMillis),
       sendTimeout: Duration(milliseconds: testCase.httpTimeoutInMillis),
       headers: headers,
-      responseType: ResponseType.plain, // we capture body as string
-      validateStatus: (_) => true, // collect all
+      responseType: ResponseType.plain,
+      validateStatus: (_) => true,
     );
 
-    final int total = testCase.numberOfRequests;
-    final int concurrency = testCase.numberOfConcurrentUsers.clamp(1, total);
+    final total = testCase.numberOfRequests;
+    var concurrency = testCase.numberOfConcurrentUsers.clamp(1, total);
 
-    // Create a simple worker pool with bounded concurrency
-    final controller = StreamController<int>();
-    // schedule indices 0..total-1
-    for (int i = 0; i < total; i++) {
-      controller.add(i);
+    // Edge case: nothing to do
+    if (total <= 0) {
+      return; // yields an empty stream
     }
-    // close when done scheduling
-    scheduleMicrotask(() async {
-      await controller.close();
-    });
 
-    final List<Future<void>> workers = List.generate(concurrency, (_) async {
-      await for (final _ in controller.stream) {
-        final now = DateTime.now();
+    // Ensure we never spawn more workers than tasks
+    if (concurrency > total) concurrency = total;
+
+    final uriBase = Uri.parse(testCase.httpUrl);
+
+    // Output stream of results
+    final out = StreamController<TestCaseResult>();
+
+    // Shared counter as a lightweight work queue
+    int nextIndex = 0;
+    int active = concurrency;
+
+    Future<void> worker() async {
+      while (true) {
+        // Synchronously grab the next index
+        final i = nextIndex;
+        if (i >= total) break;
+        nextIndex = i + 1;
+
+        final start = DateTime.now();
         try {
-          final uri = Uri.parse(testCase.httpUrl).replace(
+          final uri = uriBase.replace(
             queryParameters: queryParams.isEmpty ? null : queryParams,
           );
-
-          final Response<String> response = await _dio.request<String>(
+          final resp = await dio.request<String>(
             uri.toString(),
             data: testCase.httpBody.isEmpty ? null : testCase.httpBody,
             options: Options(method: testCase.httpMethod),
           );
-
           final end = DateTime.now();
-          final duration = end.difference(now).inMilliseconds;
-          results.results.add(
+          out.add(
             TestCaseResult(
               requestMethod: testCase.httpMethod,
               requestUrl: uri.toString(),
-              responseStatusCode: response.statusCode ?? 0,
-              responseDurationInMillis: duration,
-              responseBody: response.data ?? '',
-              responseStartDateTime: now.toIso8601String(),
+              responseStatusCode: resp.statusCode ?? 0,
+              responseDurationInMillis: end.difference(start).inMilliseconds,
+              responseBody: resp.data ?? '',
+              responseStartDateTime: start.toIso8601String(),
               responseEndDateTime: end.toIso8601String(),
-              responseHeaders: _stringifyHeaders(response.headers.map),
+              responseHeaders: _stringifyHeaders(resp.headers.map),
             ),
           );
         } catch (e) {
           final end = DateTime.now();
-          final duration = end.difference(now).inMilliseconds;
-          results.results.add(
+          out.add(
             TestCaseResult(
               requestMethod: testCase.httpMethod,
               requestUrl: testCase.httpUrl,
               responseStatusCode: 0,
-              responseDurationInMillis: duration,
+              responseDurationInMillis: end.difference(start).inMilliseconds,
               responseBody: _safeErr(e),
-              responseStartDateTime: now.toIso8601String(),
+              responseStartDateTime: start.toIso8601String(),
               responseEndDateTime: end.toIso8601String(),
               responseHeaders: {},
             ),
           );
         }
       }
-    });
 
-    await Future.wait(workers);
-    return results;
+      // When a worker finishes its loop, decrement active and close if last
+      if (--active == 0 && !out.isClosed) {
+        await out.close();
+      }
+    }
+
+    // Start workers
+    for (int i = 0; i < concurrency; i++) {
+      // fire-and-forget; we’ll await completion by yielding the stream below
+      unawaited(worker());
+    }
+
+    // Expose the merged results
+    yield* out.stream;
   }
 
   Map<String, String> _stringifyHeaders(Map<String, List<String>> headers) {

@@ -1,15 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/providers/test_case_provider.dart';
+import 'package:indi_tool/models/test_case.dart';
+
+class TestCasesExplorer extends ConsumerStatefulWidget {
+  const TestCasesExplorer({super.key});
+
+  @override
+  ConsumerState<TestCasesExplorer> createState() => _TestCasesExplorerState();
+}
+
+class _TestCasesExplorerState extends ConsumerState<TestCasesExplorer> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // ref.watch(testCaseListProvider.notifier).add(TestCase());
+                ref.read(testCaseListProvider.notifier).add(TestCase());
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('New Test'),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Expanded(child: TestCaseListWidget()),
+      ],
+    );
+  }
+}
 
 class TestCaseListWidget extends ConsumerStatefulWidget {
   const TestCaseListWidget({super.key});
 
   @override
-  ConsumerState<TestCaseListWidget> createState() => _TestCaseListState();
+  ConsumerState<TestCaseListWidget> createState() => _TestCaseListWidgetState();
 }
 
-class _TestCaseListState extends ConsumerState<TestCaseListWidget> {
+class _TestCaseListWidgetState extends ConsumerState<TestCaseListWidget> {
   @override
   Widget build(BuildContext context) {
     final testsAsync = ref.watch(testCaseListProvider);

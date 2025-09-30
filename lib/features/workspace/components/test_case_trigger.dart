@@ -23,7 +23,7 @@ class _TestCaseTriggerState extends ConsumerState<TestCaseTrigger> {
               if (testCase == null) return;
               ref.read(isTestCaseRunningProvider.notifier).setRunning(true);
               try {
-                await ref.read(testResultsByCaseProvider.notifier).runFor(testCase);
+                await ref.read(testCaseResultsProvider.notifier).runFor(testCase);
               } finally {
                 ref.read(isTestCaseRunningProvider.notifier).setRunning(false);
               }
