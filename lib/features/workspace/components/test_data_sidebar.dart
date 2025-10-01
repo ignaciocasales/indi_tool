@@ -41,21 +41,17 @@ class TestDataSideBar extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-                    children: [
+                    children: const [
                       TestNavigationButton(
                         'Request Builder',
-                        TestPage.requestBuilder,
-                      ),
-                      TestNavigationButton(
-                        'Response Viewer',
-                        TestPage.responseViewer,
+                        TestCasePage.requestBuilder,
                       ),
                       TestNavigationButton(
                         'Performance Metrics',
-                        TestPage.metricsExplorer,
+                        TestCasePage.metricsExplorer,
                       ),
                     ],
                   ),

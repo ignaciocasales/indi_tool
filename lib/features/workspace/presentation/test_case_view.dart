@@ -7,6 +7,6 @@ class TestCaseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [TestDataSideBar(), TestDataContentArea()]);
+    return Row(children: [TestDataSideBar(), TestCaseContentArea()]);
   }
 }

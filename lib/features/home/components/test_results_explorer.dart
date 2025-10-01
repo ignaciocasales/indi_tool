@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/providers/navigation_provider.dart';
 import 'package:indi_tool/core/providers/test_result_provider.dart';
 
 class TestResultsExplorer extends StatelessWidget {
@@ -58,7 +59,10 @@ class _TestResultListState extends ConsumerState<TestResultList> {
             final result = testsResults.results[index];
             return InkWell(
               onTap: () => {
-                // TODO
+                ref.read(selectedTestResultIdProvider.notifier).set(result.id),
+                ref
+                    .read(selectedTestPageProvider.notifier)
+                    .select(TestCasePage.responseViewer),
               },
               child: Container(
                 padding: const EdgeInsets.all(12.0),

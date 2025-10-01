@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/providers/navigation_provider.dart';
 import 'package:indi_tool/core/providers/test_case_provider.dart';
 import 'package:indi_tool/models/test_case.dart';
 
@@ -21,7 +22,6 @@ class _TestCasesExplorerState extends ConsumerState<TestCasesExplorer> {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                // ref.watch(testCaseListProvider.notifier).add(TestCase());
                 ref.read(testCaseListProvider.notifier).add(TestCase());
               },
               icon: const Icon(Icons.add),
@@ -62,8 +62,11 @@ class _TestCaseListWidgetState extends ConsumerState<TestCaseListWidget> {
             return InkWell(
               onTap: () => {
                 ref
-                    .watch(selectedTestCaseIdProvider.notifier)
+                    .read(selectedTestCaseIdProvider.notifier)
                     .set(tests[index].id),
+                ref
+                    .read(selectedTestPageProvider.notifier)
+                    .select(TestCasePage.requestBuilder),
               },
               child: Container(
                 padding: const EdgeInsets.all(12),

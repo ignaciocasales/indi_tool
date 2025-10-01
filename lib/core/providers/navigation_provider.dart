@@ -1,27 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum AppPage {
-  home,
-  details,
-}
+enum TestCasePage { requestBuilder, responseViewer, metricsExplorer }
 
-final navigationProvider = Provider<AppPage>((ref) {
-  return AppPage.home;
-});
-
-enum TestPage {
-  requestBuilder,
-  responseViewer,
-  metricsExplorer,
-}
-
-class SelectedTestPage extends Notifier<TestPage?> {
+class SelectedTestPageNotifier extends Notifier<TestCasePage?> {
   @override
-  TestPage? build() {
+  TestCasePage? build() {
     return null;
   }
 
-  void select(final TestPage page) {
+  void select(final TestCasePage page) {
     state = page;
   }
 
@@ -31,4 +18,6 @@ class SelectedTestPage extends Notifier<TestPage?> {
 }
 
 final selectedTestPageProvider =
-    NotifierProvider<SelectedTestPage, TestPage?>(SelectedTestPage.new);
+    NotifierProvider<SelectedTestPageNotifier, TestCasePage?>(
+      SelectedTestPageNotifier.new,
+    );

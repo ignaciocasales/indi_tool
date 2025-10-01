@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/providers/navigation_provider.dart';
 import 'package:indi_tool/core/providers/test_case_provider.dart';
 
 class BackToMainButton extends ConsumerStatefulWidget {
@@ -17,7 +18,10 @@ class _BackToMainButtonState extends ConsumerState<BackToMainButton> {
     if (testCaseId == null) throw StateError('No scenario selected');
 
     return IconButton(
-      onPressed: () => ref.watch(selectedTestCaseIdProvider.notifier).clear(),
+      onPressed: () => {
+        ref.read(selectedTestCaseIdProvider.notifier).clear(),
+        ref.read(selectedTestPageProvider.notifier).clear(),
+      },
       icon: Icon(
         Icons.arrow_back,
         size: 16,

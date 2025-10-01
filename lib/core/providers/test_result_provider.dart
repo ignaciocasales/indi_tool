@@ -75,3 +75,32 @@ final selectedTestResultsProvider = FutureProvider<TestCaseResults?>((ref) {
   return testCaseResults
       .firstWhereOrNull((element) => element.testCaseId == testCaseId);
 });
+
+class SelectedTestResultByIdNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    return null;
+  }
+
+  void set(String id) {
+    state = id;
+  }
+
+  void clear() {
+    state = null;
+  }
+}
+
+final selectedTestResultIdProvider = NotifierProvider<SelectedTestResultByIdNotifier, String?>(
+  SelectedTestResultByIdNotifier.new,
+);
+
+final selectedTestResultProvider = Provider<TestCaseResult?>((ref) {
+  final resultId = ref.watch(selectedTestResultIdProvider);
+  if (resultId == null) return null;
+
+  final testCaseResults = ref.watch(selectedTestResultsProvider).value;
+  if (testCaseResults == null) return null;
+
+  return testCaseResults.results.firstWhereOrNull((e) => e.id == resultId);
+});

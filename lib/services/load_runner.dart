@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:async/async.dart' show StreamGroup;
 import 'package:dio/dio.dart';
 import 'package:indi_tool/models/test_case.dart';
 import 'package:indi_tool/models/test_result.dart';

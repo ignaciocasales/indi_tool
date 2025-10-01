@@ -4,7 +4,7 @@ import 'package:indi_tool/core/providers/navigation_provider.dart';
 
 class TestNavigationButton extends ConsumerStatefulWidget {
   final String label;
-  final TestPage testPage;
+  final TestCasePage testPage;
 
   const TestNavigationButton(this.label, this.testPage, {super.key});
 

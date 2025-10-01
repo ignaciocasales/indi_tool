@@ -1,44 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/features/workspace/components/test_case_method_edit.dart';
-import 'package:indi_tool/features/workspace/components/test_case_name_edit.dart';
-import 'package:indi_tool/features/workspace/components/test_case_trigger.dart';
-import 'package:indi_tool/features/workspace/components/test_case_url_edit.dart';
-import 'package:indi_tool/features/workspace/presentation/test_case_tabs.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/providers/navigation_provider.dart';
+import 'package:indi_tool/features/response_viewer.dart';
+import 'package:indi_tool/features/workspace/presentation/test_case_editor.dart';
 
-class TestDataContentArea extends StatelessWidget {
-  const TestDataContentArea({super.key});
+class TestCaseContentArea extends ConsumerStatefulWidget {
+  const TestCaseContentArea({super.key});
 
   @override
+  ConsumerState<TestCaseContentArea> createState() =>
+      _TestDataContentAreaState();
+}
+
+class _TestDataContentAreaState extends ConsumerState<TestCaseContentArea> {
+  @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TestCaseNameEdit(),
-          ),
-          SizedBox(height: 16),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TestCaseMethodEdit(),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TestCaseUrlEdit(),
-                ),
-              ),
-              SizedBox(width: 8),
-              TestCaseTrigger(),
-            ],
-          ),
-          Expanded(child: TestCaseTabs()),
-        ],
-      ),
-    );
+    final testCasePage =
+        ref.watch(selectedTestPageProvider) ?? TestCasePage.requestBuilder;
+
+    switch (testCasePage) {
+      case TestCasePage.requestBuilder:
+        return TestCaseEditor();
+      case TestCasePage.metricsExplorer:
+        return Container();
+      case TestCasePage.responseViewer:
+        return TestCaseResponseViewer();
+    }
   }
 }
