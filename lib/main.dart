@@ -15,5 +15,5 @@ void main() {
     databaseFactory = databaseFactoryFfi;
   }
 
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(const ProviderScope(child: MyApp()));
 }

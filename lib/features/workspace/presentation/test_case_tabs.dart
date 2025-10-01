@@ -36,9 +36,9 @@ class _TestCaseTabsState extends State<TestCaseTabs>
           child: TabBarView(
             controller: _controller,
             children: [
-              TestCaseHeadersEdit(),
-              TestCaseBodyEdit(),
-              TestCaseConfigurationEdit(),
+              const TestCaseHeadersEdit(),
+              const TestCaseBodyEdit(),
+              const TestCaseConfigurationEdit(),
             ],
           ),
         ),

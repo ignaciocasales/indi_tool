@@ -28,7 +28,7 @@ class _BackToMainButtonState extends ConsumerState<BackToMainButton> {
         color: Theme.of(context).iconTheme.color,
       ),
       padding: EdgeInsets.zero,
-      constraints: BoxConstraints(minWidth: 16, minHeight: 16),
+      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
       splashRadius: 16,
     );
   }

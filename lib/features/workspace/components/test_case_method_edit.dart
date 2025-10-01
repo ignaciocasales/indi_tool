@@ -52,6 +52,7 @@ class _TestCaseMethodEditState extends ConsumerState<TestCaseMethodEdit> {
       controller: _controller,
       enableFilter: false,
       requestFocusOnTap: false,
+      textAlign: TextAlign.center,
       dropdownMenuEntries: const [
         DropdownMenuEntry(value: 'GET', label: 'GET'),
         DropdownMenuEntry(value: 'POST', label: 'POST'),
@@ -59,8 +60,8 @@ class _TestCaseMethodEditState extends ConsumerState<TestCaseMethodEdit> {
         DropdownMenuEntry(value: 'DELETE', label: 'DELETE'),
         DropdownMenuEntry(value: 'PATCH', label: 'PATCH'),
       ],
-      inputDecorationTheme: const InputDecorationTheme(
-        border: InputBorder.none,
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4.0)),
       ),
     );
   }

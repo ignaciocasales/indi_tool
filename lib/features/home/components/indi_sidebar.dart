@@ -20,7 +20,7 @@ class IndiSidebar extends StatelessWidget {
             right: BorderSide(color: Theme.of(context).dividerColor),
           ),
         ),
-        child: Column(
+        child: const Column(
           children: [
             Row(
               children: [
@@ -59,8 +59,8 @@ class _IndiSideBarTopBarState extends ConsumerState<IndiSideBarTopBar> {
         children: [
           Row(
             children: [
-              if (testCaseId != null) BackToMainButton() else const SizedBox.shrink(),
-              SizedBox(width: 20),
+              if (testCaseId != null) const BackToMainButton() else const SizedBox.shrink(),
+              const SizedBox(width: 20),
               Text(
                 'Tests',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -88,9 +88,9 @@ class _IndiSidebarExplorerState extends ConsumerState<IndiSidebarExplorer> {
   Widget build(BuildContext context) {
     final testCaseId = ref.watch(selectedTestCaseIdProvider);
     if (testCaseId != null) {
-      return TestResultsExplorer();
+      return const TestResultsExplorer();
     } else {
-      return TestCasesExplorer();
+      return const TestCasesExplorer();
     }
   }
 }

@@ -20,11 +20,11 @@ class _TestDataContentAreaState extends ConsumerState<TestCaseContentArea> {
 
     switch (testCasePage) {
       case TestCasePage.requestBuilder:
-        return TestCaseEditor();
+        return const TestCaseEditor();
       case TestCasePage.metricsExplorer:
         return Container();
       case TestCasePage.responseViewer:
-        return TestCaseResponseViewer();
+        return const TestCaseResponseViewer();
     }
   }
 }

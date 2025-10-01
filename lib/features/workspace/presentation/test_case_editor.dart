@@ -10,25 +10,35 @@ class TestCaseEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return const Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TestCaseNameEdit(),
+          Row(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.edit_note_sharp),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TestCaseNameEdit(),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 16),
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(8.0),
                 child: TestCaseMethodEdit(),
               ),
               SizedBox(width: 8),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0),
                   child: TestCaseUrlEdit(),
                 ),
               ),

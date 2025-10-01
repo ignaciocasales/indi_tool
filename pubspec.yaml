@@ -33,6 +33,7 @@ dependencies:
   # HTTP client
   dio: ^5.7.0
 
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

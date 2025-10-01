@@ -18,7 +18,7 @@ class _IndiHomePageState extends ConsumerState<IndiHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: indiAppBar(context: context),
-      body: Row(children: [IndiSidebar(flex: 1), MainContentArea(flex: 4)]),
+      body: const Row(children: [IndiSidebar(flex: 1), MainContentArea(flex: 4)]),
     );
   }
 }
@@ -38,7 +38,7 @@ class _MainContentAreaState extends ConsumerState<MainContentArea> {
     final id = ref.watch(selectedTestCaseIdProvider);
     return Expanded(
       flex: widget.flex,
-      child: id == null ? const ClearContentArea() : TestCaseView(),
+      child: id == null ? const ClearContentArea() : const TestCaseView(),
     );
   }
 }

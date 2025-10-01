@@ -50,10 +50,7 @@ class _TestCaseNameEditState extends ConsumerState<TestCaseNameEdit> {
       enabled: _enabled,
       controller: _nameController,
       style: Theme.of(context).textTheme.titleLarge,
-      decoration: const InputDecoration(
-        isDense: true,
-        border: InputBorder.none,
-      ),
+      decoration: const InputDecoration(isDense: true),
     );
   }
 
