@@ -12,7 +12,7 @@ class TestResultsExplorer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: SizedBox(
             width: double.infinity,
             child: Text(
@@ -25,8 +25,8 @@ class TestResultsExplorer extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 8),
-        Expanded(child: TestResultList()),
+        const SizedBox(height: 8),
+        const Expanded(child: TestResultList()),
       ],
     );
   }
@@ -57,6 +57,8 @@ class _TestResultListState extends ConsumerState<TestResultList> {
           separatorBuilder: (_, _) => const SizedBox(height: 8.0),
           itemBuilder: (context, index) {
             final result = testsResults.results[index];
+            final isSelected =
+                result.id == ref.watch(selectedTestResultIdProvider);
             return InkWell(
               onTap: () => {
                 ref.read(selectedTestResultIdProvider.notifier).set(result.id),
@@ -67,16 +69,25 @@ class _TestResultListState extends ConsumerState<TestResultList> {
               child: Container(
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: Theme.of(context).dividerColor),
+                  border: Border.all(
+                    color: isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).dividerColor,
+                    width: isSelected ? 1.2 : 1.0,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Column(children: [Text('$index.')]),
                     Column(
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 8.0,
                             vertical: 2.0,
                           ),

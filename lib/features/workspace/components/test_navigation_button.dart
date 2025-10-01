@@ -28,18 +28,22 @@ class _TestNavigationButtonState extends ConsumerState<TestNavigationButton> {
         width: double.infinity,
         child: TextButton(
           onPressed: () => {
-            ref
-                .watch(selectedTestPageProvider.notifier)
-                .select(widget.testPage),
+            ref.read(selectedTestPageProvider.notifier).select(widget.testPage),
           },
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             alignment: Alignment.centerLeft,
             backgroundColor: isSelected
-                ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
-                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                ? theme.colorScheme.primaryContainer
+                : theme.colorScheme.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.dividerColor,
+                width: isSelected ? 1.2 : 1,
+              ),
             ),
           ),
           child: Text(
