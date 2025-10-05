@@ -62,6 +62,33 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                 ..sort(
                   (a, b) => (a["status"] as int).compareTo(b["status"] as int),
                 );
+          responseTrend =
+              results.results
+                  .map(
+                    (result) => {
+                      "timestamp": result.responseStartDateTime,
+                      "responseTime": result.responseDurationInMillis,
+                    },
+                  )
+                  .toList()
+                ..sort(
+                  (a, b) => (a["timestamp"] as String).compareTo(
+                    b["timestamp"] as String,
+                  ),
+                );
+          // Ensure at least one data point for the chart
+          if (responseTrend.isEmpty) {
+            responseTrend = [
+              {"timestamp": "", "responseTime": 0},
+            ];
+          }
+          // Log all values
+          print('Avg Response Time: $avgResponseTime ms');
+          print('Success Rate: $successRate%');
+          print('Total Requests: $totalRequests');
+          print('Requests per Second: $requestsPerSecond');
+          print('Status Distribution: $statusDistribution');
+          print('Response Trend: $responseTrend');
         }
       },
       error: (_, _) {},
@@ -252,25 +279,44 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                 height: 150,
                                 child: BarChart(
                                   BarChartData(
-                                    minY: 0,
-                                    maxY: (statusDistribution.isNotEmpty
-                                        ? statusDistribution
-                                              .map(
-                                                (e) => (e["count"] as num)
-                                                    .toDouble(),
-                                              )
-                                              .reduce((a, b) => a > b ? a : b)
-                                        : 1), // fallback to 1 if empty
-                                    gridData: const FlGridData(
-                                      show: true,
-                                      drawVerticalLine: false,
-                                    ),
+                                    alignment: BarChartAlignment.spaceAround,
+                                    gridData: const FlGridData(show: false),
                                     borderData: FlBorderData(show: false),
-                                    titlesData: const FlTitlesData(show: true),
+                                    titlesData: FlTitlesData(
+                                      leftTitles: const AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                        ),
+                                      ),
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          getTitlesWidget: (value, meta) {
+                                            final index = value.toInt();
+                                            if (index < 0 ||
+                                                index >=
+                                                    statusDistribution.length) {
+                                              return const SizedBox.shrink();
+                                            }
+                                            return Text(
+                                              statusDistribution[index]["status"]
+                                                  .toString(),
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
                                     barGroups: statusDistribution
-                                        .map(
-                                          (e) => BarChartGroupData(
-                                            x: (e["status"] as num).toInt(),
+                                        .asMap()
+                                        .entries
+                                        .map((entry) {
+                                          final i = entry.key;
+                                          final e = entry.value;
+                                          return BarChartGroupData(
+                                            x: i,
                                             barRods: [
                                               BarChartRodData(
                                                 toY: (e["count"] as num)
@@ -279,11 +325,11 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                                   context,
                                                 ).colorScheme.primary,
                                                 borderRadius:
-                                                    BorderRadius.circular(4),
+                                                    BorderRadius.circular(4.0),
                                               ),
                                             ],
-                                          ),
-                                        )
+                                          );
+                                        })
                                         .toList(),
                                   ),
                                 ),
@@ -312,31 +358,42 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                 height: 150,
                                 child: LineChart(
                                   LineChartData(
-                                    gridData: const FlGridData(
-                                      show: true,
-                                      drawVerticalLine: false,
-                                    ),
-                                    titlesData: const FlTitlesData(show: true),
+                                    gridData: const FlGridData(show: true),
                                     borderData: FlBorderData(show: false),
+                                    titlesData: const FlTitlesData(show: false),
                                     lineBarsData: [
                                       LineChartBarData(
                                         isCurved: true,
-                                        spots: responseTrend
-                                            .map(
-                                              (e) => FlSpot(
-                                                (e["index"] as num).toDouble(),
-                                                (e["responseTime"] as num)
-                                                    .toDouble(),
-                                              ),
-                                            )
-                                            .toList(),
-                                        dotData: const FlDotData(show: false),
+                                        barWidth: 2,
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.primary,
-                                        barWidth: 2,
+                                        dotData: const FlDotData(show: false),
+                                        spots: responseTrend.isNotEmpty
+                                            ? responseTrend.asMap().entries.map(
+                                                (entries) {
+                                                  final i = entries.key;
+                                                  final e = entries.value;
+                                                  return FlSpot(
+                                                    i.toDouble(),
+                                                    (e["responseTime"] as num)
+                                                        .toDouble(),
+                                                  );
+                                                },
+                                              ).toList()
+                                            : [const FlSpot(0, 0)],
                                       ),
                                     ],
+                                    minY: 0,
+                                    maxY: responseTrend.isNotEmpty
+                                        ? responseTrend
+                                              .map(
+                                                (e) =>
+                                                    (e["responseTime"] as num)
+                                                        .toDouble(),
+                                              )
+                                              .reduce((a, b) => a > b ? a : b)
+                                        : 1, // fallback to 1 if empty
                                   ),
                                 ),
                               ),
