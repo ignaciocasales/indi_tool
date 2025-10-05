@@ -96,20 +96,11 @@ class _TestCaseListWidgetState extends ConsumerState<TestCaseListWidget> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            '0 results',
-                            style: Theme.of(context).textTheme.labelSmall,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: false,
-                          ),
+                        Text(
+                          tests[index].name,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      tests[index].name,
-                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     Text(
                       tests[index].httpUrl,
