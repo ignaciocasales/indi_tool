@@ -34,6 +34,7 @@ dependencies:
   dio: ^5.7.0
 
   collection: any
+  fl_chart: ^1.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

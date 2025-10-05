@@ -19,13 +19,23 @@ class _TestCaseTriggerState extends ConsumerState<TestCaseTrigger> {
       onPressed: isRunning
           ? null
           : () async {
+              // Read the needed providers synchronously before any await,
+              // to avoid using `ref` after the widget may have been unmounted.
               final testCase = ref.read(selectedTestCaseProvider);
               if (testCase == null) return;
-              ref.read(isTestCaseRunningProvider.notifier).setRunning(true);
+              final runningNotifier = ref.read(
+                isTestCaseRunningProvider.notifier,
+              );
+              final resultsNotifier = ref.read(
+                testCaseResultsProvider.notifier,
+              );
+
+              runningNotifier.setRunning(true);
               try {
-                await ref.read(testCaseResultsProvider.notifier).runFor(testCase);
+                await resultsNotifier.runFor(testCase);
               } finally {
-                ref.read(isTestCaseRunningProvider.notifier).setRunning(false);
+                // Safe to use the cached notifier instance even if the widget unmounted.
+                runningNotifier.setRunning(false);
               }
             },
       icon: Icon(isRunning ? Icons.stop : Icons.play_arrow, size: 16),
