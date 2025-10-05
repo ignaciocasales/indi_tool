@@ -83,7 +83,7 @@ class _TestResultListState extends ConsumerState<TestResultList> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(children: [Text('$index.')]),
+                    Column(children: [Text('${index + 1}.')]),
                     Column(
                       children: [
                         Container(
@@ -145,6 +145,8 @@ class _TestResultListState extends ConsumerState<TestResultList> {
                                       ?.copyWith(
                                         color: Theme.of(context).hintColor,
                                       ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ],
                             ),

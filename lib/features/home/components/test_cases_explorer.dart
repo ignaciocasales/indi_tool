@@ -93,18 +93,82 @@ class _TestCaseListWidgetState extends ConsumerState<TestCaseListWidget> {
                           child: Text(
                             tests[index].httpMethod,
                             style: Theme.of(context).textTheme.labelSmall,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          tests[index].name,
-                          style: Theme.of(context).textTheme.titleSmall,
+                        Expanded(
+                          child: Text(
+                            tests[index].name,
+                            style: Theme.of(context).textTheme.titleSmall,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        PopupMenuButton<String>(
+                          tooltip: 'More',
+                          icon: const Icon(Icons.more_vert),
+                          onSelected: (value) async {
+                            if (value == 'delete') {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Confirm Deletion'),
+                                  content: Text(
+                                    'Are you sure you want to delete the test "${tests[index].name}"?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(ctx).pop(false);
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                        foregroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.onError,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(ctx).pop(true);
+                                      },
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirmed == true) {
+                                ref
+                                    .read(testCaseListProvider.notifier)
+                                    .removeById(tests[index].id);
+                              }
+                            }
+                          },
+                          itemBuilder: (context) => const [
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: ListTile(
+                                leading: Icon(Icons.delete_outline),
+                                title: Text('Delete'),
+                                dense: true,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     Text(
                       tests[index].httpUrl,
                       style: Theme.of(context).textTheme.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),

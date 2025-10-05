@@ -67,6 +67,7 @@ class _TestCaseResponseViewerState
                     fontFamily: 'monospace',
                   ),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ],
             ),
