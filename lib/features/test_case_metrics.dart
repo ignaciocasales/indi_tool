@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/providers/test_case_provider.dart';
 import 'package:indi_tool/core/providers/test_result_provider.dart';
 
 class TestCaseMetrics extends ConsumerStatefulWidget {
@@ -21,6 +22,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
   @override
   Widget build(BuildContext context) {
     final asyncResults = ref.watch(selectedTestResultsProvider);
+    final isRunning = ref.watch(isTestCaseRunningProvider);
 
     asyncResults.when(
       data: (results) {
@@ -76,12 +78,6 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                     b["timestamp"] as String,
                   ),
                 );
-          // Ensure at least one data point for the chart
-          if (responseTrend.isEmpty) {
-            responseTrend = [
-              {"timestamp": "", "responseTime": 0},
-            ];
-          }
           // Log all values
           print('Avg Response Time: $avgResponseTime ms');
           print('Success Rate: $successRate%');
@@ -96,318 +92,411 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
     );
 
     return Expanded(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Metrics Section
+            Row(
               children: [
-                // Metric Cards
-                Row(
-                  children: [
-                    // Avg. Response Time Card
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.timer_outlined,
-                                size: 20.0,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Avg. Response Time',
-                                    style: TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                    '$avgResponseTime ms',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Success Rate Card
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.trending_up_outlined,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Success Rate',
-                                    style: TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                    '$successRate%',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Total Requests Card
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.list_alt_outlined,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Total Requests',
-                                    style: TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                    '$totalRequests',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Requests per second Card
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.bolt_outlined,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Requests/sec',
-                                    style: TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                    '$requestsPerSecond',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                _metricCard(
+                  Icons.timer_outlined,
+                  "Avg. Response Time",
+                  "$avgResponseTime ms",
+                  context,
                 ),
-                const SizedBox(height: 16.0),
-                // Charts
-                Row(
-                  children: [
-                    // Status Code Distribution Chart
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.bar_chart, size: 16),
-                                  SizedBox(width: 6),
-                                  Text("Status Code Distribution"),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                height: 150,
-                                child: BarChart(
-                                  BarChartData(
-                                    alignment: BarChartAlignment.spaceAround,
-                                    gridData: const FlGridData(show: false),
-                                    borderData: FlBorderData(show: false),
-                                    titlesData: FlTitlesData(
-                                      leftTitles: const AxisTitles(
-                                        sideTitles: SideTitles(
-                                          showTitles: true,
-                                        ),
+                _metricCard(
+                  Icons.trending_up_outlined,
+                  "Success Rate",
+                  "$successRate%",
+                  context,
+                ),
+                _metricCard(
+                  Icons.list_alt_outlined,
+                  "Total Requests",
+                  "$totalRequests",
+                  context,
+                ),
+                _metricCard(
+                  Icons.bolt_outlined,
+                  "Requests/sec",
+                  "$requestsPerSecond",
+                  context,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12.0),
+            // Charts Section
+            Flexible(
+              flex: 1,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Status Code Distribution Chart
+                  Expanded(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.bar_chart, size: 16),
+                                SizedBox(width: 6),
+                                Text("Status Code Distribution"),
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            Expanded(
+                              child: BarChart(
+                                BarChartData(
+                                  alignment: BarChartAlignment.spaceAround,
+                                  gridData: const FlGridData(show: false),
+                                  borderData: FlBorderData(show: false),
+                                  titlesData: FlTitlesData(
+                                    leftTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        getTitlesWidget: (value, meta) {
+                                          final index = value.toInt();
+                                          if (index < 0 ||
+                                              index >=
+                                                  statusDistribution.length) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          return Text(
+                                            statusDistribution[index]["status"]
+                                                .toString(),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      bottomTitles: AxisTitles(
-                                        sideTitles: SideTitles(
-                                          showTitles: true,
-                                          getTitlesWidget: (value, meta) {
-                                            final index = value.toInt();
-                                            if (index < 0 ||
-                                                index >=
-                                                    statusDistribution.length) {
-                                              return const SizedBox.shrink();
-                                            }
-                                            return Text(
-                                              statusDistribution[index]["status"]
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                fontSize: 10,
+                                    ),
+                                  ),
+                                  barGroups: statusDistribution
+                                      .asMap()
+                                      .entries
+                                      .map((entry) {
+                                        final i = entry.key;
+                                        final e = entry.value;
+                                        return BarChartGroupData(
+                                          x: i,
+                                          barRods: [
+                                            BarChartRodData(
+                                              toY: (e["count"] as num)
+                                                  .toDouble(),
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.inversePrimary,
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                            ),
+                                          ],
+                                        );
+                                      })
+                                      .toList(),
+                                  barTouchData: BarTouchData(
+                                    enabled: true,
+                                    touchTooltipData: BarTouchTooltipData(
+                                      getTooltipColor: (group) {
+                                        return Theme.of(context)
+                                            .colorScheme
+                                            .inversePrimary
+                                            .withValues(alpha: 0.8);
+                                      },
+                                      getTooltipItem:
+                                          (group, groupIndex, rod, rodIndex) {
+                                            final label =
+                                                statusDistribution[group.x
+                                                    .toInt()]["status"];
+                                            return BarTooltipItem(
+                                              "Status $label\n${rod.toY.toInt()} hits",
+                                              TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimaryContainer,
+                                                fontSize: 11,
                                               ),
                                             );
                                           },
-                                        ),
-                                      ),
                                     ),
-                                    barGroups: statusDistribution
-                                        .asMap()
-                                        .entries
-                                        .map((entry) {
-                                          final i = entry.key;
-                                          final e = entry.value;
-                                          return BarChartGroupData(
-                                            x: i,
-                                            barRods: [
-                                              BarChartRodData(
-                                                toY: (e["count"] as num)
-                                                    .toDouble(),
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
-                                                borderRadius:
-                                                    BorderRadius.circular(4.0),
-                                              ),
-                                            ],
-                                          );
-                                        })
-                                        .toList(),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    // Response Time Trend Chart
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.show_chart, size: 16),
-                                  SizedBox(width: 6),
-                                  Text("Response Time Trend"),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                height: 150,
-                                child: LineChart(
-                                  LineChartData(
-                                    gridData: const FlGridData(show: true),
-                                    borderData: FlBorderData(show: false),
-                                    titlesData: const FlTitlesData(show: false),
-                                    lineBarsData: [
-                                      LineChartBarData(
-                                        isCurved: true,
-                                        barWidth: 2,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        dotData: const FlDotData(show: false),
-                                        spots: responseTrend.isNotEmpty
-                                            ? responseTrend.asMap().entries.map(
-                                                (entries) {
-                                                  final i = entries.key;
-                                                  final e = entries.value;
-                                                  return FlSpot(
-                                                    i.toDouble(),
-                                                    (e["responseTime"] as num)
-                                                        .toDouble(),
-                                                  );
-                                                },
-                                              ).toList()
-                                            : [const FlSpot(0, 0)],
+                  ),
+                  // Response Time Trend Chart
+                  Expanded(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.show_chart, size: 16.0),
+                                SizedBox(width: 6.0),
+                                Text("Response Time Trend"),
+                              ],
+                            ),
+                            const SizedBox(height: 12.0),
+                            Expanded(
+                              child: LineChart(
+                                LineChartData(
+                                  gridData: const FlGridData(
+                                    show: true,
+                                    drawVerticalLine: false,
+                                  ),
+                                  borderData: FlBorderData(show: false),
+                                  titlesData: FlTitlesData(
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 22,
+                                        getTitlesWidget: (value, meta) {
+                                          return Text(
+                                            value.toInt().toString(),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          );
+                                        },
                                       ),
-                                    ],
-                                    minY: 0,
-                                    maxY: responseTrend.isNotEmpty
-                                        ? responseTrend
+                                    ),
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        interval: 1,
+                                        getTitlesWidget: (value, meta) {
+                                          final minY = responseTrend
                                               .map(
                                                 (e) =>
                                                     (e["responseTime"] as num)
                                                         .toDouble(),
                                               )
-                                              .reduce((a, b) => a > b ? a : b)
-                                        : 1, // fallback to 1 if empty
+                                              .reduce((a, b) => a < b ? a : b);
+                                          final maxY = responseTrend
+                                              .map(
+                                                (e) =>
+                                                    (e["responseTime"] as num)
+                                                        .toDouble(),
+                                              )
+                                              .reduce((a, b) => a > b ? a : b);
+                                          if (value == minY || value == maxY) {
+                                            return Text(
+                                              value.toInt().toString(),
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                              ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                    ),
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
                                   ),
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      isCurved: true,
+                                      barWidth: 1,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.inversePrimary,
+                                      dotData: const FlDotData(show: false),
+                                      spots: responseTrend.isNotEmpty
+                                          ? responseTrend.asMap().entries.map((
+                                              entries,
+                                            ) {
+                                              final i = entries.key;
+                                              final e = entries.value;
+                                              return FlSpot(
+                                                i.toDouble(),
+                                                (e["responseTime"] as num)
+                                                    .toDouble(),
+                                              );
+                                            }).toList()
+                                          : [const FlSpot(0, 0)],
+                                    ),
+                                  ],
+                                  minY: 0,
+                                  maxY: responseTrend.isNotEmpty
+                                      ? responseTrend
+                                                .map(
+                                                  (e) =>
+                                                      (e["responseTime"] as num)
+                                                          .toDouble(),
+                                                )
+                                                .reduce(
+                                                  (a, b) => a > b ? a : b,
+                                                ) +
+                                            100
+                                      : 1, // fallback to 1 if empty
+                                  lineTouchData: LineTouchData(
+                                    enabled: true,
+                                    touchTooltipData: LineTouchTooltipData(
+                                      getTooltipColor: (group) {
+                                        return Theme.of(context)
+                                            .colorScheme
+                                            .inversePrimary
+                                            .withValues(alpha: 0.8);
+                                      },
+                                      getTooltipItems: (touchedSpots) {
+                                        return touchedSpots.map((touchedSpot) {
+                                          final index = touchedSpot.spotIndex;
+                                          if (index < 0 ||
+                                              index >= responseTrend.length) {
+                                            return null;
+                                          }
+                                          final dataPoint =
+                                              responseTrend[index];
+                                          final timestamp =
+                                              dataPoint["timestamp"];
+                                          final responseTime =
+                                              dataPoint["responseTime"];
+                                          return LineTooltipItem(
+                                            "$timestamp\nResponse Time: ${responseTime} ms",
+                                            TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
+                                              fontSize: 11,
+                                            ),
+                                          );
+                                        }).toList();
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: isRunning
+                        ? Row(
+                            key: const ValueKey('running'),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 25.0,
+                                height: 25.0,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 16.0),
+                              Text(
+                                "Running tests...",
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Column(
+                            key: ValueKey('idle'),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.rocket_launch_sharp,
+                                size: 100,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 16.0),
+                              Text(
+                                "Ready to test",
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper
+  Widget _metricCard(
+    IconData icon,
+    String label,
+    String value,
+    BuildContext context,
+  ) {
+    return Expanded(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: Colors.grey),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
