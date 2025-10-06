@@ -28,7 +28,7 @@ class TestDataSideBar extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    "Views",
+                    "Workspace Tools",
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Theme.of(context).textTheme.bodySmall?.color,
                       fontWeight: FontWeight.w500,
