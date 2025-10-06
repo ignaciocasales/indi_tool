@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/providers/test_case_provider.dart';
 import 'package:indi_tool/core/providers/test_result_provider.dart';
+import 'package:intl/intl.dart';
 
 class TestCaseMetrics extends ConsumerStatefulWidget {
   const TestCaseMetrics({super.key});
@@ -78,13 +79,6 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                     b["timestamp"] as String,
                   ),
                 );
-          // Log all values
-          print('Avg Response Time: $avgResponseTime ms');
-          print('Success Rate: $successRate%');
-          print('Total Requests: $totalRequests');
-          print('Requests per Second: $requestsPerSecond');
-          print('Status Distribution: $statusDistribution');
-          print('Response Trend: $responseTrend');
         }
       },
       error: (_, _) {},
@@ -130,7 +124,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
             // Charts Section
             Flexible(
               flex: 1,
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Status Code Distribution Chart
@@ -166,7 +160,20 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                         drawVerticalLine: true,
                                         drawHorizontalLine: false,
                                       ),
-                                      borderData: FlBorderData(show: false),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Theme.of(context)
+                                                .dividerColor
+                                                .withValues(alpha: 0.4),
+                                            width: 1,
+                                          ),
+                                          left: BorderSide.none,
+                                          right: BorderSide.none,
+                                          top: BorderSide.none,
+                                        ),
+                                      ),
                                       titlesData: FlTitlesData(
                                         leftTitles: const AxisTitles(
                                           sideTitles: SideTitles(
@@ -184,6 +191,13 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                           ),
                                         ),
                                         bottomTitles: AxisTitles(
+                                          axisNameWidget: const Text(
+                                            'HTTP Status Hits',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                           sideTitles: SideTitles(
                                             showTitles: true,
                                             getTitlesWidget: (value, meta) {
@@ -288,134 +302,8 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                             ),
                             const SizedBox(height: 12.0),
                             Expanded(
-                              child: LineChart(
-                                LineChartData(
-                                  gridData: const FlGridData(
-                                    show: true,
-                                    drawVerticalLine: false,
-                                  ),
-                                  borderData: FlBorderData(show: false),
-                                  titlesData: FlTitlesData(
-                                    bottomTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: 22,
-                                        getTitlesWidget: (value, meta) => Text(
-                                          value.toInt().toString(),
-                                          style: const TextStyle(fontSize: 10),
-                                        ),
-                                      ),
-                                    ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        interval: 1,
-                                        getTitlesWidget: (value, meta) {
-                                          if (responseTrend.isEmpty) {
-                                            return const SizedBox.shrink();
-                                          }
-
-                                          final values = responseTrend
-                                              .map(
-                                                (e) =>
-                                                    (e["responseTime"] as num)
-                                                        .toDouble(),
-                                              )
-                                              .toList();
-                                          final minY = values.reduce(
-                                            (a, b) => a < b ? a : b,
-                                          );
-                                          final maxY = values.reduce(
-                                            (a, b) => a > b ? a : b,
-                                          );
-
-                                          if (value == minY || value == maxY) {
-                                            return Text(
-                                              value.toInt().toString(),
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                              ),
-                                            );
-                                          }
-                                          return const SizedBox.shrink();
-                                        },
-                                      ),
-                                    ),
-                                    rightTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    topTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                  ),
-                                  lineBarsData: [
-                                    LineChartBarData(
-                                      isCurved: true,
-                                      barWidth: 1.5,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.inversePrimary,
-                                      dotData: const FlDotData(show: true),
-                                      spots: responseTrend.isNotEmpty
-                                          ? responseTrend.asMap().entries.map((
-                                              entry,
-                                            ) {
-                                              final i = entry.key;
-                                              final e = entry.value;
-                                              return FlSpot(
-                                                i.toDouble(),
-                                                (e["responseTime"] as num)
-                                                    .toDouble(),
-                                              );
-                                            }).toList()
-                                          : [const FlSpot(0, 0)],
-                                    ),
-                                  ],
-                                  minY: 0,
-                                  maxY: responseTrend.isNotEmpty
-                                      ? responseTrend
-                                                .map(
-                                                  (e) =>
-                                                      (e["responseTime"] as num)
-                                                          .toDouble(),
-                                                )
-                                                .reduce(
-                                                  (a, b) => a > b ? a : b,
-                                                ) +
-                                            100
-                                      : 1,
-                                  lineTouchData: LineTouchData(
-                                    enabled: true,
-                                    touchTooltipData: LineTouchTooltipData(
-                                      getTooltipColor: (group) {
-                                        return Theme.of(context)
-                                            .colorScheme
-                                            .inversePrimary
-                                            .withValues(alpha: 0.8);
-                                      },
-                                      getTooltipItems: (spots) => spots.map((
-                                        spot,
-                                      ) {
-                                        final index = spot.spotIndex;
-                                        if (index < 0 ||
-                                            index >= responseTrend.length)
-                                          return null;
-                                        final data = responseTrend[index];
-                                        final time = data["timestamp"];
-                                        final rt = data["responseTime"];
-                                        return LineTooltipItem(
-                                          "$time\nResponse: ${rt}ms",
-                                          TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimaryContainer,
-                                            fontSize: 11,
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
+                              child: ResponseTimeTrendChart(
+                                responseTrend: responseTrend,
                               ),
                             ),
                           ],
@@ -424,62 +312,6 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                     ),
                   ),
                 ],
-              ),
-            ),
-            Flexible(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: isRunning
-                        ? Row(
-                            key: const ValueKey('running'),
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 25.0,
-                                height: 25.0,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.0,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Text(
-                                "Running tests...",
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          )
-                        : const Column(
-                            key: ValueKey('idle'),
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.rocket_launch_sharp,
-                                size: 100,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 16.0),
-                              Text(
-                                "Ready to test",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
               ),
             ),
           ],
@@ -520,6 +352,159 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ResponseTimeTrendChart extends StatelessWidget {
+  final List<Map<String, dynamic>> responseTrend;
+
+  const ResponseTimeTrendChart({super.key, required this.responseTrend});
+
+  @override
+  Widget build(BuildContext context) {
+    // Handle empty state
+    if (responseTrend.isEmpty) {
+      return const Center(child: Text("No response data"));
+    }
+
+    // Convert and compute chart data
+    final spots = responseTrend.asMap().entries.map((entry) {
+      final i = entry.key;
+      final e = entry.value;
+      return FlSpot(i.toDouble(), (e["responseTime"] as num).toDouble());
+    }).toList();
+
+    final values = spots.map((s) => s.y).toList();
+    final minY = values.reduce((a, b) => a < b ? a : b);
+    final maxY = values.reduce((a, b) => a > b ? a : b);
+
+    // Chart width grows with number of points
+    final chartWidth = (responseTrend.length * 70)
+        .toDouble()
+        .clamp(300, double.infinity)
+        .toDouble();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SizedBox(
+        width: chartWidth,
+        child: LineChart(
+          LineChartData(
+            gridData: const FlGridData(show: true, drawVerticalLine: false),
+            borderData: FlBorderData(
+              show: true,
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+                left: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+                right: BorderSide.none,
+                top: BorderSide.none,
+              ),
+            ),
+
+            // Titles setup
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                axisNameWidget: const Text(
+                  "Time (HH:mm)", // label under the ticks
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                ),
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 28,
+                  interval: 1,
+                  getTitlesWidget: (value, meta) {
+                    final index = value.toInt();
+                    if (index < 0 || index >= responseTrend.length) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final ts = responseTrend[index]["timestamp"];
+                    // Parse ISO and format to HH:mm
+                    final date = DateTime.tryParse(ts);
+                    final formatted = date != null
+                        ? DateFormat('HH:mm').format(date)
+                        : ts.toString();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        formatted,
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 50,
+                  interval: (maxY - minY) / 3,
+                  getTitlesWidget: (value, meta) => Text(
+                    "${value.toInt()} ms",
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+            ),
+
+            lineBarsData: [
+              LineChartBarData(
+                isCurved: true,
+                barWidth: 2,
+                color: Theme.of(context).colorScheme.inversePrimary,
+                dotData: const FlDotData(show: true),
+                spots: spots,
+              ),
+            ],
+
+            // Dynamic range
+            minY: (minY - 50).clamp(0, double.infinity),
+            maxY: maxY + 100,
+
+            // Tooltip for hover/tap
+            lineTouchData: LineTouchData(
+              enabled: true,
+              touchTooltipData: LineTouchTooltipData(
+                getTooltipColor: (_) => Theme.of(
+                  context,
+                ).colorScheme.inversePrimary.withValues(alpha: 0.85),
+                getTooltipItems: (spots) => spots.map((spot) {
+                  final index = spot.spotIndex;
+                  if (index < 0 || index >= responseTrend.length) return null;
+                  final data = responseTrend[index];
+                  final time = DateTime.tryParse(data["timestamp"]) != null
+                      ? DateFormat(
+                          'HH:mm:ss',
+                        ).format(DateTime.parse(data["timestamp"]))
+                      : data["timestamp"];
+                  final rt = data["responseTime"];
+                  return LineTooltipItem(
+                    "$time\nResponse: $rt ms",
+                    TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontSize: 11,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
         ),
       ),
