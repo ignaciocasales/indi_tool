@@ -150,91 +150,120 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                             ),
                             const SizedBox(height: 8.0),
                             Expanded(
-                              child: BarChart(
-                                BarChartData(
-                                  alignment: BarChartAlignment.spaceAround,
-                                  gridData: const FlGridData(show: false),
-                                  borderData: FlBorderData(show: false),
-                                  titlesData: FlTitlesData(
-                                    leftTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    rightTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    topTitles: const AxisTitles(
-                                      sideTitles: SideTitles(showTitles: false),
-                                    ),
-                                    bottomTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        getTitlesWidget: (value, meta) {
-                                          final index = value.toInt();
-                                          if (index < 0 ||
-                                              index >=
-                                                  statusDistribution.length) {
-                                            return const SizedBox.shrink();
-                                          }
-                                          return Text(
-                                            statusDistribution[index]["status"]
-                                                .toString(),
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                            ),
-                                          );
-                                        },
+                              child: LayoutBuilder(
+                                builder: (context, constrains) {
+                                  final totalBars = statusDistribution.length;
+                                  final availableWidth = constrains.maxWidth;
+                                  final barWidth = totalBars > 0
+                                      ? ((availableWidth / (totalBars)) * 0.6)
+                                            .clamp(8.0, 40.0)
+                                      : 10.0;
+                                  return BarChart(
+                                    BarChartData(
+                                      alignment: BarChartAlignment.spaceEvenly,
+                                      gridData: const FlGridData(
+                                        show: true,
+                                        drawVerticalLine: true,
+                                        drawHorizontalLine: false,
+                                      ),
+                                      borderData: FlBorderData(show: false),
+                                      titlesData: FlTitlesData(
+                                        leftTitles: const AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
+                                        ),
+                                        rightTitles: const AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
+                                        ),
+                                        topTitles: const AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
+                                        ),
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            getTitlesWidget: (value, meta) {
+                                              final index = value.toInt();
+                                              if (index < 0 ||
+                                                  index >=
+                                                      statusDistribution
+                                                          .length) {
+                                                return const SizedBox.shrink();
+                                              }
+                                              return Text(
+                                                statusDistribution[index]["status"]
+                                                    .toString(),
+                                                style: const TextStyle(
+                                                  fontSize: 10,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      barGroups: statusDistribution
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                            final i = entry.key;
+                                            final e = entry.value;
+                                            return BarChartGroupData(
+                                              x: i,
+                                              barRods: [
+                                                BarChartRodData(
+                                                  toY: (e["count"] as num)
+                                                      .toDouble(),
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.inversePrimary,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        2.0,
+                                                      ),
+                                                  width: barWidth,
+                                                ),
+                                              ],
+                                            );
+                                          })
+                                          .toList(),
+                                      barTouchData: BarTouchData(
+                                        enabled: true,
+                                        touchTooltipData: BarTouchTooltipData(
+                                          getTooltipColor: (group) {
+                                            return Theme.of(context)
+                                                .colorScheme
+                                                .inversePrimary
+                                                .withValues(alpha: 0.8);
+                                          },
+                                          getTooltipItem:
+                                              (
+                                                group,
+                                                groupIndex,
+                                                rod,
+                                                rodIndex,
+                                              ) {
+                                                final label =
+                                                    statusDistribution[group.x
+                                                        .toInt()]["status"];
+                                                return BarTooltipItem(
+                                                  "Status $label\n${rod.toY.toInt()} hits",
+                                                  TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimaryContainer,
+                                                    fontSize: 11,
+                                                  ),
+                                                );
+                                              },
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  barGroups: statusDistribution
-                                      .asMap()
-                                      .entries
-                                      .map((entry) {
-                                        final i = entry.key;
-                                        final e = entry.value;
-                                        return BarChartGroupData(
-                                          x: i,
-                                          barRods: [
-                                            BarChartRodData(
-                                              toY: (e["count"] as num)
-                                                  .toDouble(),
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.inversePrimary,
-                                              borderRadius:
-                                                  BorderRadius.circular(4.0),
-                                            ),
-                                          ],
-                                        );
-                                      })
-                                      .toList(),
-                                  barTouchData: BarTouchData(
-                                    enabled: true,
-                                    touchTooltipData: BarTouchTooltipData(
-                                      getTooltipColor: (group) {
-                                        return Theme.of(context)
-                                            .colorScheme
-                                            .inversePrimary
-                                            .withValues(alpha: 0.8);
-                                      },
-                                      getTooltipItem:
-                                          (group, groupIndex, rod, rodIndex) {
-                                            final label =
-                                                statusDistribution[group.x
-                                                    .toInt()]["status"];
-                                            return BarTooltipItem(
-                                              "Status $label\n${rod.toY.toInt()} hits",
-                                              TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                                fontSize: 11,
-                                              ),
-                                            );
-                                          },
-                                    ),
-                                  ),
-                                ),
+                                  );
+                                },
                               ),
                             ),
                           ],
@@ -271,14 +300,10 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                       sideTitles: SideTitles(
                                         showTitles: true,
                                         reservedSize: 22,
-                                        getTitlesWidget: (value, meta) {
-                                          return Text(
-                                            value.toInt().toString(),
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                            ),
-                                          );
-                                        },
+                                        getTitlesWidget: (value, meta) => Text(
+                                          value.toInt().toString(),
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
                                       ),
                                     ),
                                     leftTitles: AxisTitles(
@@ -286,20 +311,24 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                         showTitles: true,
                                         interval: 1,
                                         getTitlesWidget: (value, meta) {
-                                          final minY = responseTrend
+                                          if (responseTrend.isEmpty) {
+                                            return const SizedBox.shrink();
+                                          }
+
+                                          final values = responseTrend
                                               .map(
                                                 (e) =>
                                                     (e["responseTime"] as num)
                                                         .toDouble(),
                                               )
-                                              .reduce((a, b) => a < b ? a : b);
-                                          final maxY = responseTrend
-                                              .map(
-                                                (e) =>
-                                                    (e["responseTime"] as num)
-                                                        .toDouble(),
-                                              )
-                                              .reduce((a, b) => a > b ? a : b);
+                                              .toList();
+                                          final minY = values.reduce(
+                                            (a, b) => a < b ? a : b,
+                                          );
+                                          final maxY = values.reduce(
+                                            (a, b) => a > b ? a : b,
+                                          );
+
                                           if (value == minY || value == maxY) {
                                             return Text(
                                               value.toInt().toString(),
@@ -322,17 +351,17 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                   lineBarsData: [
                                     LineChartBarData(
                                       isCurved: true,
-                                      barWidth: 1,
+                                      barWidth: 1.5,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.inversePrimary,
-                                      dotData: const FlDotData(show: false),
+                                      dotData: const FlDotData(show: true),
                                       spots: responseTrend.isNotEmpty
                                           ? responseTrend.asMap().entries.map((
-                                              entries,
+                                              entry,
                                             ) {
-                                              final i = entries.key;
-                                              final e = entries.value;
+                                              final i = entry.key;
+                                              final e = entry.value;
                                               return FlSpot(
                                                 i.toDouble(),
                                                 (e["responseTime"] as num)
@@ -354,7 +383,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                                   (a, b) => a > b ? a : b,
                                                 ) +
                                             100
-                                      : 1, // fallback to 1 if empty
+                                      : 1,
                                   lineTouchData: LineTouchData(
                                     enabled: true,
                                     touchTooltipData: LineTouchTooltipData(
@@ -364,30 +393,26 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                             .inversePrimary
                                             .withValues(alpha: 0.8);
                                       },
-                                      getTooltipItems: (touchedSpots) {
-                                        return touchedSpots.map((touchedSpot) {
-                                          final index = touchedSpot.spotIndex;
-                                          if (index < 0 ||
-                                              index >= responseTrend.length) {
-                                            return null;
-                                          }
-                                          final dataPoint =
-                                              responseTrend[index];
-                                          final timestamp =
-                                              dataPoint["timestamp"];
-                                          final responseTime =
-                                              dataPoint["responseTime"];
-                                          return LineTooltipItem(
-                                            "$timestamp\nResponse Time: ${responseTime} ms",
-                                            TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimaryContainer,
-                                              fontSize: 11,
-                                            ),
-                                          );
-                                        }).toList();
-                                      },
+                                      getTooltipItems: (spots) => spots.map((
+                                        spot,
+                                      ) {
+                                        final index = spot.spotIndex;
+                                        if (index < 0 ||
+                                            index >= responseTrend.length)
+                                          return null;
+                                        final data = responseTrend[index];
+                                        final time = data["timestamp"];
+                                        final rt = data["responseTime"];
+                                        return LineTooltipItem(
+                                          "$time\nResponse: ${rt}ms",
+                                          TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer,
+                                            fontSize: 11,
+                                          ),
+                                        );
+                                      }).toList(),
                                     ),
                                   ),
                                 ),
