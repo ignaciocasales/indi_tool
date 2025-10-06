@@ -359,18 +359,27 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
 
 class ResponseTimeTrendChart extends StatelessWidget {
   final List<Map<String, dynamic>> responseTrend;
+  final int windowSize; // how many points to display at once
 
-  const ResponseTimeTrendChart({super.key, required this.responseTrend});
+  const ResponseTimeTrendChart({
+    super.key,
+    required this.responseTrend,
+    this.windowSize = 100,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Handle empty state
     if (responseTrend.isEmpty) {
       return const Center(child: Text("No response data"));
     }
 
-    // Convert and compute chart data
-    final spots = responseTrend.asMap().entries.map((entry) {
+    // --- Sliding window ---
+    final visibleData = responseTrend.length > windowSize
+        ? responseTrend.sublist(responseTrend.length - windowSize)
+        : responseTrend;
+
+    // --- Convert to chart data ---
+    final spots = visibleData.asMap().entries.map((entry) {
       final i = entry.key;
       final e = entry.value;
       return FlSpot(i.toDouble(), (e["responseTime"] as num).toDouble());
@@ -380,150 +389,113 @@ class ResponseTimeTrendChart extends StatelessWidget {
     final minY = values.reduce((a, b) => a < b ? a : b);
     final maxY = values.reduce((a, b) => a > b ? a : b);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate ideal width based on number of points
-        final idealWidth = responseTrend.length * 70.0;
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        borderData: FlBorderData(
+          show: true,
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
+              width: 1,
+            ),
+            left: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
+              width: 1,
+            ),
+          ),
+        ),
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            axisNameWidget: const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Text(
+                "Time (HH:mm)",
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+              ),
+            ),
+            axisNameSize: 20,
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 28,
+              interval: (visibleData.length / 6).floorToDouble().clamp(1, 10),
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= visibleData.length) {
+                  return const SizedBox.shrink();
+                }
 
-        // Use the available space if idealWidth is smaller
-        final chartWidth = idealWidth < constraints.maxWidth
-            ? constraints.maxWidth
-            : idealWidth;
+                final ts = visibleData[index]["timestamp"];
+                final date = DateTime.tryParse(ts);
+                final formatted = date != null
+                    ? DateFormat('HH:mm').format(date)
+                    : ts.toString();
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: chartWidth,
-            child: LineChart(
-              LineChartData(
-                // Keep your chart config the same
-                gridData: const FlGridData(show: true, drawVerticalLine: false),
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.4),
-                      width: 1,
-                    ),
-                    left: BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.4),
-                      width: 1,
-                    ),
-                    right: BorderSide.none,
-                    top: BorderSide.none,
-                  ),
-                ),
-
-                // Titles setup
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    axisNameWidget: const Text(
-                      "Time (HH:mm)", // label under the ticks
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 28,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        if (index < 0 || index >= responseTrend.length) {
-                          return const SizedBox.shrink();
-                        }
-
-                        final ts = responseTrend[index]["timestamp"];
-                        // Parse ISO and format to HH:mm
-                        final date = DateTime.tryParse(ts);
-                        final formatted = date != null
-                            ? DateFormat('HH:mm').format(date)
-                            : ts.toString();
-
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            formatted,
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 50,
-                      interval: (maxY - minY) / 3,
-                      getTitlesWidget: (value, meta) => Text(
-                        "${value.toInt()} ms",
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-
-                lineBarsData: [
-                  LineChartBarData(
-                    isCurved: true,
-                    barWidth: 2,
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    dotData: const FlDotData(show: true),
-                    spots: spots,
-                  ),
-                ],
-
-                // Dynamic range
-                minY: (minY - 50).clamp(0, double.infinity),
-                maxY: maxY + 100,
-
-                // Tooltip for hover/tap
-                lineTouchData: LineTouchData(
-                  enabled: true,
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => Theme.of(
-                      context,
-                    ).colorScheme.inversePrimary.withValues(alpha: 0.85),
-                    getTooltipItems: (spots) => spots.map((spot) {
-                      final index = spot.spotIndex;
-                      if (index < 0 || index >= responseTrend.length) {
-                        return null;
-                      }
-                      final data = responseTrend[index];
-                      final time = DateTime.tryParse(data["timestamp"]) != null
-                          ? DateFormat(
-                              'HH:mm:ss',
-                            ).format(DateTime.parse(data["timestamp"]))
-                          : data["timestamp"];
-                      final rt = data["responseTime"];
-                      return LineTooltipItem(
-                        "$time\nResponse: $rt ms",
-                        TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                          fontSize: 11,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(formatted, style: const TextStyle(fontSize: 10)),
+                );
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 50,
+              interval: (maxY - minY) / 3,
+              getTitlesWidget: (value, meta) => Text(
+                "${value.toInt()} ms",
+                style: const TextStyle(fontSize: 10),
               ),
             ),
           ),
-        );
-      },
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+        ),
+        lineBarsData: [
+          LineChartBarData(
+            isCurved: true,
+            barWidth: 2,
+            color: Theme.of(context).colorScheme.inversePrimary,
+            dotData: const FlDotData(show: true),
+            spots: spots,
+          ),
+        ],
+        minY: (minY - 50).clamp(0, double.infinity),
+        maxY: maxY + 100,
+        lineTouchData: LineTouchData(
+          enabled: true,
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (_) => Theme.of(
+              context,
+            ).colorScheme.inversePrimary.withValues(alpha: 0.85),
+            getTooltipItems: (spots) => spots.map((spot) {
+              final index = spot.spotIndex;
+              if (index < 0 || index >= visibleData.length) return null;
+              final data = visibleData[index];
+              final time = DateTime.tryParse(data["timestamp"]) != null
+                  ? DateFormat(
+                      'HH:mm:ss',
+                    ).format(DateTime.parse(data["timestamp"]))
+                  : data["timestamp"];
+              final rt = data["responseTime"];
+              return LineTooltipItem(
+                "$time\nResponse: $rt ms",
+                TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  fontSize: 11,
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+      duration: const Duration(milliseconds: 400), // smooth animation
+      curve: Curves.easeInOut,
     );
   }
 }
