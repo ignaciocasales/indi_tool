@@ -675,14 +675,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  riverpod_sqflite:
-    dependency: "direct main"
-    description:
-      name: riverpod_sqflite
-      sha256: "1b7588f11804a955e674ee15e2a6f61848d5abe96f200fe3a62c64e6fb3020b3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.2"
   rxdart:
     dependency: transitive
     description:

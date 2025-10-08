@@ -15,6 +15,7 @@ class ResultBuffer {
   List<TestCaseResult> get current => List.unmodifiable(_buffer);
 
   void add(TestCaseResult result) {
+    print('Adding result: ${result.id}');
     _buffer.add(result);
 
     // Optionally notify UI or aggregators

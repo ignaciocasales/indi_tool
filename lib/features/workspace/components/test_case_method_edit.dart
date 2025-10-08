@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
 
-class TestCaseMethodEdit extends ConsumerStatefulWidget {
-  const TestCaseMethodEdit({super.key});
+class TestCaseMethodEdit extends StatefulWidget {
+  const TestCaseMethodEdit({
+    super.key,
+    required this.testCase,
+    required this.onChanged,
+  });
+
+  final TestCase testCase;
+  final void Function(TestCase updated) onChanged;
 
   @override
-  ConsumerState<TestCaseMethodEdit> createState() => _TestCaseMethodEditState();
+  State<TestCaseMethodEdit> createState() => _TestCaseMethodEditState();
 }
 
-class _TestCaseMethodEditState extends ConsumerState<TestCaseMethodEdit> {
+class _TestCaseMethodEditState extends State<TestCaseMethodEdit> {
   late final TextEditingController _controller;
-  bool _enabled = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _controller.text = widget.testCase.httpMethod;
     _controller.addListener(_updateMethod);
   }
 
@@ -30,25 +35,10 @@ class _TestCaseMethodEditState extends ConsumerState<TestCaseMethodEdit> {
 
   @override
   Widget build(BuildContext context) {
-    final TestCase? testCase = ref.watch(selectedTestCaseProvider);
-
-    if (testCase != null) {
-      if (!_enabled) {
-        setState(() {
-          _enabled = true;
-        });
-      }
-
-      if (_controller.text != testCase.httpMethod) {
-        _controller.text = testCase.httpMethod;
-      }
-    } else {
-      throw StateError('No scenario selected');
-    }
-
+    final tc = widget.testCase;
     return DropdownMenu(
-      key: Key('http-method-${testCase.id}'),
-      enabled: _enabled,
+      key: Key('http-method-${tc.id}'),
+      enabled: true,
       controller: _controller,
       enableFilter: false,
       requestFocusOnTap: false,
@@ -67,20 +57,10 @@ class _TestCaseMethodEditState extends ConsumerState<TestCaseMethodEdit> {
   }
 
   void _updateMethod() {
-    final String method = _controller.text;
-
-    if (method.isEmpty) {
-      return;
-    }
-
-    final TestCase? testCase = ref.watch(selectedTestCaseProvider);
-
-    if (testCase == null) {
-      return;
-    }
-
-    final TestCase updated = testCase.copyWith(httpMethod: method);
-
-    ref.read(testCaseListProvider.notifier).updateTestCase(updated);
+    final tc = widget.testCase;
+    final newMethod = _controller.text;
+    if (newMethod.isEmpty || newMethod == tc.httpMethod) return;
+    final updated = tc.copyWith(httpMethod: newMethod);
+    widget.onChanged(updated);
   }
 }

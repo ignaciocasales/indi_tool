@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/features/workspace/components/test_case_body_edit.dart';
 import 'package:indi_tool/features/workspace/components/test_case_configuration_edit.dart';
 import 'package:indi_tool/features/workspace/components/test_case_headers_edit.dart';
 
 class TestCaseTabs extends StatefulWidget {
-  const TestCaseTabs({super.key});
+  const TestCaseTabs({
+    super.key,
+    required this.testCase,
+    required this.onChanged,
+  });
+
+  final TestCase testCase;
+  final void Function(TestCase updated) onChanged;
 
   @override
   State<TestCaseTabs> createState() => _TestCaseTabsState();
@@ -36,9 +44,18 @@ class _TestCaseTabsState extends State<TestCaseTabs>
           child: TabBarView(
             controller: _controller,
             children: [
-              const TestCaseHeadersEdit(),
-              const TestCaseBodyEdit(),
-              const TestCaseConfigurationEdit(),
+              TestCaseHeadersEdit(
+                testCase: widget.testCase,
+                onChanged: widget.onChanged,
+              ),
+              TestCaseBodyEdit(
+                testCase: widget.testCase,
+                onChanged: widget.onChanged,
+              ),
+              TestCaseConfigurationEdit(
+                testCase: widget.testCase,
+                onChanged: widget.onChanged,
+              ),
             ],
           ),
         ),

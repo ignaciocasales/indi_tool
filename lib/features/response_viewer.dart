@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/test_result_provider.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
 
 class TestCaseResponseViewer extends ConsumerStatefulWidget {
   const TestCaseResponseViewer({super.key});
@@ -14,8 +14,17 @@ class _TestCaseResponseViewerState
     extends ConsumerState<TestCaseResponseViewer> {
   @override
   Widget build(BuildContext context) {
-    final testResult = ref.watch(selectedTestResultProvider);
-    if (testResult == null) throw StateError('No test result selected');
+    final testResultAsync = ref.watch(selectedTestResultProvider);
+    final isReady = testResultAsync.hasValue && testResultAsync.value != null;
+    if (!isReady) {
+      return const Expanded(
+        child: Center(
+          child: Text('No response available'), // FIXME: better placeholder?
+        ),
+      );
+    }
+    final testResult = testResultAsync.value!;
+
     final theme = Theme.of(context);
 
     return Expanded(
@@ -94,7 +103,7 @@ class _TestCaseResponseViewerState
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Text(
-                            testResult.responseBody,
+                            'There are no response bodies anymore', // FIXME
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontFamily: 'monospace',
                             ),

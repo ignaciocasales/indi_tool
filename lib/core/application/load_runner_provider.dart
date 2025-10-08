@@ -17,6 +17,7 @@ class LoadRunnerController {
     if (_isRunning) return;
     _isRunning = true;
 
+    print('Starting test: ${testCase.name}');
     final stream = _runner.runStream(testCase);
     await for (final result in stream) {
       buffer.add(result);

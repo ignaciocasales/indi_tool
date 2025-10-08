@@ -1,72 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
 
-class TestCaseConfigurationEdit extends ConsumerStatefulWidget {
-  const TestCaseConfigurationEdit({super.key});
+class TestCaseConfigurationEdit extends StatefulWidget {
+  const TestCaseConfigurationEdit({
+    super.key,
+    required this.testCase,
+    required this.onChanged,
+  });
+
+  final TestCase testCase;
+  final void Function(TestCase updated) onChanged;
 
   @override
-  ConsumerState<TestCaseConfigurationEdit> createState() =>
+  State<TestCaseConfigurationEdit> createState() =>
       _TestCaseConfigurationEditState();
 }
 
-class _TestCaseConfigurationEditState
-    extends ConsumerState<TestCaseConfigurationEdit> {
+class _TestCaseConfigurationEditState extends State<TestCaseConfigurationEdit> {
   late final TextEditingController _timeoutController;
   late final TextEditingController _numberOfRequestsController;
   late final TextEditingController _concurrencyController;
-  bool _enabled = false;
 
   @override
   void initState() {
     super.initState();
+
+    var tc = widget.testCase;
+
     _timeoutController = TextEditingController();
-    _numberOfRequestsController = TextEditingController();
-    _concurrencyController = TextEditingController();
+    _timeoutController.text = tc.httpTimeoutInMillis.toString();
     _timeoutController.addListener(_updateTimeout);
+
+    _numberOfRequestsController = TextEditingController();
+    _numberOfRequestsController.text = tc.numberOfRequests.toString();
     _numberOfRequestsController.addListener(_updateNumberOfRequests);
+
+    _concurrencyController = TextEditingController();
+    _concurrencyController.text = tc.numberOfConcurrentUsers.toString();
     _concurrencyController.addListener(_updateConcurrency);
+  }
+
+  @override
+  void didUpdateWidget(covariant TestCaseConfigurationEdit oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newTc = widget.testCase;
+    var oldTc = oldWidget.testCase;
+    if (oldTc.httpTimeoutInMillis != newTc.httpTimeoutInMillis) {
+      _timeoutController.text = newTc.httpTimeoutInMillis.toString();
+    }
+    if (oldTc.numberOfRequests != newTc.numberOfRequests) {
+      _numberOfRequestsController.text = newTc.numberOfRequests.toString();
+    }
+    if (oldTc.numberOfConcurrentUsers != newTc.numberOfConcurrentUsers) {
+      _concurrencyController.text = newTc.numberOfConcurrentUsers.toString();
+    }
   }
 
   @override
   void dispose() {
     _timeoutController.removeListener(_updateTimeout);
-    _numberOfRequestsController.removeListener(_updateNumberOfRequests);
-    _concurrencyController.removeListener(_updateConcurrency);
     _timeoutController.dispose();
+
+    _numberOfRequestsController.removeListener(_updateNumberOfRequests);
     _numberOfRequestsController.dispose();
+
+    _concurrencyController.removeListener(_updateConcurrency);
     _concurrencyController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final testCase = ref.watch(selectedTestCaseProvider);
-    if (testCase != null) {
-      if (!_enabled) {
-        setState(() {
-          _enabled = true;
-        });
-      }
-
-      if (_timeoutController.text != testCase.httpTimeoutInMillis.toString()) {
-        _timeoutController.text = testCase.httpTimeoutInMillis.toString();
-      }
-      if (_numberOfRequestsController.text !=
-          testCase.numberOfRequests.toString()) {
-        _numberOfRequestsController.text = testCase.numberOfRequests.toString();
-      }
-      if (_concurrencyController.text !=
-          testCase.numberOfConcurrentUsers.toString()) {
-        _concurrencyController.text = testCase.numberOfConcurrentUsers
-            .toString();
-      }
-    } else {
-      throw StateError('No scenario selected');
-    }
-
+    var theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -77,14 +84,14 @@ class _TestCaseConfigurationEditState
             children: [
               Text(
                 "Load Test Configuration",
-                style: Theme.of(context).textTheme.titleSmall,
+                style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 16),
               _buildNumberInputField(
                 label: 'HTTP Timeout (ms)',
                 hint: 'e.g., 300',
                 controller: _timeoutController,
-                testCase: testCase,
+                testCase: widget.testCase,
                 minValue: 0,
                 maxValue: 60000,
               ),
@@ -93,7 +100,7 @@ class _TestCaseConfigurationEditState
                 label: 'Number of Requests',
                 hint: 'e.g., 100',
                 controller: _numberOfRequestsController,
-                testCase: testCase,
+                testCase: widget.testCase,
                 minValue: 1,
                 maxValue: 1000,
               ),
@@ -102,7 +109,7 @@ class _TestCaseConfigurationEditState
                 label: 'Number of Concurrent Users',
                 hint: 'e.g., 10',
                 controller: _concurrencyController,
-                testCase: testCase,
+                testCase: widget.testCase,
                 minValue: 1,
                 maxValue: 1000,
               ),
@@ -128,7 +135,7 @@ class _TestCaseConfigurationEditState
         const SizedBox(height: 8),
         TextField(
           key: Key('$label-${testCase.id}'),
-          enabled: _enabled,
+          enabled: true,
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [
@@ -244,56 +251,29 @@ class _TestCaseConfigurationEditState
   }
 
   void _updateTimeout() {
+    final tc = widget.testCase;
     final String text = _timeoutController.text;
     final int? timeout = int.tryParse(text);
-
-    if (timeout == null || timeout < 0) {
-      return;
-    }
-
-    final testCase = ref.watch(selectedTestCaseProvider);
-    if (testCase == null) {
-      return;
-    }
-
-    final updated = testCase.copyWith(httpTimeoutInMillis: timeout);
-
-    ref.read(testCaseListProvider.notifier).updateTestCase(updated);
+    if (timeout == null || timeout < 0) return;
+    final updated = tc.copyWith(httpTimeoutInMillis: timeout);
+    widget.onChanged(updated);
   }
 
   void _updateNumberOfRequests() {
+    final tc = widget.testCase;
     final String text = _numberOfRequestsController.text;
     final int? numberOfRequests = int.tryParse(text);
-
-    if (numberOfRequests == null || numberOfRequests < 1) {
-      return;
-    }
-
-    final testCase = ref.watch(selectedTestCaseProvider);
-    if (testCase == null) {
-      return;
-    }
-
-    final updated = testCase.copyWith(numberOfRequests: numberOfRequests);
-
-    ref.read(testCaseListProvider.notifier).updateTestCase(updated);
+    if (numberOfRequests == null || numberOfRequests < 1) return;
+    final updated = tc.copyWith(numberOfRequests: numberOfRequests);
+    widget.onChanged(updated);
   }
 
   void _updateConcurrency() {
+    final tc = widget.testCase;
     final String text = _concurrencyController.text;
     final int? concurrency = int.tryParse(text);
-
-    if (concurrency == null || concurrency < 1) {
-      return;
-    }
-
-    final testCase = ref.watch(selectedTestCaseProvider);
-    if (testCase == null) {
-      return;
-    }
-
-    final updated = testCase.copyWith(numberOfConcurrentUsers: concurrency);
-
-    ref.read(testCaseListProvider.notifier).updateTestCase(updated);
+    if (concurrency == null || concurrency < 1) return;
+    final updated = tc.copyWith(numberOfConcurrentUsers: concurrency);
+    widget.onChanged(updated);
   }
 }

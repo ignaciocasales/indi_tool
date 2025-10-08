@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/repositories/test_cases_repository_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
 
 class ClearContentArea extends ConsumerWidget {
   const ClearContentArea({super.key});
@@ -27,8 +27,9 @@ class ClearContentArea extends ConsumerWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              // Create a new test case.
-              ref.read(testCaseListProvider.notifier).add(TestCase());
+              ref
+                  .read(testCasesRepositoryProvider)
+                  .insert(testCase: TestCase());
             },
             child: const Text('Create New Test'),
           ),

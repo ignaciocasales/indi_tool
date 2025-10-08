@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
-import 'package:indi_tool/core/providers/test_result_provider.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
+import 'package:indi_tool/core/application/load_runner_provider.dart';
 
 class TestCaseTrigger extends ConsumerStatefulWidget {
   const TestCaseTrigger({super.key});
@@ -13,30 +13,19 @@ class TestCaseTrigger extends ConsumerStatefulWidget {
 class _TestCaseTriggerState extends ConsumerState<TestCaseTrigger> {
   @override
   Widget build(BuildContext context) {
-    final bool isRunning = ref.watch(isTestCaseRunningProvider);
+    final controller = ref.watch(loadRunnerControllerProvider);
+    final isRunning = controller.isRunning;
+
+    final asyncTestCase = ref.watch(selectedTestCaseProvider);
+    final isReady = asyncTestCase.hasValue && asyncTestCase.value != null;
 
     return ElevatedButton.icon(
-      onPressed: isRunning
+      onPressed: isRunning || !isReady
           ? null
-          : () async {
-              // Read the needed providers synchronously before any await,
-              // to avoid using `ref` after the widget may have been unmounted.
-              final testCase = ref.read(selectedTestCaseProvider);
+          : () {
+              final testCase = ref.read(selectedTestCaseProvider).value;
               if (testCase == null) return;
-              final runningNotifier = ref.read(
-                isTestCaseRunningProvider.notifier,
-              );
-              final resultsNotifier = ref.read(
-                testCaseResultsProvider.notifier,
-              );
-
-              runningNotifier.setRunning(true);
-              try {
-                await resultsNotifier.runFor(testCase);
-              } finally {
-                // Safe to use the cached notifier instance even if the widget unmounted.
-                runningNotifier.setRunning(false);
-              }
+              ref.read(loadRunnerControllerProvider).runTest(testCase);
             },
       icon: Icon(isRunning ? Icons.stop : Icons.play_arrow, size: 16),
       label: Text(isRunning ? 'Running...' : 'Start'),

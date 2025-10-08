@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:indi_tool/core/db/converters.dart';
 import 'package:uuid/uuid.dart';
+
+import 'database.dart';
 
 class TestCasesTable extends Table {
   TextColumn get id => text()
@@ -39,21 +40,7 @@ class TestCaseResultsTable extends Table {
 
   TextColumn get testCaseId => text().map(const UuidValueConverter())();
 
-  TextColumn get requestMethod => text()();
-
-  TextColumn get requestUrl => text()();
-
-  IntColumn get responseStatusCode => integer().nullable()();
-
-  IntColumn get responseDurationInMillis => integer().nullable()();
-
-  IntColumn get responseBodySizeInBytes => integer().nullable()();
-
-  IntColumn get startTimestamp => integer().map(const TimestampConverter())();
-
-  IntColumn get endTimestamp => integer().map(const TimestampConverter())();
-
-  BlobColumn get responseHeaders => blob().nullable()();
+  BlobColumn get resultsJson => blob()();
 
   IntColumn get createdAt => integer().map(const TimestampConverter())();
 

@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/test_result_provider.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:intl/intl.dart';
 
 class TestCaseMetrics extends ConsumerStatefulWidget {
@@ -25,21 +25,21 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
 
     asyncResults.when(
       data: (results) {
-        if (results != null && results.results.isNotEmpty) {
-          final totalResults = results.results.length;
-          final totalResponseTime = results.results
+        if (results != null && results.isNotEmpty) {
+          final totalResults = results.length;
+          final totalResponseTime = results
               .map((result) => result.responseDurationInMillis)
               .reduce((a, b) => a + b);
           avgResponseTime = (totalResponseTime / totalResults).round();
-          final successCount = results.results
+          final successCount = results
               .where((result) => result.isSuccessStatusCode)
               .length;
           successRate = ((successCount / totalResults) * 100).round();
           totalRequests = totalResults;
-          final firstTimestamp = results.results
+          final firstTimestamp = results
               .map((result) => DateTime.parse(result.responseStartDateTime))
               .reduce((a, b) => a.isBefore(b) ? a : b);
-          final lastTimestamp = results.results
+          final lastTimestamp = results
               .map((result) => DateTime.parse(result.responseStartDateTime))
               .reduce((a, b) => a.isAfter(b) ? a : b);
           final durationInSeconds = lastTimestamp
@@ -49,7 +49,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
               ? (totalResults / durationInSeconds).round()
               : totalResults;
           final statusCountMap = <int, int>{};
-          for (var result in results.results) {
+          for (var result in results) {
             statusCountMap.update(
               result.responseStatusCode,
               (value) => value + 1,
@@ -64,7 +64,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                   (a, b) => (a["status"] as int).compareTo(b["status"] as int),
                 );
           responseTrend =
-              results.results
+              results
                   .map(
                     (result) => {
                       "timestamp": result.responseStartDateTime,

@@ -6,10 +6,11 @@ import 'package:indi_tool/consts.dart';
 import 'package:indi_tool/core/db/tables.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [TestCasesTable])
+@DriftDatabase(tables: [TestCasesTable, TestCaseResultsTable])
 class DriftDb extends _$DriftDb {
   DriftDb({
     required String dbName,
@@ -53,6 +54,34 @@ DatabaseConnection _openConnection(
       );
     }),
   );
+}
+
+class UuidValueConverter extends TypeConverter<UuidValue, String> {
+  const UuidValueConverter();
+
+  @override
+  UuidValue fromSql(String fromDb) {
+    return UuidValue.fromString(fromDb);
+  }
+
+  @override
+  String toSql(UuidValue value) {
+    return value.toString();
+  }
+}
+
+class TimestampConverter extends TypeConverter<DateTime, int> {
+  const TimestampConverter();
+
+  @override
+  DateTime fromSql(int fromDb) {
+    return DateTime.fromMillisecondsSinceEpoch(fromDb);
+  }
+
+  @override
+  int toSql(DateTime value) {
+    return value.millisecondsSinceEpoch;
+  }
 }
 
 class DriftDbInstance {

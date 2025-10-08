@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/repositories/test_cases_repository_provider.dart';
+import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
+import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/domain/models/test_result.dart';
 
@@ -17,7 +20,7 @@ final isTestCaseRunningProvider = NotifierProvider<IsTestCaseRunning, bool>(
   IsTestCaseRunning.new,
 );
 
-class SelectedTestCaseId extends Notifier<String?> {
+class SelectedTestCaseIdNotifier extends Notifier<String?> {
   @override
   String? build() {
     return null;
@@ -33,30 +36,11 @@ class SelectedTestCaseId extends Notifier<String?> {
 }
 
 final selectedTestCaseIdProvider =
-    NotifierProvider<SelectedTestCaseId, String?>(SelectedTestCaseId.new);
+    NotifierProvider<SelectedTestCaseIdNotifier, String?>(
+      SelectedTestCaseIdNotifier.new,
+    );
 
-final selectedTestCaseProvider = Provider<TestCase?>((ref) {
-  final listAsync = ref.watch(testCaseListProvider);
-  final id = ref.watch(selectedTestCaseIdProvider);
-
-  final list = listAsync.value;
-  if (list == null || id == null) return null;
-  return list.firstWhereOrNull((e) => e.id == id);
-});
-
-final selectedTestResultsProvider = FutureProvider<TestCaseResults?>((ref) {
-  final testCaseId = ref.watch(selectedTestCaseIdProvider);
-  if (testCaseId == null) return null;
-
-  final testCaseResults = ref.watch(testCaseResultsProvider).value;
-  if (testCaseResults == null) return null;
-
-  return testCaseResults.firstWhereOrNull(
-    (element) => element.testCaseId == testCaseId,
-  );
-});
-
-class SelectedTestResultByIdNotifier extends Notifier<String?> {
+class SelectedTestResultIdNotifier extends Notifier<String?> {
   @override
   String? build() {
     return null;
@@ -72,16 +56,38 @@ class SelectedTestResultByIdNotifier extends Notifier<String?> {
 }
 
 final selectedTestResultIdProvider =
-    NotifierProvider<SelectedTestResultByIdNotifier, String?>(
-      SelectedTestResultByIdNotifier.new,
+    NotifierProvider<SelectedTestResultIdNotifier, String?>(
+      SelectedTestResultIdNotifier.new,
     );
 
-final selectedTestResultProvider = Provider<TestCaseResult?>((ref) {
-  final resultId = ref.watch(selectedTestResultIdProvider);
-  if (resultId == null) return null;
+final testCasesProvider = StreamProvider<List<TestCase>>((ref) {
+  final repo = ref.read(testCasesRepositoryProvider);
+  return repo.watchAll();
+});
 
-  final testCaseResults = ref.watch(selectedTestResultsProvider).value;
-  if (testCaseResults == null) return null;
+final selectedTestCaseProvider = StreamProvider<TestCase?>((ref) {
+  final repo = ref.read(testCasesRepositoryProvider);
+  final id = ref.watch(selectedTestCaseIdProvider);
+  if (id == null) return Stream.value(null);
+  return repo.watch(id: id);
+});
 
-  return testCaseResults.results.firstWhereOrNull((e) => e.id == resultId);
+final selectedTestResultsProvider = StreamProvider<List<TestCaseResult>?>((
+  ref,
+) {
+  // final repo = ref.read(testResultsRepositoryProvider);
+  // final testCaseId = ref.watch(selectedTestCaseIdProvider);
+  // if (testCaseId == null) return Stream.value(null);
+  // return repo.watchAll(testCaseId);
+  final buffer = ref.watch(resultBufferProvider);
+  return buffer.stream;
+});
+
+final selectedTestResultProvider = StreamProvider<TestCaseResult?>((ref) {
+  final repo = ref.read(testResultsRepositoryProvider);
+  final testCaseId = ref.watch(selectedTestCaseIdProvider);
+  if (testCaseId == null) return Stream.value(null);
+  final testResultId = ref.watch(selectedTestResultIdProvider);
+  if (testResultId == null) return Stream.value(null);
+  return repo.watch(testCaseId: testCaseId, testResultId: testResultId);
 });

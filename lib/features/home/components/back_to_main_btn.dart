@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
 
 class BackToMainButton extends ConsumerStatefulWidget {
   const BackToMainButton({super.key});

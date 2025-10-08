@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:indi_tool/core/db/database.dart';
 import 'package:uuid/uuid.dart';
 
 class TestCase {
@@ -113,6 +114,26 @@ class TestCase {
       'numberOfRequests': testCase.numberOfRequests,
       'numberOfConcurrentUsers': testCase.numberOfConcurrentUsers,
     };
+  }
+
+  static TestCase fromData(TestCasesTableData row) {
+    return TestCase(
+      id: row.id.toString(),
+      name: row.name,
+      description: row.description,
+      httpMethod: row.httpMethod,
+      httpUrl: row.httpUrl,
+      httpBody: utf8.decode(row.httpBody),
+      httpTimeoutInMillis: row.httpTimeoutInMillis,
+      httpHeaders: (jsonDecode(utf8.decode(row.httpHeaders)) as List<dynamic>)
+          .map((e) => TestCaseHeader.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      httpParams: (jsonDecode(utf8.decode(row.httpParams)) as List<dynamic>)
+          .map((e) => TestCaseParam.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      numberOfRequests: row.numberOfRequests,
+      numberOfConcurrentUsers: row.numberOfConcurrentUsers,
+    );
   }
 }
 

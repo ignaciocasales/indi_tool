@@ -1,12 +1,18 @@
 import 'dart:convert';
 
+import 'package:indi_tool/core/db/database.dart';
 import 'package:uuid/uuid.dart';
 
 class TestCaseResults {
-  TestCaseResults({String? testCaseId, List<TestCaseResult>? results})
-    : testCaseId = testCaseId ?? const Uuid().v4(),
-      results = results ?? [];
+  TestCaseResults({
+    String? id,
+    String? testCaseId,
+    List<TestCaseResult>? results,
+  }) : id = id ?? const Uuid().v4(),
+       testCaseId = testCaseId ?? const Uuid().v4(),
+       results = results ?? [];
 
+  final String id;
   final String testCaseId;
   final List<TestCaseResult> results;
 
@@ -22,6 +28,7 @@ class TestCaseResults {
 
   static TestCaseResults fromJson(Map<String, dynamic> json) {
     return TestCaseResults(
+      id: json['id'] as String?,
       testCaseId: json['testCaseId'] as String?,
       results: (json['results'] as List<dynamic>?)
           ?.map(
@@ -53,6 +60,7 @@ class TestCaseResults {
 
   static Map<String, dynamic> toJson(TestCaseResults testCaseResults) {
     return {
+      'id': testCaseResults.id,
       'testCaseId': testCaseResults.testCaseId,
       'results': testCaseResults.results
           .map(
@@ -70,6 +78,16 @@ class TestCaseResults {
           )
           .toList(),
     };
+  }
+
+  static TestCaseResults fromData(TestCaseResultsTableData row) {
+    return TestCaseResults(
+      id: row.id.toString(),
+      testCaseId: row.testCaseId.toString(),
+      results: TestCaseResult.fromJsonArray(
+        jsonDecode(utf8.decode(row.resultsJson)) as String,
+      ),
+    );
   }
 }
 
@@ -163,5 +181,14 @@ class TestCaseResult {
       'responseEndDateTime': result.responseEndDateTime,
       'responseHeaders': result.responseHeaders,
     };
+  }
+
+  static List<TestCaseResult> fromJsonArray(String jsonString) {
+    final List<dynamic> jsonList = jsonString.isNotEmpty
+        ? (jsonDecode(jsonString) as List<dynamic>)
+        : [];
+    return jsonList
+        .map((e) => TestCaseResult.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

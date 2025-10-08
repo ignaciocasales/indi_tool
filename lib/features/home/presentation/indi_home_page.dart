@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/features/home/components/indi_app_bar.dart';
 import 'package:indi_tool/features/home/components/indi_sidebar.dart';
 import 'package:indi_tool/features/home/presentation/clear_content_area.dart';
@@ -18,7 +18,9 @@ class _IndiHomePageState extends ConsumerState<IndiHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: indiAppBar(context: context),
-      body: const Row(children: [IndiSidebar(flex: 1), MainContentArea(flex: 4)]),
+      body: const Row(
+        children: [IndiSidebar(flex: 1), MainContentArea(flex: 4)],
+      ),
     );
   }
 }

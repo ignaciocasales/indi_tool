@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
+import 'package:indi_tool/core/application/repositories/test_cases_repository_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
 
 class TestCasesExplorer extends ConsumerStatefulWidget {
   const TestCasesExplorer({super.key});
@@ -22,7 +23,9 @@ class _TestCasesExplorerState extends ConsumerState<TestCasesExplorer> {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                ref.read(testCaseListProvider.notifier).add(TestCase());
+                ref
+                    .read(testCasesRepositoryProvider)
+                    .insert(testCase: TestCase());
               },
               icon: const Icon(Icons.add),
               label: const Text('New Test'),
@@ -46,8 +49,8 @@ class TestCaseListWidget extends ConsumerStatefulWidget {
 class _TestCaseListWidgetState extends ConsumerState<TestCaseListWidget> {
   @override
   Widget build(BuildContext context) {
-    final testsAsync = ref.watch(testCaseListProvider);
-    return testsAsync.when(
+    final allAsync = ref.watch(testCasesProvider);
+    return allAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => const Center(child: Text('Failed to load tests')),
       data: (tests) {
@@ -146,8 +149,8 @@ class _TestCaseListWidgetState extends ConsumerState<TestCaseListWidget> {
 
                               if (confirmed == true) {
                                 ref
-                                    .read(testCaseListProvider.notifier)
-                                    .removeById(tests[index].id);
+                                    .read(testCasesRepositoryProvider)
+                                    .delete(id: tests[index].id);
                               }
                             }
                           },

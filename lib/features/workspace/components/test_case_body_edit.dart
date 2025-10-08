@@ -1,23 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/test_case_provider.dart';
+import 'package:indi_tool/core/domain/models/test_case.dart';
 
-class TestCaseBodyEdit extends ConsumerStatefulWidget {
-  const TestCaseBodyEdit({super.key});
+class TestCaseBodyEdit extends StatefulWidget {
+  const TestCaseBodyEdit({
+    super.key,
+    required this.testCase,
+    required this.onChanged,
+  });
+
+  final TestCase testCase;
+  final void Function(TestCase updated) onChanged;
 
   @override
-  ConsumerState<TestCaseBodyEdit> createState() => _TestCaseBodyEditState();
+  State<TestCaseBodyEdit> createState() => _TestCaseBodyEditState();
 }
 
-class _TestCaseBodyEditState extends ConsumerState<TestCaseBodyEdit> {
+class _TestCaseBodyEditState extends State<TestCaseBodyEdit> {
   late TextEditingController _controller;
-  bool _enabled = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _controller.text = widget.testCase.httpBody;
     _controller.addListener(_updateBody);
+  }
+
+  @override
+  void didUpdateWidget(covariant TestCaseBodyEdit oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newTc = widget.testCase.httpBody;
+    final oldTc = oldWidget.testCase;
+    if (oldTc.httpBody != newTc) {
+      final previousSelection = _controller.selection;
+      _controller.value = TextEditingValue(
+        text: newTc,
+        selection: previousSelection.isValid
+            ? previousSelection
+            : TextSelection.collapsed(offset: newTc.length),
+        composing: TextRange.empty,
+      );
+    }
   }
 
   @override
@@ -29,22 +52,6 @@ class _TestCaseBodyEditState extends ConsumerState<TestCaseBodyEdit> {
 
   @override
   Widget build(BuildContext context) {
-    final testCase = ref.watch(selectedTestCaseProvider);
-    if (testCase != null) {
-      if (!_enabled) {
-        setState(() {
-          _enabled = true;
-        });
-      }
-
-      final body = testCase.httpBody;
-      if (_controller.text != body) {
-        _controller.text = body;
-      }
-    } else {
-      throw StateError('No scenario selected');
-    }
-
     final theme = Theme.of(context);
 
     return Padding(
@@ -64,8 +71,8 @@ class _TestCaseBodyEditState extends ConsumerState<TestCaseBodyEdit> {
               const SizedBox(height: 8),
               Expanded(
                 child: TextField(
-                  key: Key('body-${testCase.id}'),
-                  enabled: _enabled,
+                  key: Key('body-${widget.testCase.id}'),
+                  enabled: true,
                   controller: _controller,
                   expands: true,
                   maxLines: null,
@@ -94,15 +101,9 @@ class _TestCaseBodyEditState extends ConsumerState<TestCaseBodyEdit> {
   }
 
   void _updateBody() {
-    final String body = _controller.text;
-
-    final testCase = ref.watch(selectedTestCaseProvider);
-    if (testCase == null) {
-      return;
-    }
-
-    final updated = testCase.copyWith(httpBody: body);
-
-    ref.read(testCaseListProvider.notifier).updateTestCase(updated);
+    final tc = widget.testCase;
+    final newBody = _controller.text;
+    if (newBody == tc.httpBody) return;
+    widget.onChanged(tc.copyWith(httpBody: newBody));
   }
 }
