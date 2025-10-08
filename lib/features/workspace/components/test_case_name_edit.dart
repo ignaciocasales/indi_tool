@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/providers/test_case_provider.dart';
-import 'package:indi_tool/models/test_case.dart';
 
 class TestCaseNameEdit extends ConsumerStatefulWidget {
   const TestCaseNameEdit({super.key});

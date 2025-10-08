@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:indi_tool/core/providers/navigation_provider.dart';
+import 'package:indi_tool/core/application/navigation_provider.dart';
 import 'package:indi_tool/features/workspace/components/test_navigation_button.dart';
 
 class TestDataSideBar extends StatelessWidget {

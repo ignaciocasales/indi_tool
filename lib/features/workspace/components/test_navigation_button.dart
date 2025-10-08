@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/navigation_provider.dart';
+import 'package:indi_tool/core/application/navigation_provider.dart';
 
 class TestNavigationButton extends ConsumerStatefulWidget {
   final String label;

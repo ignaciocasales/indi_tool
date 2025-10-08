@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:indi_tool/models/test_case.dart';
-import 'package:indi_tool/models/test_result.dart';
+import 'package:indi_tool/core/domain/models/test_case.dart';
+import 'package:indi_tool/core/domain/models/test_result.dart';
 
 class LoadRunner {
   LoadRunner({Dio? dio}) : _dio = dio ?? Dio();
@@ -14,10 +14,12 @@ class LoadRunner {
 
     // Prepare common request parts
     final headers = {
-      for (final h in testCase.httpHeaders.where((h) => h.enabled)) h.key: h.value,
+      for (final h in testCase.httpHeaders.where((h) => h.enabled))
+        h.key: h.value,
     };
     final queryParams = {
-      for (final p in testCase.httpParams.where((p) => p.enabled)) p.key: p.value,
+      for (final p in testCase.httpParams.where((p) => p.enabled))
+        p.key: p.value,
     };
 
     dio.options = BaseOptions(
@@ -56,6 +58,7 @@ class LoadRunner {
         if (i >= total) break;
         nextIndex = i + 1;
 
+        var sizeInBytes = 0;
         final start = DateTime.now();
         try {
           final uri = uriBase.replace(
@@ -65,6 +68,13 @@ class LoadRunner {
             uri.toString(),
             data: testCase.httpBody.isEmpty ? null : testCase.httpBody,
             options: Options(method: testCase.httpMethod),
+            onReceiveProgress: (actualBytes, totalBytes) {
+              if (totalBytes != -1) {
+                sizeInBytes = totalBytes;
+              } else {
+                sizeInBytes = sizeInBytes + actualBytes;
+              }
+            },
           );
           final end = DateTime.now();
           out.add(
@@ -73,7 +83,7 @@ class LoadRunner {
               requestUrl: uri.toString(),
               responseStatusCode: resp.statusCode ?? 0,
               responseDurationInMillis: end.difference(start).inMilliseconds,
-              responseBody: resp.data ?? '',
+              responseBodySizeInBytes: sizeInBytes,
               responseStartDateTime: start.toIso8601String(),
               responseEndDateTime: end.toIso8601String(),
               responseHeaders: _stringifyHeaders(resp.headers.map),
@@ -87,7 +97,7 @@ class LoadRunner {
               requestUrl: testCase.httpUrl,
               responseStatusCode: 0,
               responseDurationInMillis: end.difference(start).inMilliseconds,
-              responseBody: _safeErr(e),
+              responseBodySizeInBytes: sizeInBytes,
               responseStartDateTime: start.toIso8601String(),
               responseEndDateTime: end.toIso8601String(),
               responseHeaders: {},
@@ -116,13 +126,5 @@ class LoadRunner {
     final out = <String, String>{};
     headers.forEach((k, v) => out[k] = v.join(','));
     return out;
-  }
-
-  String _safeErr(Object e) {
-    try {
-      return e.toString();
-    } catch (_) {
-      return 'Unknown error';
-    }
   }
 }

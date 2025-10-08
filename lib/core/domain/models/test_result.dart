@@ -31,7 +31,7 @@ class TestCaseResults {
               requestUrl: e['requestUrl'] as String?,
               responseStatusCode: e['responseStatusCode'] as int?,
               responseDurationInMillis: e['responseDurationInMillis'] as int?,
-              responseBody: e['responseBody'] as String?,
+              responseBodySizeInBytes: e['responseBodySizeInBytes'] as int?,
               responseStartDateTime: e['responseStartDateTime'] as String?,
               responseEndDateTime: e['responseEndDateTime'] as String?,
               responseHeaders: (e['responseHeaders'] as Map<String, dynamic>?)
@@ -62,7 +62,7 @@ class TestCaseResults {
               'requestUrl': e.requestUrl,
               'responseStatusCode': e.responseStatusCode,
               'responseDurationInMillis': e.responseDurationInMillis,
-              'responseBody': e.responseBody,
+              'responseBodySizeInBytes': e.responseBodySizeInBytes,
               'responseStartDateTime': e.responseStartDateTime,
               'responseEndDateTime': e.responseEndDateTime,
               'responseHeaders': e.responseHeaders,
@@ -80,7 +80,7 @@ class TestCaseResult {
     String? requestUrl,
     int? responseStatusCode,
     int? responseDurationInMillis,
-    String? responseBody,
+    int? responseBodySizeInBytes,
     String? responseStartDateTime,
     String? responseEndDateTime,
     Map<String, String>? responseHeaders,
@@ -89,7 +89,7 @@ class TestCaseResult {
        requestUrl = requestUrl ?? '',
        responseStatusCode = responseStatusCode ?? 0,
        responseDurationInMillis = responseDurationInMillis ?? 0,
-       responseBody = responseBody ?? '',
+       responseBodySizeInBytes = responseBodySizeInBytes ?? 0,
        responseStartDateTime = responseStartDateTime ?? '',
        responseEndDateTime = responseEndDateTime ?? '',
        responseHeaders = responseHeaders ?? {};
@@ -99,7 +99,7 @@ class TestCaseResult {
   final String requestUrl;
   final int responseStatusCode;
   final int responseDurationInMillis;
-  final String responseBody;
+  final int responseBodySizeInBytes;
   final String responseStartDateTime;
   final String responseEndDateTime;
   final Map<String, String> responseHeaders;
@@ -114,7 +114,7 @@ class TestCaseResult {
     String? requestUrl,
     int? responseStatusCode,
     int? responseDurationInMillis,
-    String? responseBody,
+    int? responseBodySizeInBytes,
     String? responseStartDateTime,
     String? responseEndDateTime,
     Map<String, String>? responseHeaders,
@@ -126,7 +126,8 @@ class TestCaseResult {
       responseStatusCode: responseStatusCode ?? this.responseStatusCode,
       responseDurationInMillis:
           responseDurationInMillis ?? this.responseDurationInMillis,
-      responseBody: responseBody ?? this.responseBody,
+      responseBodySizeInBytes:
+          responseBodySizeInBytes ?? this.responseBodySizeInBytes,
       responseStartDateTime:
           responseStartDateTime ?? this.responseStartDateTime,
       responseEndDateTime: responseEndDateTime ?? this.responseEndDateTime,
@@ -141,7 +142,7 @@ class TestCaseResult {
       requestUrl: json['requestUrl'] as String?,
       responseStatusCode: json['responseStatusCode'] as int?,
       responseDurationInMillis: json['responseDurationInMillis'] as int?,
-      responseBody: json['responseBody'] as String?,
+      responseBodySizeInBytes: json['responseBodySizeInBytes'] as int?,
       responseStartDateTime: json['responseStartDateTime'] as String?,
       responseEndDateTime: json['responseEndDateTime'] as String?,
       responseHeaders: (json['responseHeaders'] as Map<String, dynamic>?)?.map(
@@ -157,7 +158,7 @@ class TestCaseResult {
       'requestUrl': result.requestUrl,
       'responseStatusCode': result.responseStatusCode,
       'responseDurationInMillis': result.responseDurationInMillis,
-      'responseBody': result.responseBody,
+      'responseBodySizeInBytes': result.responseBodySizeInBytes,
       'responseStartDateTime': result.responseStartDateTime,
       'responseEndDateTime': result.responseEndDateTime,
       'responseHeaders': result.responseHeaders,

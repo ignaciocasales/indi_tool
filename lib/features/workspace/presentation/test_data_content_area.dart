@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/navigation_provider.dart';
+import 'package:indi_tool/core/application/navigation_provider.dart';
 import 'package:indi_tool/features/response_viewer.dart';
 import 'package:indi_tool/features/test_case_metrics.dart';
 import 'package:indi_tool/features/workspace/presentation/test_case_editor.dart';

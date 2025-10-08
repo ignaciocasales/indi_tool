@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/providers/navigation_provider.dart';
+import 'package:indi_tool/core/application/navigation_provider.dart';
+import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/providers/test_case_provider.dart';
-import 'package:indi_tool/models/test_case.dart';
 
 class TestCasesExplorer extends ConsumerStatefulWidget {
   const TestCasesExplorer({super.key});
