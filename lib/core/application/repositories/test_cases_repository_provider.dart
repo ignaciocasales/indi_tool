@@ -59,10 +59,24 @@ class TestCasesRepository {
       httpBody: Value(Uint8List.fromList(utf8.encode(testCase.httpBody))),
       httpTimeoutInMillis: Value(testCase.httpTimeoutInMillis),
       httpHeaders: Value(
-        Uint8List.fromList(utf8.encode(jsonEncode(testCase.httpHeaders))),
+        Uint8List.fromList(
+          utf8.encode(
+            jsonEncode(
+              testCase.httpHeaders
+                  .map((h) => TestCaseHeader.toJson(h))
+                  .toList(),
+            ),
+          ),
+        ),
       ),
       httpParams: Value(
-        Uint8List.fromList(utf8.encode(jsonEncode(testCase.httpParams))),
+        Uint8List.fromList(
+          utf8.encode(
+            jsonEncode(
+              testCase.httpParams.map((p) => TestCaseParam.toJson(p)).toList(),
+            ),
+          ),
+        ),
       ),
       numberOfRequests: Value(testCase.numberOfRequests),
       numberOfConcurrentUsers: Value(testCase.numberOfConcurrentUsers),

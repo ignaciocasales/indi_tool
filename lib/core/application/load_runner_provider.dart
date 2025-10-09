@@ -17,7 +17,6 @@ class LoadRunnerController {
     if (_isRunning) return;
     _isRunning = true;
 
-    print('Starting test: ${testCase.name}');
     final stream = _runner.runStream(testCase);
     await for (final result in stream) {
       buffer.add(result);
@@ -28,7 +27,7 @@ class LoadRunnerController {
 }
 
 final loadRunnerControllerProvider = Provider<LoadRunnerController>(
-  isAutoDispose: false,
+  // isAutoDispose: false,
   (ref) {
     final buffer = ref.read(resultBufferProvider);
     return LoadRunnerController(buffer: buffer);

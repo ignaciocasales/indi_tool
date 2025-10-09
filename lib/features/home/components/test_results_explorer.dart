@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
+import 'package:indi_tool/core/application/result_buffer_provider.dart';
 
 class TestResultsExplorer extends StatelessWidget {
   const TestResultsExplorer({super.key});
@@ -42,14 +43,13 @@ class TestResultList extends ConsumerStatefulWidget {
 class _TestResultListState extends ConsumerState<TestResultList> {
   @override
   Widget build(BuildContext context) {
-    final allAsync = ref.watch(selectedTestResultsProvider);
-    print('allAsync: $allAsync');
+    final allAsync = ref.watch(liveResultsProvider);
     return allAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) =>
           const Center(child: Text('Failed to load test results')),
       data: (testsResults) {
-        if (testsResults == null || testsResults.isEmpty) {
+        if (testsResults.isEmpty) {
           return const EmptyTestResultList();
         }
         return ListView.separated(

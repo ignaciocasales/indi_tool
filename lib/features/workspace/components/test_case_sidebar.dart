@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
 import 'package:indi_tool/features/workspace/components/test_navigation_button.dart';
 
-class TestDataSideBar extends StatelessWidget {
-  const TestDataSideBar({super.key});
+class TestCaseSideBar extends StatelessWidget {
+  const TestCaseSideBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class TestDataSideBar extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    "Workspace Tools",
+                    "Tools",
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Theme.of(context).textTheme.bodySmall?.color,
                       fontWeight: FontWeight.w500,

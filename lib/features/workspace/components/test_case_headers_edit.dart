@@ -1,5 +1,7 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
+import 'package:indi_tool/core/utils/debouncer.dart';
 import 'package:uuid/uuid.dart';
 
 class TestCaseHeadersEdit extends StatefulWidget {
@@ -20,8 +22,12 @@ class _TestCaseHeadersEditState extends State<TestCaseHeadersEdit> {
   String _draftId = const Uuid().v4();
 
   void _rotateDraftId() {
-    setState(() {
-      _draftId = const Uuid().v4();
+    // Defer to next frame so the current editing row keeps its focus/identity.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _draftId = const Uuid().v4();
+      });
     });
   }
 
@@ -98,7 +104,10 @@ class TestCaseHeaderEdit extends StatefulWidget {
 
 class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
   late final TextEditingController _keyController;
+  late final FocusNode _keyFocusNode; // TODO: Check if this is needed.
   late final TextEditingController _valueController;
+  late final FocusNode _valueFocusNode; // TODO: Check if this is needed.
+  late final Debouncer _debouncer;
 
   @override
   void initState() {
@@ -111,24 +120,29 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
 
     _keyController = TextEditingController();
     _keyController.text = header.key;
-    _keyController.addListener(_onChanged);
+    _keyController.addListener(_scheduleOnChanged);
+    _keyFocusNode = FocusNode();
 
     _valueController = TextEditingController();
     _valueController.text = header.value;
-    _valueController.addListener(_onChanged);
+    _valueController.addListener(_scheduleOnChanged);
+    _valueFocusNode = FocusNode();
+
+    _debouncer = Debouncer(const Duration(milliseconds: 300));
   }
 
   @override
   void didUpdateWidget(covariant TestCaseHeaderEdit oldWidget) {
     super.didUpdateWidget(oldWidget);
     final newTc = widget.testCase;
-    final newHeader = newTc.httpHeaders.firstWhere(
+    final newHeader = newTc.httpHeaders.firstWhereOrNull(
       (h) => h.id == widget.headerId,
     );
     final oldTc = oldWidget.testCase;
-    final oldHeader = oldTc.httpHeaders.firstWhere(
+    final oldHeader = oldTc.httpHeaders.firstWhereOrNull(
       (h) => h.id == widget.headerId,
     );
+    if (oldHeader == null || newHeader == null) return;
     if (oldHeader.key != newHeader.key) {
       var previousKeyControllerSelection = _keyController.selection;
       _keyController.value = _keyController.value.copyWith(
@@ -136,6 +150,7 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
         selection: previousKeyControllerSelection.isValid
             ? previousKeyControllerSelection
             : TextSelection.collapsed(offset: newHeader.key.length),
+        composing: TextRange.empty, // TODO: Check if this is needed.
       );
     }
     if (oldHeader.value != newHeader.value) {
@@ -145,6 +160,7 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
         selection: previousValueControllerSelection.isValid
             ? previousValueControllerSelection
             : TextSelection.collapsed(offset: newHeader.value.length),
+        composing: TextRange.empty, // TODO: Check if this is needed.
       );
     }
   }
@@ -153,9 +169,13 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
   void dispose() {
     _keyController.removeListener(_onChanged);
     _keyController.dispose();
+    _keyFocusNode.dispose();
 
     _valueController.removeListener(_onChanged);
     _valueController.dispose();
+    _valueFocusNode.dispose();
+
+    _debouncer.dispose();
 
     super.dispose();
   }
@@ -169,6 +189,7 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
           child: TextField(
             key: Key('header-key-${tc.id}-${widget.headerId}'),
             controller: _keyController,
+            focusNode: _keyFocusNode,
             decoration: const InputDecoration(hintText: 'Header Name'),
           ),
         ),
@@ -177,6 +198,7 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
           child: TextField(
             key: Key('header-value-${tc.id}-${widget.headerId}'),
             controller: _valueController,
+            focusNode: _valueFocusNode,
             decoration: const InputDecoration(hintText: 'Header Value'),
           ),
         ),
@@ -187,6 +209,10 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
         ),
       ],
     );
+  }
+
+  void _scheduleOnChanged() {
+    _debouncer(_onChanged);
   }
 
   void _onChanged() {

@@ -8,34 +8,38 @@ class ResultBuffer {
   final _buffer = <TestCaseResult>[];
   final int flushThreshold;
 
-  ResultBuffer({this.flushThreshold = 500});
+  ResultBuffer({this.flushThreshold = 500}) {
+    _controller.onListen = () {
+      _controller.add(List.unmodifiable(_buffer));
+    };
+  }
 
   Stream<List<TestCaseResult>> get stream => _controller.stream;
 
-  List<TestCaseResult> get current => List.unmodifiable(_buffer);
+  // List<TestCaseResult> get current => List.unmodifiable(_buffer);
 
   void add(TestCaseResult result) {
-    print('Adding result: ${result.id}');
     _buffer.add(result);
 
+    _controller.add(List.unmodifiable(_buffer));
     // Optionally notify UI or aggregators
-    if (_buffer.length % 50 == 0) {
-      _controller.add(List.unmodifiable(_buffer));
-    }
+    // if (_buffer.length % 50 == 0) {
+    //   _controller.add(List.unmodifiable(_buffer));
+    // }
 
-    // Optional: auto-flush if too large
-    if (_buffer.length >= flushThreshold) {
-      flushPartial();
-    }
+    // // Optional: auto-flush if too large
+    // if (_buffer.length >= flushThreshold) {
+    //   flushPartial();
+    // }
   }
 
   /// Clear or flush some items when buffer gets too big
-  void flushPartial() {
-    // For example, keep last 100 items
-    if (_buffer.length > 100) {
-      _buffer.removeRange(0, _buffer.length - 100);
-    }
-  }
+  // void flushPartial() {
+  //   // For example, keep last 100 items
+  //   if (_buffer.length > 100) {
+  //     _buffer.removeRange(0, _buffer.length - 100);
+  //   }
+  // }
 
   /// Called when test completes
   List<TestCaseResult> finalize() {
@@ -59,7 +63,7 @@ final resultBufferProvider = Provider<ResultBuffer>(isAutoDispose: true, (ref) {
 });
 
 final liveResultsProvider = StreamProvider<List<TestCaseResult>>(
-  isAutoDispose: true,
+  // isAutoDispose: true,
   (ref) {
     final buffer = ref.watch(resultBufferProvider);
     return buffer.stream;

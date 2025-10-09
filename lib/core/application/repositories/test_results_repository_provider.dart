@@ -24,7 +24,7 @@ class TestResultsRepository {
     required final String testResultId,
   }) {
     return (_db.select(_db.testCaseResultsTable)
-          ..where((tbl) => tbl.id.equals(testCaseId)))
+          ..where((tbl) => tbl.testCaseId.equals(testCaseId)))
         .watchSingle()
         .map((row) => TestCaseResults.fromData(row))
         .map(

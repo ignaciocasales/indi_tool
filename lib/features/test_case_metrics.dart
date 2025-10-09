@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:indi_tool/core/application/global_state_provider.dart';
+import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:intl/intl.dart';
 
 class TestCaseMetrics extends ConsumerStatefulWidget {
@@ -21,11 +21,11 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncResults = ref.watch(selectedTestResultsProvider);
+    final asyncResults = ref.watch(liveResultsProvider);
 
     asyncResults.when(
       data: (results) {
-        if (results != null && results.isNotEmpty) {
+        if (results.isNotEmpty) {
           final totalResults = results.length;
           final totalResponseTime = results
               .map((result) => result.responseDurationInMillis)
