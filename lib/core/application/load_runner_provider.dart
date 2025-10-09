@@ -1,7 +1,38 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/services/load_runner.dart';
+
+class IsLoadRunnerRunning extends Notifier<bool> {
+  @override
+  bool build() {
+    return false;
+  }
+
+  void set(bool isRunning) {
+    state = isRunning;
+  }
+}
+
+final isLoadRunnerRunningStateProvider =
+    NotifierProvider<IsLoadRunnerRunning, bool>(IsLoadRunnerRunning.new);
+
+class LoadRunHandle {
+  LoadRunHandle(this.signal, this.cancelToken);
+
+  final CancellationSignal signal;
+  final CancelToken cancelToken;
+
+  void cancel() {
+    if (!signal.isCancelled) {
+      signal.cancel();
+      if (!cancelToken.isCancelled) {
+        cancelToken.cancel('User requested cancellation');
+      }
+    }
+  }
+}
 
 class LoadRunnerController {
   LoadRunnerController({required this.buffer});
@@ -9,27 +40,48 @@ class LoadRunnerController {
   final ResultBuffer buffer;
   final LoadRunner _runner = LoadRunner();
 
-  bool _isRunning = false;
+  LoadRunHandle? _current;
 
-  bool get isRunning => _isRunning;
+  Future<void> runLoadTest(TestCase testCase) async {
+    if (_current != null) return;
 
-  Future<void> runTest(TestCase testCase) async {
-    if (_isRunning) return;
-    _isRunning = true;
-
-    final stream = _runner.runStream(testCase);
-    await for (final result in stream) {
-      buffer.add(result);
+    final handle = LoadRunHandle(CancellationSignal(), CancelToken());
+    _current = handle;
+    try {
+      final stream = _runner.runStream(
+        testCase,
+        signal: handle.signal,
+        cancelToken: handle.cancelToken,
+      );
+      await for (final result in stream) {
+        buffer.add(result);
+      }
+    } finally {
+      _current = null;
     }
+  }
 
-    _isRunning = false;
+  void stop() {
+    _current?.cancel();
   }
 }
 
-final loadRunnerControllerProvider = Provider<LoadRunnerController>(
-  // isAutoDispose: false,
-  (ref) {
-    final buffer = ref.read(resultBufferProvider);
-    return LoadRunnerController(buffer: buffer);
-  },
-);
+final loadRunnerControllerProvider = Provider<LoadRunnerController>((ref) {
+  final buffer = ref.read(resultBufferProvider);
+  return LoadRunnerController(buffer: buffer);
+});
+
+Future<void> runLoadTest(WidgetRef ref, TestCase testCase) async {
+  final running = ref.read(isLoadRunnerRunningStateProvider);
+  if (running) return;
+  ref.read(isLoadRunnerRunningStateProvider.notifier).set(true);
+  try {
+    await ref.read(loadRunnerControllerProvider).runLoadTest(testCase);
+  } finally {
+    ref.read(isLoadRunnerRunningStateProvider.notifier).set(false);
+  }
+}
+
+void stopLoadTest(WidgetRef ref) {
+  ref.read(loadRunnerControllerProvider).stop();
+}

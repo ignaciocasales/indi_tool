@@ -26,7 +26,7 @@ class _TestDataContentAreaState extends ConsumerState<TestCaseContentArea> {
     final tcAsync = ref.watch(selectedTestCaseProvider);
     final isReady = tcAsync.hasValue && tcAsync.value != null;
     if (!isReady) {
-      return const Center(child: CircularProgressIndicator()); // FIXME?
+      return const Center(child: CircularProgressIndicator());
     }
     final tc = tcAsync.value!;
 

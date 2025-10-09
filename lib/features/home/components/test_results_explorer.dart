@@ -4,29 +4,96 @@ import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
 
-class TestResultsExplorer extends StatelessWidget {
+class TestResultsExplorer extends ConsumerStatefulWidget {
   const TestResultsExplorer({super.key});
 
+  @override
+  ConsumerState<TestResultsExplorer> createState() =>
+      _TestResultsExplorerState();
+}
+
+class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Text(
-              'Test Results',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+          child: Row(
+            children: [
+              Text(
+                'Test Results',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
-            ),
+              const Spacer(),
+              Tooltip(
+                message: 'Export to CSV',
+                child: IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.file_download_outlined, size: 18),
+                  onPressed: () async {},
+                ),
+              ),
+              Tooltip(
+                message: 'Clear results',
+                child: IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Confirm Deletion'),
+                        content: const Text(
+                          'Are you sure you want to clear all test results?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop(false);
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.error,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onError,
+                            ),
+                            onPressed: () {
+                              Navigator.of(ctx).pop(true);
+                            },
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmed == true) {
+                      ref.read(selectedTestResultIdProvider.notifier).clear();
+                      var testPage = ref.read(selectedTestPageProvider);
+                      if (testPage == TestCasePage.responseViewer) {
+                        ref
+                            .read(selectedTestPageProvider.notifier)
+                            .select(TestCasePage.requestBuilder);
+                      }
+                      ref.read(resultBufferProvider).clear();
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 8),
         const Expanded(child: TestResultList()),
       ],
     );

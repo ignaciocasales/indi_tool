@@ -16,30 +16,16 @@ class ResultBuffer {
 
   Stream<List<TestCaseResult>> get stream => _controller.stream;
 
-  // List<TestCaseResult> get current => List.unmodifiable(_buffer);
-
   void add(TestCaseResult result) {
     _buffer.add(result);
 
     _controller.add(List.unmodifiable(_buffer));
-    // Optionally notify UI or aggregators
-    // if (_buffer.length % 50 == 0) {
-    //   _controller.add(List.unmodifiable(_buffer));
-    // }
-
-    // // Optional: auto-flush if too large
-    // if (_buffer.length >= flushThreshold) {
-    //   flushPartial();
-    // }
   }
 
-  /// Clear or flush some items when buffer gets too big
-  // void flushPartial() {
-  //   // For example, keep last 100 items
-  //   if (_buffer.length > 100) {
-  //     _buffer.removeRange(0, _buffer.length - 100);
-  //   }
-  // }
+  void clear() {
+    _buffer.clear();
+    _controller.add(List.unmodifiable(_buffer));
+  }
 
   /// Called when test completes
   List<TestCaseResult> finalize() {
@@ -62,10 +48,7 @@ final resultBufferProvider = Provider<ResultBuffer>(isAutoDispose: true, (ref) {
   return buffer;
 });
 
-final liveResultsProvider = StreamProvider<List<TestCaseResult>>(
-  // isAutoDispose: true,
-  (ref) {
-    final buffer = ref.watch(resultBufferProvider);
-    return buffer.stream;
-  },
-);
+final liveResultsProvider = StreamProvider<List<TestCaseResult>>((ref) {
+  final buffer = ref.watch(resultBufferProvider);
+  return buffer.stream;
+});

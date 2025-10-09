@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
 
 class TestNavigationButton extends ConsumerStatefulWidget {
@@ -28,6 +29,7 @@ class _TestNavigationButtonState extends ConsumerState<TestNavigationButton> {
         width: double.infinity,
         child: TextButton(
           onPressed: () => {
+            ref.read(selectedTestResultIdProvider.notifier).clear(),
             ref.read(selectedTestPageProvider.notifier).select(widget.testPage),
           },
           style: TextButton.styleFrom(

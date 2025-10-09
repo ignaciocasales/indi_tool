@@ -4,12 +4,27 @@ import 'package:dio/dio.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/domain/models/test_result.dart';
 
+class CancellationSignal {
+  CancellationSignal() : _cancelled = false;
+  bool _cancelled;
+
+  bool get isCancelled => _cancelled;
+
+  void cancel() {
+    _cancelled = true;
+  }
+}
+
 class LoadRunner {
   LoadRunner({Dio? dio}) : _dio = dio ?? Dio();
 
   final Dio _dio;
 
-  Stream<TestCaseResult> runStream(TestCase testCase) async* {
+  Stream<TestCaseResult> runStream(
+    TestCase testCase, {
+    required CancellationSignal signal,
+    required CancelToken cancelToken,
+  }) async* {
     final dio = _dio;
 
     // Prepare common request parts
@@ -53,6 +68,8 @@ class LoadRunner {
 
     Future<void> worker() async {
       while (true) {
+        if (signal.isCancelled) break;
+
         // Synchronously grab the next index
         final i = nextIndex;
         if (i >= total) break;
@@ -68,6 +85,7 @@ class LoadRunner {
             uri.toString(),
             data: testCase.httpBody.isEmpty ? null : testCase.httpBody,
             options: Options(method: testCase.httpMethod),
+            cancelToken: cancelToken,
             onReceiveProgress: (actualBytes, totalBytes) {
               if (totalBytes != -1) {
                 sizeInBytes = totalBytes;
@@ -77,32 +95,56 @@ class LoadRunner {
             },
           );
           final end = DateTime.now();
-          out.add(
-            TestCaseResult(
-              requestMethod: testCase.httpMethod,
-              requestUrl: uri.toString(),
-              responseStatusCode: resp.statusCode ?? 0,
-              responseDurationInMillis: end.difference(start).inMilliseconds,
-              responseBodySizeInBytes: sizeInBytes,
-              responseStartDateTime: start.toIso8601String(),
-              responseEndDateTime: end.toIso8601String(),
-              responseHeaders: _stringifyHeaders(resp.headers.map),
-            ),
-          );
-        } catch (e) {
+          if (!signal.isCancelled && !out.isClosed) {
+            out.add(
+              TestCaseResult(
+                requestMethod: testCase.httpMethod,
+                requestUrl: uri.toString(),
+                responseStatusCode: resp.statusCode ?? 0,
+                responseDurationInMillis: end.difference(start).inMilliseconds,
+                responseBodySizeInBytes: sizeInBytes,
+                responseStartDateTime: start.toIso8601String(),
+                responseEndDateTime: end.toIso8601String(),
+                responseHeaders: _stringifyHeaders(resp.headers.map),
+              ),
+            );
+          }
+        } on DioException catch (e) {
+          // If cancelled, just break quietly
+          if (CancelToken.isCancel(e)) {
+            break;
+          }
           final end = DateTime.now();
-          out.add(
-            TestCaseResult(
-              requestMethod: testCase.httpMethod,
-              requestUrl: testCase.httpUrl,
-              responseStatusCode: 0,
-              responseDurationInMillis: end.difference(start).inMilliseconds,
-              responseBodySizeInBytes: sizeInBytes,
-              responseStartDateTime: start.toIso8601String(),
-              responseEndDateTime: end.toIso8601String(),
-              responseHeaders: {},
-            ),
-          );
+          if (!signal.isCancelled && !out.isClosed) {
+            out.add(
+              TestCaseResult(
+                requestMethod: testCase.httpMethod,
+                requestUrl: testCase.httpUrl,
+                responseStatusCode: 0,
+                responseDurationInMillis: end.difference(start).inMilliseconds,
+                responseBodySizeInBytes: sizeInBytes,
+                responseStartDateTime: start.toIso8601String(),
+                responseEndDateTime: end.toIso8601String(),
+                responseHeaders: {},
+              ),
+            );
+          }
+        } catch (_) {
+          final end = DateTime.now();
+          if (!signal.isCancelled && !out.isClosed) {
+            out.add(
+              TestCaseResult(
+                requestMethod: testCase.httpMethod,
+                requestUrl: testCase.httpUrl,
+                responseStatusCode: 0,
+                responseDurationInMillis: end.difference(start).inMilliseconds,
+                responseBodySizeInBytes: sizeInBytes,
+                responseStartDateTime: start.toIso8601String(),
+                responseEndDateTime: end.toIso8601String(),
+                responseHeaders: {},
+              ),
+            );
+          }
         }
       }
 
