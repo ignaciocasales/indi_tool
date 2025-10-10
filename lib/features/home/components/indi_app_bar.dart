@@ -7,7 +7,6 @@ AppBar indiAppBar({required BuildContext context}) {
     elevation: 0,
     centerTitle: false,
     title: Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           decoration: BoxDecoration(
@@ -23,11 +22,15 @@ AppBar indiAppBar({required BuildContext context}) {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          kAppName,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            kAppName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
