@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 
 class TestCaseBodyEdit extends StatefulWidget {
@@ -78,9 +79,9 @@ class _TestCaseBodyEditState extends State<TestCaseBodyEdit> {
                   maxLines: null,
                   minLines: null,
                   textAlignVertical: TextAlignVertical.top,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontFamily: 'SourceCodePro'),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontFamily: GoogleFonts.firaCode().fontFamily,
+                  ),
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: "Enter request body (JSON, XML, etc.)",

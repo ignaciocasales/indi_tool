@@ -1,7 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/global_state_provider.dart';
+import 'package:indi_tool/core/application/load_runner_provider.dart';
+import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
+import 'package:indi_tool/core/application/test_case_metrics.dart';
 import 'package:intl/intl.dart';
 
 class TestCaseMetrics extends ConsumerStatefulWidget {
@@ -12,72 +16,20 @@ class TestCaseMetrics extends ConsumerStatefulWidget {
 }
 
 class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
-  var avgResponseTime = 0;
-  var successRate = 100;
-  var totalRequests = 0;
-  var requestsPerSecond = 0;
-  var statusDistribution = <Map<String, Object>>[];
-  var responseTrend = <Map<String, Object>>[];
+  var metrics = TestMetrics.empty;
 
   @override
   Widget build(BuildContext context) {
-    final asyncResults = ref.watch(liveResultsProvider);
+    final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
+    final testCaseId = ref.watch(selectedTestCaseIdProvider);
+    if (testCaseId == null) throw StateError('No test case selected');
+    final allAsync = isRunning
+        ? ref.watch(liveResultsProvider)
+        : ref.watch(persistedResultsProvider(testCaseId));
 
-    asyncResults.when(
+    allAsync.when(
       data: (results) {
-        if (results.isNotEmpty) {
-          final totalResults = results.length;
-          final totalResponseTime = results
-              .map((result) => result.responseDurationInMillis)
-              .reduce((a, b) => a + b);
-          avgResponseTime = (totalResponseTime / totalResults).round();
-          final successCount = results
-              .where((result) => result.isSuccessStatusCode)
-              .length;
-          successRate = ((successCount / totalResults) * 100).round();
-          totalRequests = totalResults;
-          final firstTimestamp = results
-              .map((result) => DateTime.parse(result.responseStartDateTime))
-              .reduce((a, b) => a.isBefore(b) ? a : b);
-          final lastTimestamp = results
-              .map((result) => DateTime.parse(result.responseStartDateTime))
-              .reduce((a, b) => a.isAfter(b) ? a : b);
-          final durationInSeconds = lastTimestamp
-              .difference(firstTimestamp)
-              .inSeconds;
-          requestsPerSecond = durationInSeconds > 0
-              ? (totalResults / durationInSeconds).round()
-              : totalResults;
-          final statusCountMap = <int, int>{};
-          for (var result in results) {
-            statusCountMap.update(
-              result.responseStatusCode,
-              (value) => value + 1,
-              ifAbsent: () => 1,
-            );
-          }
-          statusDistribution =
-              statusCountMap.entries
-                  .map((entry) => {"status": entry.key, "count": entry.value})
-                  .toList()
-                ..sort(
-                  (a, b) => (a["status"] as int).compareTo(b["status"] as int),
-                );
-          responseTrend =
-              results
-                  .map(
-                    (result) => {
-                      "timestamp": result.responseStartDateTime,
-                      "responseTime": result.responseDurationInMillis,
-                    },
-                  )
-                  .toList()
-                ..sort(
-                  (a, b) => (a["timestamp"] as String).compareTo(
-                    b["timestamp"] as String,
-                  ),
-                );
-        }
+        metrics = compute(results);
       },
       error: (_, _) {},
       loading: () {},
@@ -95,25 +47,25 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                 _metricCard(
                   Icons.timer_outlined,
                   "Avg. Response Time",
-                  "$avgResponseTime ms",
+                  "${metrics.avgResponseTimeMs} ms",
                   context,
                 ),
                 _metricCard(
                   Icons.trending_up_outlined,
                   "Success Rate",
-                  "$successRate%",
+                  "${metrics.successRatePercent}%",
                   context,
                 ),
                 _metricCard(
                   Icons.list_alt_outlined,
                   "Total Requests",
-                  "$totalRequests",
+                  "${metrics.totalRequests}",
                   context,
                 ),
                 _metricCard(
                   Icons.bolt_outlined,
                   "Requests/sec",
-                  "$requestsPerSecond",
+                  "${metrics.requestsPerSecond}",
                   context,
                 ),
               ],
@@ -144,7 +96,8 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                             Expanded(
                               child: LayoutBuilder(
                                 builder: (context, constrains) {
-                                  final totalBars = statusDistribution.length;
+                                  final totalBars =
+                                      metrics.statusDistribution.length;
                                   final availableWidth = constrains.maxWidth;
                                   final barWidth = totalBars > 0
                                       ? ((availableWidth / (totalBars)) * 0.6)
@@ -202,13 +155,18 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                               final index = value.toInt();
                                               if (index < 0 ||
                                                   index >=
-                                                      statusDistribution
+                                                      metrics
+                                                          .statusDistribution
                                                           .length) {
                                                 return const SizedBox.shrink();
                                               }
                                               return Text(
-                                                statusDistribution[index]["status"]
+                                                metrics
+                                                    .statusDistribution[index]["status"]
                                                     .toString(),
+                                                maxLines: 1,
+                                                softWrap: false,
+                                                overflow: TextOverflow.clip,
                                                 style: const TextStyle(
                                                   fontSize: 10,
                                                 ),
@@ -217,7 +175,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                           ),
                                         ),
                                       ),
-                                      barGroups: statusDistribution
+                                      barGroups: metrics.statusDistribution
                                           .asMap()
                                           .entries
                                           .map((entry) {
@@ -259,7 +217,9 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                                 rodIndex,
                                               ) {
                                                 final label =
-                                                    statusDistribution[group.x
+                                                    metrics
+                                                        .statusDistribution[group
+                                                        .x
                                                         .toInt()]["status"];
                                                 return BarTooltipItem(
                                                   "Status $label\n${rod.toY.toInt()} hits",
@@ -274,6 +234,8 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                                         ),
                                       ),
                                     ),
+                                    duration: const Duration(milliseconds: 150),
+                                    curve: Curves.easeOutCubic,
                                   );
                                 },
                               ),
@@ -301,7 +263,7 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                             const SizedBox(height: 12.0),
                             Expanded(
                               child: ResponseTimeTrendChart(
-                                responseTrend: responseTrend,
+                                responseTrend: metrics.responseTrend,
                               ),
                             ),
                           ],
@@ -373,24 +335,46 @@ class ResponseTimeTrendChart extends StatelessWidget {
       return const Center(child: Text("No response data"));
     }
 
-    // --- Sliding window ---
     final visibleData = responseTrend.length > windowSize
         ? responseTrend.sublist(responseTrend.length - windowSize)
         : responseTrend;
 
-    // --- Convert to chart data ---
+    final visibleLen = visibleData.length;
+
+    // X-axis: slide from right to left
+    // Map indices so that the last point is at xMax (right edge).
+    final int xMax = (visibleLen - 1).clamp(0, windowSize - 1);
+    final int xMin = 0;
+
     final spots = visibleData.asMap().entries.map((entry) {
-      final i = entry.key;
-      final e = entry.value;
-      return FlSpot(i.toDouble(), (e["responseTime"] as num).toDouble());
+      final i = entry.key; // 0..visibleLen-1
+      final shiftedX = (xMax - (visibleLen - 1 - i))
+          .toDouble(); // pushes left as new data comes
+      final y = (entry.value["responseTime"] as num).toDouble();
+      return FlSpot(shiftedX, y);
     }).toList();
 
     final values = spots.map((s) => s.y).toList();
-    final minY = values.reduce((a, b) => a < b ? a : b);
-    final maxY = values.reduce((a, b) => a > b ? a : b);
+    final rawMinY = values.reduce((a, b) => a < b ? a : b);
+    final rawMaxY = values.reduce((a, b) => a > b ? a : b);
+
+    double minY = rawMinY;
+    double maxY = rawMaxY;
+    if (maxY == minY) {
+      minY = (minY - 1).clamp(0, double.infinity);
+      maxY = maxY + 1;
+    }
+
+    // Intervals
+    final double bottomInterval = (visibleLen / 6).floorToDouble().clamp(1, 10);
+    final bool onlyOne = visibleLen == 1;
 
     return LineChart(
       LineChartData(
+        minX: xMin.toDouble() - (onlyOne ? 1 : 0),
+        maxX: xMax.toDouble() + (onlyOne ? 1 : 0),
+        minY: (minY - 50).clamp(0, double.infinity),
+        maxY: maxY + 100,
         gridData: const FlGridData(show: true, drawVerticalLine: false),
         borderData: FlBorderData(
           show: true,
@@ -399,10 +383,7 @@ class ResponseTimeTrendChart extends StatelessWidget {
               color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
               width: 1,
             ),
-            left: BorderSide(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
-              width: 1,
-            ),
+            left: BorderSide.none,
           ),
         ),
         titlesData: FlTitlesData(
@@ -418,14 +399,16 @@ class ResponseTimeTrendChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 28,
-              interval: (visibleData.length / 6).floorToDouble().clamp(1, 10),
+              interval: bottomInterval,
               getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= visibleData.length) {
+                // Convert chart X back to visibleData index:
+                // value in [xMin..xMax] maps to index = visibleLen - 1 - (xMax - value)
+                final idx = (visibleLen - 1 - (xMax - value.toInt()));
+                if (idx < 0 || idx >= visibleLen) {
                   return const SizedBox.shrink();
                 }
 
-                final ts = visibleData[index]["timestamp"];
+                final ts = visibleData[idx]["timestamp"];
                 final date = DateTime.tryParse(ts);
                 final formatted = date != null
                     ? DateFormat('HH:mm').format(date)
@@ -433,21 +416,19 @@ class ResponseTimeTrendChart extends StatelessWidget {
 
                 return Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(formatted, style: const TextStyle(fontSize: 10)),
+                  child: Text(
+                    formatted,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.clip,
+                    style: const TextStyle(fontSize: 10),
+                  ),
                 );
               },
             ),
           ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 50,
-              interval: (maxY - minY) / 3,
-              getTitlesWidget: (value, meta) => Text(
-                "${value.toInt()} ms",
-                style: const TextStyle(fontSize: 10),
-              ),
-            ),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
           ),
           rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
@@ -458,25 +439,24 @@ class ResponseTimeTrendChart extends StatelessWidget {
         ),
         lineBarsData: [
           LineChartBarData(
-            isCurved: true,
+            isCurved: !onlyOne,
             barWidth: 2,
             color: Theme.of(context).colorScheme.inversePrimary,
             dotData: const FlDotData(show: true),
             spots: spots,
           ),
         ],
-        minY: (minY - 50).clamp(0, double.infinity),
-        maxY: maxY + 100,
         lineTouchData: LineTouchData(
           enabled: true,
           touchTooltipData: LineTouchTooltipData(
             getTooltipColor: (_) => Theme.of(
               context,
             ).colorScheme.inversePrimary.withValues(alpha: 0.85),
-            getTooltipItems: (spots) => spots.map((spot) {
-              final index = spot.spotIndex;
-              if (index < 0 || index >= visibleData.length) return null;
-              final data = visibleData[index];
+            getTooltipItems: (items) => items.map((spot) {
+              // Recover original index
+              final idx = (visibleLen - 1 - (xMax - spot.x.toInt()));
+              if (idx < 0 || idx >= visibleLen) return null;
+              final data = visibleData[idx];
               final time = DateTime.tryParse(data["timestamp"]) != null
                   ? DateFormat(
                       'HH:mm:ss',
@@ -494,8 +474,8 @@ class ResponseTimeTrendChart extends StatelessWidget {
           ),
         ),
       ),
-      duration: const Duration(milliseconds: 400), // smooth animation
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOutCubic,
     );
   }
 }
