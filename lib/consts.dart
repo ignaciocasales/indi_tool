@@ -6,3 +6,7 @@ const kRelativeAppStoragePath = 'indi_tool';
 const kDatabaseFolder = 'databases';
 // Name of the main database
 const kDatabaseName = 'main.db';
+
+const kMinScreenWidth = 1024.0;
+const kMinScreenHeight = 768.0;
+const kScrollThickness = 5.0;
