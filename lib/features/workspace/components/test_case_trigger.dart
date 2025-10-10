@@ -24,10 +24,41 @@ class _TestCaseTriggerState extends ConsumerState<TestCaseTrigger> {
         ? () {
             stopLoadTest(ref);
           }
-        : () {
-            final testCase = ref.read(selectedTestCaseProvider).value;
-            if (testCase == null) return;
-            runLoadTest(ref, testCase);
+        : () async {
+            final confirmed = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Start Load Test?'),
+                content: const Text(
+                  'Starting a load test will overwrite any existing test results. Do you want to continue?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop(false);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    onPressed: () {
+                      Navigator.of(ctx).pop(true);
+                    },
+                    child: const Text('Continue'),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirmed == true) {
+              final testCase = ref.read(selectedTestCaseProvider).value;
+              if (testCase == null) return;
+              runLoadTest(ref, testCase);
+            }
           };
 
     return ElevatedButton.icon(
