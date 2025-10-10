@@ -78,6 +78,12 @@ class TestResultsRepository {
       await (_db.into(_db.testCaseResultsTable).insert(entry));
     }
   }
+
+  Future<void> delete({required final String testCaseId}) async {
+    await (_db.delete(
+      _db.testCaseResultsTable,
+    )..where((tbl) => tbl.testCaseId.equals(testCaseId))).go();
+  }
 }
 
 final testResultsRepositoryProvider = Provider<TestResultsRepository>(

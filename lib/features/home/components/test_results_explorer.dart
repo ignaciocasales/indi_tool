@@ -83,6 +83,10 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
                           );
 
                           if (confirmed == true) {
+                            final testCaseId = ref.read(
+                              selectedTestCaseIdProvider,
+                            );
+                            if (testCaseId == null) return;
                             ref
                                 .read(selectedTestResultIdProvider.notifier)
                                 .clear();
@@ -92,7 +96,9 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
                                   .read(selectedTestPageProvider.notifier)
                                   .select(TestCasePage.requestBuilder);
                             }
-                            ref.read(resultBufferProvider).clear();
+                            ref
+                                .read(testResultsRepositoryProvider)
+                                .delete(testCaseId: testCaseId);
                           }
                         },
                 ),
