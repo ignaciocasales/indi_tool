@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/application/global_state_provider.dart';
+import 'package:indi_tool/core/application/load_runner_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
 
 class BackToMainButton extends ConsumerStatefulWidget {
@@ -14,14 +15,17 @@ class _BackToMainButtonState extends ConsumerState<BackToMainButton> {
   @override
   Widget build(BuildContext context) {
     final testCaseId = ref.watch(selectedTestCaseIdProvider);
-
     if (testCaseId == null) throw StateError('No scenario selected');
 
+    final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
+
     return IconButton(
-      onPressed: () => {
-        ref.read(selectedTestCaseIdProvider.notifier).clear(),
-        ref.read(selectedTestPageProvider.notifier).clear(),
-      },
+      onPressed: isRunning
+          ? null
+          : () => {
+              ref.read(selectedTestCaseIdProvider.notifier).clear(),
+              ref.read(selectedTestPageProvider.notifier).clear(),
+            },
       icon: Icon(
         Icons.arrow_back,
         size: 16,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/application/global_state_provider.dart';
+import 'package:indi_tool/core/application/load_runner_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
+import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
 
 class TestResultsExplorer extends ConsumerStatefulWidget {
@@ -15,6 +17,7 @@ class TestResultsExplorer extends ConsumerStatefulWidget {
 class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
   @override
   Widget build(BuildContext context) {
+    final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,7 +39,7 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
                 child: IconButton(
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.file_download_outlined, size: 18),
-                  onPressed: () async {},
+                  onPressed: isRunning ? null : () async {},
                 ),
               ),
               Tooltip(
@@ -44,51 +47,55 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
                 child: IconButton(
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.delete_sweep_outlined, size: 18),
-                  onPressed: () async {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Confirm Deletion'),
-                        content: const Text(
-                          'Are you sure you want to clear all test results?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(ctx).pop(false);
-                            },
-                            child: const Text('Cancel'),
-                          ),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.error,
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onError,
+                  onPressed: isRunning
+                      ? null
+                      : () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Confirm Deletion'),
+                              content: const Text(
+                                'Are you sure you want to clear all test results?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(ctx).pop(false);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.error,
+                                    foregroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.onError,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(ctx).pop(true);
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                              ],
                             ),
-                            onPressed: () {
-                              Navigator.of(ctx).pop(true);
-                            },
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
+                          );
 
-                    if (confirmed == true) {
-                      ref.read(selectedTestResultIdProvider.notifier).clear();
-                      var testPage = ref.read(selectedTestPageProvider);
-                      if (testPage == TestCasePage.responseViewer) {
-                        ref
-                            .read(selectedTestPageProvider.notifier)
-                            .select(TestCasePage.requestBuilder);
-                      }
-                      ref.read(resultBufferProvider).clear();
-                    }
-                  },
+                          if (confirmed == true) {
+                            ref
+                                .read(selectedTestResultIdProvider.notifier)
+                                .clear();
+                            var testPage = ref.read(selectedTestPageProvider);
+                            if (testPage == TestCasePage.responseViewer) {
+                              ref
+                                  .read(selectedTestPageProvider.notifier)
+                                  .select(TestCasePage.requestBuilder);
+                            }
+                            ref.read(resultBufferProvider).clear();
+                          }
+                        },
                 ),
               ),
             ],
@@ -110,7 +117,13 @@ class TestResultList extends ConsumerStatefulWidget {
 class _TestResultListState extends ConsumerState<TestResultList> {
   @override
   Widget build(BuildContext context) {
-    final allAsync = ref.watch(liveResultsProvider);
+    final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
+    final testCaseId = ref.watch(selectedTestCaseIdProvider);
+    if (testCaseId == null) throw StateError('No test case selected');
+    final allAsync = isRunning
+        ? ref.watch(liveResultsProvider)
+        : ref.watch(persistedResultsProvider(testCaseId));
+
     return allAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) =>

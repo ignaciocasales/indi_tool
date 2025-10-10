@@ -85,7 +85,7 @@ class TestCaseResults {
       id: row.id.toString(),
       testCaseId: row.testCaseId.toString(),
       results: TestCaseResult.fromJsonArray(
-        jsonDecode(utf8.decode(row.resultsJson)) as String,
+        (jsonDecode(utf8.decode(row.resultsJson.toList())) as List<dynamic>),
       ),
     );
   }
@@ -183,12 +183,11 @@ class TestCaseResult {
     };
   }
 
-  static List<TestCaseResult> fromJsonArray(String jsonString) {
-    final List<dynamic> jsonList = jsonString.isNotEmpty
-        ? (jsonDecode(jsonString) as List<dynamic>)
-        : [];
-    return jsonList
-        .map((e) => TestCaseResult.fromJson(e as Map<String, dynamic>))
-        .toList();
+  static List<Map<String, dynamic>> toJsonArray(List<TestCaseResult> results) {
+    return results.map((e) => TestCaseResult.toJson(e)).toList();
+  }
+
+  static List<TestCaseResult> fromJsonArray(List<dynamic> jsonString) {
+    return jsonString.map((e) => TestCaseResult.fromJson(e)).toList();
   }
 }

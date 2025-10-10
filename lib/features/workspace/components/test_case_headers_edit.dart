@@ -204,7 +204,7 @@ class _TestCaseHeaderEditState extends State<TestCaseHeaderEdit> {
         ),
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: _removeHeader,
+          onPressed: widget.isDraft ? null : _removeHeader,
           tooltip: 'Remove header',
         ),
       ],

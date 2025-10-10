@@ -6,9 +6,8 @@ import 'package:indi_tool/core/domain/models/test_result.dart';
 class ResultBuffer {
   final _controller = StreamController<List<TestCaseResult>>.broadcast();
   final _buffer = <TestCaseResult>[];
-  final int flushThreshold;
 
-  ResultBuffer({this.flushThreshold = 500}) {
+  ResultBuffer() {
     _controller.onListen = () {
       _controller.add(List.unmodifiable(_buffer));
     };
@@ -18,29 +17,34 @@ class ResultBuffer {
 
   void add(TestCaseResult result) {
     _buffer.add(result);
-
-    _controller.add(List.unmodifiable(_buffer));
+    if (!_controller.isClosed) {
+      _controller.add(List.unmodifiable(_buffer));
+    }
   }
 
   void clear() {
     _buffer.clear();
-    _controller.add(List.unmodifiable(_buffer));
+    if (!_controller.isClosed) {
+      _controller.add(const []);
+    }
   }
 
-  /// Called when test completes
+  /// Called when test completes. Snapshot is returned and memory is freed,
+  /// but stream stays open for reuse in future runs.
   List<TestCaseResult> finalize() {
     final snapshot = List<TestCaseResult>.from(_buffer);
-    _controller.add(snapshot);
-    _controller.close();
+    clear(); // free memory
     return snapshot;
   }
 
   void dispose() {
-    _controller.close();
+    if (!_controller.isClosed) {
+      _controller.close();
+    }
   }
 }
 
-final resultBufferProvider = Provider<ResultBuffer>(isAutoDispose: true, (ref) {
+final resultBufferProvider = Provider<ResultBuffer>((ref) {
   final buffer = ResultBuffer();
   ref.onDispose(() {
     buffer.dispose();

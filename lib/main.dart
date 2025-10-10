@@ -11,7 +11,7 @@ void main() {
   DriftDbInstance.setup(
     dbName: kDatabaseName,
     inMemory: false,
-    logStatements: true,
+    logStatements: false,
   );
 
   runApp(const ProviderScope(child: MyApp()));

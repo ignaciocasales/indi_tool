@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/services/load_runner.dart';
@@ -35,9 +36,10 @@ class LoadRunHandle {
 }
 
 class LoadRunnerController {
-  LoadRunnerController({required this.buffer});
+  LoadRunnerController({required this.buffer, required this.repo});
 
   final ResultBuffer buffer;
+  final TestResultsRepository repo;
   final LoadRunner _runner = LoadRunner();
 
   LoadRunHandle? _current;
@@ -56,6 +58,10 @@ class LoadRunnerController {
       await for (final result in stream) {
         buffer.add(result);
       }
+      final snapshot = buffer.finalize();
+      if (snapshot.isNotEmpty) {
+        await repo.save(testCaseId: testCase.id, results: snapshot);
+      }
     } finally {
       _current = null;
     }
@@ -67,8 +73,10 @@ class LoadRunnerController {
 }
 
 final loadRunnerControllerProvider = Provider<LoadRunnerController>((ref) {
-  final buffer = ref.read(resultBufferProvider);
-  return LoadRunnerController(buffer: buffer);
+  return LoadRunnerController(
+    buffer: ref.read(resultBufferProvider),
+    repo: ref.read(testResultsRepositoryProvider),
+  );
 });
 
 Future<void> runLoadTest(WidgetRef ref, TestCase testCase) async {

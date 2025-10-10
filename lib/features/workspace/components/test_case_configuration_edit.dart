@@ -47,13 +47,18 @@ class _TestCaseConfigurationEditState extends State<TestCaseConfigurationEdit> {
     final newTc = widget.testCase;
     var oldTc = oldWidget.testCase;
     if (oldTc.httpTimeoutInMillis != newTc.httpTimeoutInMillis) {
-      _timeoutController.text = newTc.httpTimeoutInMillis.toString();
+      _timeoutController.value = _timeoutController.value.copyWith(
+        text: newTc.httpTimeoutInMillis.toString(),
+      );
     }
     if (oldTc.numberOfRequests != newTc.numberOfRequests) {
-      _numberOfRequestsController.text = newTc.numberOfRequests.toString();
+      _numberOfRequestsController.value = _numberOfRequestsController.value
+          .copyWith(text: newTc.numberOfRequests.toString());
     }
     if (oldTc.numberOfConcurrentUsers != newTc.numberOfConcurrentUsers) {
-      _concurrencyController.text = newTc.numberOfConcurrentUsers.toString();
+      _concurrencyController.value = _concurrencyController.value.copyWith(
+        text: newTc.numberOfConcurrentUsers.toString(),
+      );
     }
   }
 
@@ -142,29 +147,54 @@ class _TestCaseConfigurationEditState extends State<TestCaseConfigurationEdit> {
             // Allow only digits
             FilteringTextInputFormatter.digitsOnly,
             TextInputFormatter.withFunction((o, n) {
-              // Prevent leading zeros
               if (n.text.isEmpty) {
-                return o;
+                return n.copyWith(
+                  text: minValue.toString(),
+                  selection: TextSelection.collapsed(
+                    offset: minValue.toString().length,
+                  ),
+                );
               }
 
-              // Prevent non-numeric input
+              // Prevent non-numeric input and leading zeros.
               final int? newValueInt = int.tryParse(n.text);
               if (newValueInt == null) {
-                return o;
+                return n.copyWith(
+                  text: minValue.toString(),
+                  selection: TextSelection.collapsed(
+                    offset: minValue.toString().length,
+                  ),
+                );
               }
 
               // Enforce min constraints
               if (newValueInt < minValue) {
-                return o;
+                return n.copyWith(
+                  text: minValue.toString(),
+                  selection: TextSelection.collapsed(
+                    offset: minValue.toString().length,
+                  ),
+                );
               }
 
               // Enforce max constraints
               if (newValueInt > maxValue) {
-                return o;
+                return n.copyWith(
+                  text: maxValue.toString(),
+                  selection: TextSelection.collapsed(
+                    offset: maxValue.toString().length,
+                  ),
+                );
               }
 
               // Accept the new value
-              return n;
+              return n.copyWith(
+                text: newValueInt.toString(),
+                selection: TextSelection.collapsed(
+                  offset: newValueInt.toString().length,
+                ),
+                composing: TextRange.empty,
+              );
             }),
           ],
           style: Theme.of(context).textTheme.bodyMedium,
@@ -255,6 +285,7 @@ class _TestCaseConfigurationEditState extends State<TestCaseConfigurationEdit> {
     final String text = _timeoutController.text;
     final int? timeout = int.tryParse(text);
     if (timeout == null || timeout < 0) return;
+    if (tc.httpTimeoutInMillis == timeout) return;
     final updated = tc.copyWith(httpTimeoutInMillis: timeout);
     widget.onChanged(updated);
   }
@@ -264,6 +295,7 @@ class _TestCaseConfigurationEditState extends State<TestCaseConfigurationEdit> {
     final String text = _numberOfRequestsController.text;
     final int? numberOfRequests = int.tryParse(text);
     if (numberOfRequests == null || numberOfRequests < 1) return;
+    if (tc.numberOfRequests == numberOfRequests) return;
     final updated = tc.copyWith(numberOfRequests: numberOfRequests);
     widget.onChanged(updated);
   }
@@ -273,6 +305,7 @@ class _TestCaseConfigurationEditState extends State<TestCaseConfigurationEdit> {
     final String text = _concurrencyController.text;
     final int? concurrency = int.tryParse(text);
     if (concurrency == null || concurrency < 1) return;
+    if (tc.numberOfConcurrentUsers == concurrency) return;
     final updated = tc.copyWith(numberOfConcurrentUsers: concurrency);
     widget.onChanged(updated);
   }

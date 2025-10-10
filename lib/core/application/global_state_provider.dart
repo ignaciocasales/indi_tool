@@ -72,21 +72,8 @@ final selectedTestCaseProvider = StreamProvider<TestCase?>((ref) {
   return repo.watch(id: id);
 });
 
-// final selectedTestResultsProvider = StreamProvider<List<TestCaseResult>?>((
-//   ref,
-// ) {
-//   // final repo = ref.read(testResultsRepositoryProvider);
-//   // final testCaseId = ref.watch(selectedTestCaseIdProvider);
-//   // if (testCaseId == null) return Stream.value(null);
-//   // return repo.watchAll(testCaseId);
-//   final buffer = ref.watch(resultBufferProvider);
-//   return buffer.stream;
-// });
-
 final selectedTestResultProvider = StreamProvider<TestCaseResult?>((ref) {
   final live = ref.watch(liveResultsProvider);
-  // final testCaseId = ref.watch(selectedTestCaseIdProvider);
-  // if (testCaseId == null) return Stream.value(null);
   final testResultId = ref.watch(selectedTestResultIdProvider);
   if (testResultId == null) return Stream.value(null);
   return live.when(
