@@ -300,10 +300,16 @@ class _TestCaseMetricsState extends ConsumerState<TestCaseMetrics> {
                 children: [
                   Text(
                     label,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   Text(
                     value,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.clip,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -404,9 +410,7 @@ class ResponseTimeTrendChart extends StatelessWidget {
                 // Convert chart X back to visibleData index:
                 // value in [xMin..xMax] maps to index = visibleLen - 1 - (xMax - value)
                 final idx = (visibleLen - 1 - (xMax - value.toInt()));
-                if (idx < 0 || idx >= visibleLen) {
-                  return const SizedBox.shrink();
-                }
+                if (idx < 0 || idx >= visibleLen) return const SizedBox.shrink();
 
                 final ts = visibleData[idx]["timestamp"];
                 final date = DateTime.tryParse(ts);
