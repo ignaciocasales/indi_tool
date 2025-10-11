@@ -76,11 +76,11 @@ class LoadRunner {
         nextIndex = i + 1;
 
         var sizeInBytes = 0;
-        final start = DateTime.now();
+        final uri = uriBase.replace(
+          queryParameters: queryParams.isEmpty ? null : queryParams,
+        );
+        final stopwatch = Stopwatch()..start();
         try {
-          final uri = uriBase.replace(
-            queryParameters: queryParams.isEmpty ? null : queryParams,
-          );
           final resp = await dio.request<String>(
             uri.toString(),
             data: testCase.httpBody.isEmpty ? null : testCase.httpBody,
@@ -94,17 +94,20 @@ class LoadRunner {
               }
             },
           );
-          final end = DateTime.now();
+          stopwatch.stop();
           if (!signal.isCancelled && !out.isClosed) {
+            final now = DateTime.now();
             out.add(
               TestCaseResult(
                 requestMethod: testCase.httpMethod,
                 requestUrl: uri.toString(),
                 responseStatusCode: resp.statusCode ?? 0,
-                responseDurationInMillis: end.difference(start).inMilliseconds,
+                responseDurationInMillis: stopwatch.elapsed.inMilliseconds,
                 responseBodySizeInBytes: sizeInBytes,
-                responseStartDateTime: start.toIso8601String(),
-                responseEndDateTime: end.toIso8601String(),
+                responseStartDateTime: now
+                    .subtract(stopwatch.elapsed)
+                    .toIso8601String(),
+                responseEndDateTime: now.toIso8601String(),
                 responseHeaders: _stringifyHeaders(resp.headers.map),
               ),
             );
@@ -114,33 +117,39 @@ class LoadRunner {
           if (CancelToken.isCancel(e)) {
             break;
           }
-          final end = DateTime.now();
+          stopwatch.stop();
           if (!signal.isCancelled && !out.isClosed) {
+            final now = DateTime.now();
             out.add(
               TestCaseResult(
                 requestMethod: testCase.httpMethod,
                 requestUrl: testCase.httpUrl,
                 responseStatusCode: 0,
-                responseDurationInMillis: end.difference(start).inMilliseconds,
+                responseDurationInMillis: stopwatch.elapsed.inMilliseconds,
                 responseBodySizeInBytes: sizeInBytes,
-                responseStartDateTime: start.toIso8601String(),
-                responseEndDateTime: end.toIso8601String(),
+                responseStartDateTime: now
+                    .subtract(stopwatch.elapsed)
+                    .toIso8601String(),
+                responseEndDateTime: now.toIso8601String(),
                 responseHeaders: {},
               ),
             );
           }
         } catch (_) {
-          final end = DateTime.now();
+          stopwatch.stop();
           if (!signal.isCancelled && !out.isClosed) {
+            final now = DateTime.now();
             out.add(
               TestCaseResult(
                 requestMethod: testCase.httpMethod,
                 requestUrl: testCase.httpUrl,
                 responseStatusCode: 0,
-                responseDurationInMillis: end.difference(start).inMilliseconds,
+                responseDurationInMillis: stopwatch.elapsed.inMilliseconds,
                 responseBodySizeInBytes: sizeInBytes,
-                responseStartDateTime: start.toIso8601String(),
-                responseEndDateTime: end.toIso8601String(),
+                responseStartDateTime: now
+                    .subtract(stopwatch.elapsed)
+                    .toIso8601String(),
+                responseEndDateTime: now.toIso8601String(),
                 responseHeaders: {},
               ),
             );
