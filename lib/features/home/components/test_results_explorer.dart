@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/application/global_state_provider.dart';
 import 'package:indi_tool/core/application/load_runner_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
 import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
-import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:indi_tool/core/services/csv_exporter.dart';
 
 class TestResultsExplorer extends ConsumerStatefulWidget {
@@ -16,6 +16,8 @@ class TestResultsExplorer extends ConsumerStatefulWidget {
 }
 
 class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
+  bool _showFilters = false;
+
   @override
   Widget build(BuildContext context) {
     final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
@@ -34,6 +36,18 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
                 ),
               ),
               const Spacer(),
+              Tooltip(
+                message: 'Filters',
+                child: IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.filter_list, size: 18),
+                  onPressed: () {
+                    setState(() {
+                      _showFilters = !_showFilters;
+                    });
+                  },
+                ),
+              ),
               Tooltip(
                 message: 'Export to CSV',
                 child: IconButton(
@@ -119,6 +133,7 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
             ],
           ),
         ),
+        if (_showFilters) const _TestResultsListFilter(),
         const Expanded(child: TestResultList()),
       ],
     );
@@ -135,12 +150,7 @@ class TestResultList extends ConsumerStatefulWidget {
 class _TestResultListState extends ConsumerState<TestResultList> {
   @override
   Widget build(BuildContext context) {
-    final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
-    final testCaseId = ref.watch(selectedTestCaseIdProvider);
-    if (testCaseId == null) throw StateError('No test case selected');
-    final allAsync = isRunning
-        ? ref.watch(liveResultsProvider)
-        : ref.watch(persistedResultsProvider(testCaseId));
+    final allAsync = ref.watch(filteredTestResultsProvider);
 
     return allAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -287,6 +297,302 @@ class EmptyTestResultList extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TestResultsListFilter extends ConsumerStatefulWidget {
+  const _TestResultsListFilter();
+
+  @override
+  ConsumerState<_TestResultsListFilter> createState() =>
+      _TestResultsListFilterState();
+}
+
+class _TestResultsListFilterState
+    extends ConsumerState<_TestResultsListFilter> {
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.filter_list),
+                const SizedBox(width: 8, height: 32),
+                Text('Filters', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final filters = ref.watch(testResultsFiltersProvider);
+                    if (!filters.anyActive) return const SizedBox.shrink();
+                    return TextButton.icon(
+                      onPressed: () =>
+                          ref.read(testResultsFiltersProvider.notifier).clear(),
+                      icon: const Icon(Icons.clear),
+                      label: const Text('Clear Filters'),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text('Search Content', style: theme.textTheme.labelMedium),
+            const SizedBox(height: 6),
+            Consumer(
+              builder: (context, ref, _) {
+                final filters = ref.watch(testResultsFiltersProvider);
+                return TextField(
+                  controller: TextEditingController(text: filters.query)
+                    ..selection = TextSelection.fromPosition(
+                      TextPosition(offset: filters.query.length),
+                    ),
+                  onChanged: (v) =>
+                      ref.read(testResultsFiltersProvider.notifier).setQuery(v),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search text…',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Text('Result Type', style: theme.textTheme.labelMedium),
+            const SizedBox(height: 6),
+            Consumer(
+              builder: (context, ref, _) {
+                final filters = ref.watch(testResultsFiltersProvider);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _filterChip(
+                        label: 'Success',
+                        tooltip: 'Successful status codes (< 300)',
+                        selected: filters.successOnly,
+                        onSelected: (v) => ref
+                            .read(testResultsFiltersProvider.notifier)
+                            .setSuccessOnly(v),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _filterChip(
+                        label: 'Failure',
+                        tooltip: 'Failed status codes (>= 300)',
+                        selected: filters.failureOnly,
+                        onSelected: (v) => ref
+                            .read(testResultsFiltersProvider.notifier)
+                            .setFailureOnly(v),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Text('Response Time (ms)', style: theme.textTheme.labelMedium),
+            const SizedBox(height: 6),
+            Consumer(
+              builder: (context, ref, _) {
+                final filters = ref.watch(testResultsFiltersProvider);
+                return _MinMaxTestResultsListFilters(
+                  filters: filters,
+                  onChanged: (updated) => ref
+                      .read(testResultsFiltersProvider.notifier)
+                      .replace(updated),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _filterChip({
+    required String label,
+    required String tooltip,
+    required bool selected,
+    required void Function(bool) onSelected,
+  }) {
+    var theme = Theme.of(context);
+    return FilterChip(
+      label: Center(child: Text(label)),
+      tooltip: tooltip,
+      selected: selected,
+      onSelected: onSelected,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      selectedColor: theme.colorScheme.primaryContainer,
+      side: BorderSide(
+        color: selected ? theme.colorScheme.primary : theme.dividerColor,
+      ),
+    );
+  }
+}
+
+class _MinMaxTestResultsListFilters extends StatefulWidget {
+  const _MinMaxTestResultsListFilters({
+    required this.filters,
+    required this.onChanged,
+  });
+
+  final TestResultsFilters filters;
+  final void Function(TestResultsFilters updated) onChanged;
+
+  @override
+  State<_MinMaxTestResultsListFilters> createState() =>
+      _MinMaxTestResultsListFiltersState();
+}
+
+class _MinMaxTestResultsListFiltersState
+    extends State<_MinMaxTestResultsListFilters> {
+  late final TextEditingController _minMsController;
+  late final TextEditingController _maxMsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _minMsController = TextEditingController();
+    _minMsController.text = widget.filters.minMs?.toString() ?? '';
+    _minMsController.addListener(_updateMinMs);
+    _maxMsController = TextEditingController();
+    _maxMsController.text = widget.filters.maxMs?.toString() ?? '';
+    _maxMsController.addListener(_updateMaxMs);
+  }
+
+  @override
+  void didUpdateWidget(covariant _MinMaxTestResultsListFilters oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final filters = widget.filters;
+    if (int.tryParse(_minMsController.text) != filters.minMs) {
+      _minMsController.value = _minMsController.value.copyWith(
+        text: filters.minMs?.toString() ?? '',
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: (filters.minMs?.toString() ?? '').length),
+        ),
+      );
+    }
+    if (int.tryParse(_maxMsController.text) != filters.maxMs) {
+      _maxMsController.value = _maxMsController.value.copyWith(
+        text: filters.maxMs?.toString() ?? '',
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: (filters.maxMs?.toString() ?? '').length),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _minMsController.removeListener(_updateMinMs);
+    _minMsController.dispose();
+    _maxMsController.removeListener(_updateMaxMs);
+    _maxMsController.dispose();
+    super.dispose();
+  }
+
+  void _updateMinMs() {
+    final parsed = int.tryParse(_minMsController.text);
+    final current = widget.filters.minMs;
+    if (parsed == current) return;
+    widget.onChanged(widget.filters.copyWith(minMs: parsed));
+  }
+
+  void _updateMaxMs() {
+    final parsed = int.tryParse(_maxMsController.text);
+    final current = widget.filters.maxMs;
+    if (parsed == current) return;
+    widget.onChanged(widget.filters.copyWith(maxMs: parsed));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _numberInput(controller: _minMsController, hintText: 'Min'),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _numberInput(controller: _maxMsController, hintText: 'Max'),
+        ),
+      ],
+    );
+  }
+
+  Widget _numberInput({
+    required final TextEditingController controller,
+    required final String hintText,
+  }) {
+    const int minValue = 0;
+    const int maxValue = 99999999999;
+    return TextField(
+      key: const Key('min-ms-input'),
+      enabled: true,
+      controller: controller,
+      keyboardType: TextInputType.text,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        TextInputFormatter.withFunction((o, n) {
+          if (n.text.isEmpty) {
+            return n.copyWith(
+              text: null, // clear the field
+            );
+          }
+
+          // Prevent non-numeric input and leading zeros.
+          final int? newValueInt = int.tryParse(n.text);
+          if (newValueInt == null) {
+            return n.copyWith(
+              text: null, // clear the field
+            );
+          }
+
+          // Enforce min constraints
+          if (newValueInt < minValue) {
+            return n.copyWith(
+              text: minValue.toString(),
+              selection: TextSelection.collapsed(
+                offset: minValue.toString().length,
+              ),
+            );
+          }
+
+          // Enforce max constraints
+          if (newValueInt > maxValue) {
+            return n.copyWith(
+              text: maxValue.toString(),
+              selection: TextSelection.collapsed(
+                offset: maxValue.toString().length,
+              ),
+            );
+          }
+
+          // Accept the new value
+          return n.copyWith(
+            text: newValueInt.toString(),
+            selection: TextSelection.collapsed(
+              offset: newValueInt.toString().length,
+            ),
+            composing: TextRange.empty,
+          );
+        }),
+      ],
+      decoration: InputDecoration(
+        hintText: hintText,
+        border: const OutlineInputBorder(),
+        isDense: true,
       ),
     );
   }
