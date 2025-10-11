@@ -44,10 +44,23 @@ class TestCasesRepository {
     return (_db.into(_db.testCasesTable).insert(entry));
   }
 
-  Future<int> delete({required final String id}) {
-    return (_db.delete(
-      _db.testCasesTable,
-    )..where((tbl) => tbl.id.equals(id))).go();
+  Future<int> delete({required final String id}) async {
+    return await _db.transaction(() async {
+      final get = await (_db.select(
+        _db.testCasesTable,
+      )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+      if (get == null) return 0;
+
+      var i = await (_db.delete(
+        _db.testCasesTable,
+      )..where((tbl) => tbl.id.equals(id))).go();
+
+      var j = await (_db.delete(
+        _db.testCaseResultsTable,
+      )..where((tbl) => tbl.testCaseId.equals(id))).go();
+
+      return i + j;
+    });
   }
 
   void update({required final TestCase testCase}) {
