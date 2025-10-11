@@ -1,10 +1,14 @@
 const kAppName = 'INDI Tool';
-const kShortAppName = 'INDI';
+
+const kAppVersion = 'v0.0.1';
 
 const kRelativeAppStoragePath = 'indi_tool';
+
+// Where the databases are stored
 const kDatabaseFolder = 'databases';
+// Name of the main database
 const kDatabaseName = 'main.db';
 
-const kMinScreenWidth = 1024.0;
+const kMinScreenWidth = 1366.0;
 const kMinScreenHeight = 768.0;
-const kScrollThickness = 10.0;
+const kScrollThickness = 5.0;

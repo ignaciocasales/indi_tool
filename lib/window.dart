@@ -9,7 +9,17 @@ void setupWindow() async {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
 
-    WindowOptions windowOptions = const WindowOptions(
+    final size = Platform.isWindows
+        ? const Size(
+            // On Windows, we need to add some extra width to account for window borders
+            kMinScreenWidth + 16,
+            // On Windows, we need to add some extra height to account for window title bar and borders
+            kMinScreenHeight + kToolbarHeight + 40,
+          )
+        : const Size(kMinScreenWidth, kMinScreenHeight + kToolbarHeight);
+
+    WindowOptions windowOptions = WindowOptions(
+      size: size,
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,

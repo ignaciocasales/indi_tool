@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/app.dart';
 import 'package:indi_tool/consts.dart';
-import 'package:indi_tool/core/compression/zstd.dart';
-import 'package:indi_tool/data/source/database.dart';
+import 'package:indi_tool/core/db/database.dart';
 import 'package:indi_tool/window.dart';
 
 void main() {
@@ -11,9 +10,6 @@ void main() {
 
   // Setup the initial window
   setupWindow();
-
-  // Setup the Zstd library
-  Zstd.setup();
 
   // Setup the database
   DriftDbInstance.setup(
@@ -27,7 +23,7 @@ void main() {
     // Riverpod app state management
     const ProviderScope(
       // Main app widget
-      child: IndiApp(),
+      child: MyApp(),
     ),
   );
 }
