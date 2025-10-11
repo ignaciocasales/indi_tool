@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = ThemeData(
-      fontFamily: GoogleFonts.robotoMono().fontFamily,
+      fontFamily: GoogleFonts.inter().fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.cyan,
         brightness: Brightness.dark,
