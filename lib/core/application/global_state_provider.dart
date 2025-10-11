@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:indi_tool/core/application/load_runner_provider.dart';
 import 'package:indi_tool/core/application/repositories/test_cases_repository_provider.dart';
+import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/domain/models/test_result.dart';
@@ -73,10 +75,15 @@ final selectedTestCaseProvider = StreamProvider<TestCase?>((ref) {
 });
 
 final selectedTestResultProvider = StreamProvider<TestCaseResult?>((ref) {
-  final live = ref.watch(liveResultsProvider);
   final testResultId = ref.watch(selectedTestResultIdProvider);
   if (testResultId == null) return Stream.value(null);
-  return live.when(
+  final testCaseId = ref.watch(selectedTestCaseIdProvider);
+  if (testCaseId == null) return Stream.value(null);
+  final isRunning = ref.watch(isLoadRunnerRunningStateProvider);
+  final allAsync = isRunning
+      ? ref.watch(liveResultsProvider)
+      : ref.watch(persistedResultsProvider(testCaseId));
+  return allAsync.when(
     data: (results) =>
         Stream.value(results.firstWhereOrNull((r) => r.id == testResultId)),
     loading: () => Stream.value(null),
