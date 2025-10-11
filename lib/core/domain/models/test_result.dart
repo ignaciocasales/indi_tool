@@ -190,4 +190,37 @@ class TestCaseResult {
   static List<TestCaseResult> fromJsonArray(List<dynamic> jsonString) {
     return jsonString.map((e) => TestCaseResult.fromJson(e)).toList();
   }
+
+  static String toCsv(List<TestCaseResult> results) {
+    final headers = [
+      'id',
+      'requestMethod',
+      'requestUrl',
+      'responseStatusCode',
+      'responseDurationInMillis',
+      'responseBodySizeInBytes',
+      'responseStartDateTime',
+      'responseEndDateTime',
+      'responseHeaders',
+    ];
+    final csvBuffer = StringBuffer();
+    csvBuffer.writeln(headers.join(','));
+    for (final result in results) {
+      final row = [
+        result.id,
+        result.requestMethod,
+        result.requestUrl,
+        result.responseStatusCode.toString(),
+        result.responseDurationInMillis.toString(),
+        result.responseBodySizeInBytes.toString(),
+        result.responseStartDateTime,
+        result.responseEndDateTime,
+        jsonEncode(result.responseHeaders),
+      ];
+      csvBuffer.writeln(
+        row.map((e) => '"${e.replaceAll('"', '""')}"').join(','),
+      );
+    }
+    return csvBuffer.toString();
+  }
 }

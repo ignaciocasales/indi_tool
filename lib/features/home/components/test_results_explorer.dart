@@ -5,6 +5,7 @@ import 'package:indi_tool/core/application/load_runner_provider.dart';
 import 'package:indi_tool/core/application/navigation_provider.dart';
 import 'package:indi_tool/core/application/repositories/test_results_repository_provider.dart';
 import 'package:indi_tool/core/application/result_buffer_provider.dart';
+import 'package:indi_tool/core/services/csv_exporter.dart';
 
 class TestResultsExplorer extends ConsumerStatefulWidget {
   const TestResultsExplorer({super.key});
@@ -38,7 +39,19 @@ class _TestResultsExplorerState extends ConsumerState<TestResultsExplorer> {
                 child: IconButton(
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.file_download_outlined, size: 18),
-                  onPressed: isRunning ? null : () async {},
+                  onPressed: isRunning
+                      ? null
+                      : () async {
+                          final testCaseId = ref.read(
+                            selectedTestCaseIdProvider,
+                          );
+                          if (testCaseId == null) return;
+                          final testResults = await ref.read(
+                            persistedResultsProvider(testCaseId).future,
+                          );
+                          if (testResults.isEmpty) return;
+                          export(results: testResults);
+                        },
                 ),
               ),
               Tooltip(
