@@ -37,7 +37,6 @@ dependencies:
   drift: ^2.28.2
   drift_flutter: ^0.2.7
   path_provider: ^2.1.5
-  google_fonts: ^6.3.2
   window_manager: ^0.5.1
   file_selector: ^1.0.4
 dev_dependencies:
@@ -55,6 +54,16 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/google_fonts/Roboto-VariableFont_wdth,wght.ttf
+        - asset: assets/google_fonts/Roboto-Italic-VariableFont_wdth,wght.ttf
+    - family: RobotoMono
+      fonts:
+        - asset: assets/google_fonts/RobotoMono-VariableFont_wght.ttf
+        - asset: assets/google_fonts/RobotoMono-Italic-VariableFont_wght.ttf
 
 analyzer:
   plugins:

@@ -12,3 +12,7 @@ const kDatabaseName = 'main.db';
 const kMinScreenWidth = 1366.0;
 const kMinScreenHeight = 768.0;
 const kScrollThickness = 5.0;
+
+// Fonts
+const kFontFamily = 'Roboto';
+const kCodeFontFamily = 'RobotoMono';

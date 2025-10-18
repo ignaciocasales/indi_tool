@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:indi_tool/consts.dart';
 import 'package:indi_tool/features/home/presentation/indi_home_page.dart';
 
@@ -9,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = ThemeData(
-      fontFamily: GoogleFonts.inter().fontFamily,
+      fontFamily: kFontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.cyan,
         brightness: Brightness.dark,
