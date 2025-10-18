@@ -9,21 +9,6 @@ import 'package:indi_tool/core/application/result_buffer_provider.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
 import 'package:indi_tool/core/domain/models/test_result.dart';
 
-class IsTestCaseRunning extends Notifier<bool> {
-  @override
-  bool build() {
-    return false;
-  }
-
-  void setRunning(bool isRunning) {
-    state = isRunning;
-  }
-}
-
-final isTestCaseRunningProvider = NotifierProvider<IsTestCaseRunning, bool>(
-  IsTestCaseRunning.new,
-);
-
 class SelectedTestCaseIdNotifier extends Notifier<String?> {
   @override
   String? build() {
