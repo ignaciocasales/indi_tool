@@ -16,3 +16,7 @@ const kScrollThickness = 5.0;
 // Fonts
 const kFontFamily = 'Roboto';
 const kCodeFontFamily = 'RobotoMono';
+
+// Links
+const kGitHubRepoLink = 'https://github.com/ignaciocasales/indi_tool';
+const kGitHubWikiLink = '$kGitHubRepoLink/wiki';

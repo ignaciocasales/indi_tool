@@ -25,7 +25,10 @@ class _TestCasesExplorerState extends ConsumerState<TestCasesExplorer> {
               onPressed: () {
                 ref
                     .read(testCasesRepositoryProvider)
-                    .insert(testCase: TestCase());
+                    .insert(testCase: TestCase())
+                    .then((id) {
+                      ref.read(selectedTestCaseIdProvider.notifier).set(id);
+                    });
               },
               icon: const Icon(Icons.add),
               label: const Text('New Test'),

@@ -57,6 +57,7 @@ final testCasesProvider = StreamProvider<List<TestCase>>((ref) {
 final selectedTestCaseProvider = StreamProvider<TestCase?>((ref) {
   final repo = ref.read(testCasesRepositoryProvider);
   final id = ref.watch(selectedTestCaseIdProvider);
+  print('selectedTestCaseProvider: id=$id');
   if (id == null) return Stream.value(null);
   return repo.watch(id: id);
 });
