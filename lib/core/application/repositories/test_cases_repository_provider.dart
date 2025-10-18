@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:indi_tool/core/db/database.dart';
 import 'package:indi_tool/core/domain/models/test_case.dart';
+import 'package:uuid/uuid.dart';
 
 class TestCasesRepository {
   TestCasesRepository();
@@ -22,8 +23,10 @@ class TestCasesRepository {
         .map((row) => TestCase.fromData(row));
   }
 
-  Future<int> insert({required final TestCase testCase}) {
+  Future<String> insert({required final TestCase testCase}) async {
+    final uuid = const Uuid().v4();
     final entry = TestCasesTableCompanion(
+      id: Value(UuidValue.fromString(uuid)),
       name: Value(testCase.name),
       description: Value(testCase.description),
       httpMethod: Value(testCase.httpMethod),
@@ -41,7 +44,8 @@ class TestCasesRepository {
       createdAt: Value(DateTime.now()),
       updatedAt: Value(DateTime.now()),
     );
-    return (_db.into(_db.testCasesTable).insert(entry));
+    await (_db.into(_db.testCasesTable).insert(entry));
+    return uuid;
   }
 
   Future<int> delete({required final String id}) async {

@@ -24,26 +24,33 @@ class _TestDataContentAreaState extends ConsumerState<TestCaseContentArea> {
         ref.watch(selectedTestPageProvider) ?? TestCasePage.requestBuilder;
 
     final tcAsync = ref.watch(selectedTestCaseProvider);
-    final isReady = tcAsync.hasValue && tcAsync.value != null;
-    if (!isReady) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    final tc = tcAsync.value!;
-
-    return Expanded(
-      child: Column(
-        children: [
-          TestCaseTopBar(testCase: tc, onChanged: _onChanged),
-          switch (testCasePage) {
-            TestCasePage.requestBuilder => TestCaseEditor(
-              testCase: tc,
-              onChanged: _onChanged,
-            ),
-            TestCasePage.metricsExplorer => const TestCaseMetrics(),
-            TestCasePage.responseViewer => const TestCaseResponseViewer(),
-          },
-        ],
-      ),
+    return tcAsync.when(
+      loading: () =>
+          const Expanded(child: Center(child: CircularProgressIndicator())),
+      error: (e, st) =>
+          Expanded(child: Center(child: Text('Error loading test case: $e'))),
+      data: (tc) {
+        if (tc == null) {
+          return const Expanded(
+            child: Center(child: Text('No test case selected')),
+          );
+        }
+        return Expanded(
+          child: Column(
+            children: [
+              TestCaseTopBar(testCase: tc, onChanged: _onChanged),
+              switch (testCasePage) {
+                TestCasePage.requestBuilder => TestCaseEditor(
+                  testCase: tc,
+                  onChanged: _onChanged,
+                ),
+                TestCasePage.metricsExplorer => const TestCaseMetrics(),
+                TestCasePage.responseViewer => const TestCaseResponseViewer(),
+              },
+            ],
+          ),
+        );
+      },
     );
   }
 

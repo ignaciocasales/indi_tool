@@ -21,7 +21,7 @@ dependencies:
   dio: ^5.9.0
 
   # Reactive library to store relational data
-  drift: ^2.29.2
+  drift: ^2.29.0
   drift_flutter: ^0.2.7
 
   # Plugin that manages files and interactions with file dialogs
@@ -49,6 +49,9 @@ dependencies:
 
   # For generating UUIDs
   uuid: ^4.5.1
+
+  # A plugin for launching a URL
+  url_launcher: ^6.3.2
 
   # Plugin for comprehensive window management capabilities
   window_manager: ^0.5.1
